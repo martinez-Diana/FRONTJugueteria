@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import API from "../api"; // ← AGREGAR ESTA LÍNEA
 
 const styles = `
   @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
@@ -555,26 +556,20 @@ const Register = () => {
       return;
     }
 
-    try {
-      const response = await fetch("http://localhost:4000/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          first_name: firstName,
-          last_name: lastName,
-          mother_lastname: motherLastName,
-          email: email,
-          phone: phone,
-          birthdate: birthDate,
-          username: username,
-          password: password,
-          role_id: userType === "Cliente" ? 3 : userType === "Empleado" ? 2 : 1
-        }),
-      });
+try {
+  const response = await API.post("/api/register", {
+    first_name: firstName,
+    last_name: lastName,
+    mother_lastname: motherLastName,
+    email: email,
+    phone: phone,
+    birthdate: birthDate,
+    username: username,
+    password: password,
+    role_id: userType === "Cliente" ? 3 : userType === "Empleado" ? 2 : 1
+  });
 
-      if (!response.ok) throw new Error("Error en la conexión con el servidor");
-
-      const data = await response.json();
+  const data = response.data;
       setSuccess(data.message);
       setFormData({
         firstName: "",
