@@ -37,125 +37,124 @@ const Login = () => {
   // ========================================
   // 🔑 LOGIN TRADICIONAL
   // ========================================
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setMessage("");
-    setLoading(true);
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setError("");
+  setMessage("");
+  setLoading(true);
 
-    try {
-      const response = await API.post("/api/login", {
-        username: formData.username,
-        password: formData.password,
-      });
+  try {
+    const response = await API.post("/api/login", {
+      username: formData.username,
+      password: formData.password,
+    });
 
-      const data = response.data;
+    const data = response.data;
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
 
-      setMessage("¡Inicio de sesión exitoso! Redirigiendo...");
+    setMessage("¡Inicio de sesión exitoso! Redirigiendo...");
 
-      setTimeout(() => {
-        redirectByRole(data.user); // 👈 USA LA FUNCIÓN CENTRALIZADA
-      }, 1500);
+    setTimeout(() => {
+      redirectByRole(data.user);
+    }, 1500);
 
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    setError(err.response?.data?.error || err.message || "Error al iniciar sesión");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ========================================
   // 📧 SOLICITAR CÓDIGO POR EMAIL
   // ========================================
-  const handleRequestCode = async (e) => {
-    e.preventDefault();
-    setError("");
-    setMessage("");
-    setLoading(true);
+const handleRequestCode = async (e) => {
+  e.preventDefault();
+  setError("");
+  setMessage("");
+  setLoading(true);
 
-    try {
-      const response = await API.post("/api/auth/email/request-code", {
-        email: formData.email,
-      });
+  try {
+    const response = await API.post("/api/auth/email/request-code", {
+      email: formData.email,
+    });
 
-      const data = response.data;
+    const data = response.data;
 
-      setCodeSent(true);
-      setMessage("📧 Código enviado a tu correo. Revisa tu bandeja de entrada.");
+    setCodeSent(true);
+    setMessage("📧 Código enviado a tu correo. Revisa tu bandeja de entrada.");
 
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  } catch (err) {
+    setError(err.response?.data?.error || err.message || "Error al solicitar código");
+  } finally {
+    setLoading(false);
+  }
+};
   // ========================================
   // ✅ VERIFICAR CÓDIGO
   // ========================================
-  const handleVerifyCode = async (e) => {
-    e.preventDefault();
-    setError("");
-    setMessage("");
-    setLoading(true);
+const handleVerifyCode = async (e) => {
+  e.preventDefault();
+  setError("");
+  setMessage("");
+  setLoading(true);
 
-    try {
-      const response = await API.post("/api/auth/email/verify-code", {
-        email: formData.email,
-        code: formData.code,
-      });
+  try {
+    const response = await API.post("/api/auth/email/verify-code", {
+      email: formData.email,
+      code: formData.code,
+    });
 
-      const data = response.data;
+    const data = response.data;
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
 
-      setMessage("¡Verificación exitosa! Redirigiendo...");
+    setMessage("¡Verificación exitosa! Redirigiendo...");
 
-      setTimeout(() => {
-        redirectByRole(data.user); // 👈 USA LA FUNCIÓN CENTRALIZADA
-      }, 1500);
+    setTimeout(() => {
+      redirectByRole(data.user);
+    }, 1500);
 
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    setError(err.response?.data?.error || err.message || "Código inválido");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ========================================
   // 🔵 LOGIN CON GOOGLE
   // ========================================
-  const handleGoogleSuccess = async (credentialResponse) => {
-    setError("");
-    setMessage("");
-    setLoading(true);
+ const handleGoogleSuccess = async (credentialResponse) => {
+  setError("");
+  setMessage("");
+  setLoading(true);
 
-    try {
-      const response = await API.post("/api/auth/google", {
-        credential: credentialResponse.credential,
-      });
+  try {
+    const response = await API.post("/api/auth/google", {
+      credential: credentialResponse.credential,
+    });
 
-      const data = response.data;
+    const data = response.data;
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
 
-      setMessage("¡Inicio de sesión con Google exitoso! Redirigiendo...");
+    setMessage("¡Inicio de sesión con Google exitoso! Redirigiendo...");
 
-      setTimeout(() => {
-        redirectByRole(data.user); // 👈 USA LA FUNCIÓN CENTRALIZADA
-      }, 1500);
+    setTimeout(() => {
+      redirectByRole(data.user);
+    }, 1500);
 
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    setError(err.response?.data?.error || err.message || "Error al iniciar sesión con Google");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleGoogleError = () => {
     setError("Error al iniciar sesión con Google. Inténtalo de nuevo.");
