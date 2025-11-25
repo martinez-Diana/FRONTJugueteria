@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useNavigate, Link } from "react-router-dom";
+import API from "../api"; // ← AGREGAR ESTA LÍNEA
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+// const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000"; // ← ELIMINAR O COMENTAR
 
 const Login = () => {
   const [loginMethod, setLoginMethod] = useState("traditional");
@@ -43,20 +44,12 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
+      const response = await API.post("/api/login", {
+        username: formData.username,
+        password: formData.password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error al iniciar sesión");
-      }
+      const data = response.data;
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -84,17 +77,11 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/email/request-code`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email }),
+      const response = await API.post("/api/auth/email/request-code", {
+        email: formData.email,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error al solicitar código");
-      }
+      const data = response.data;
 
       setCodeSent(true);
       setMessage("📧 Código enviado a tu correo. Revisa tu bandeja de entrada.");
@@ -116,20 +103,12 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/email/verify-code`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          code: formData.code,
-        }),
+      const response = await API.post("/api/auth/email/verify-code", {
+        email: formData.email,
+        code: formData.code,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Código inválido");
-      }
+      const data = response.data;
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -156,19 +135,11 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/google`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          credential: credentialResponse.credential,
-        }),
+      const response = await API.post("/api/auth/google", {
+        credential: credentialResponse.credential,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error al iniciar sesión con Google");
-      }
+      const data = response.data;
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
