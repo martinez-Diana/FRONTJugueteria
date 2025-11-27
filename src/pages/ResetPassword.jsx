@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://back-jugueteria-andqdrj3h-20230105-8787s-projects.vercel.app";
+const API_URL = import.meta.env.VITE_API_URL || "https://back-jugueteria.vercel.app";
 
 function ResetPassword() {
   const [searchParams] = useSearchParams();
