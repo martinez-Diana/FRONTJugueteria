@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useNavigate, Link } from "react-router-dom";
-import API from "../api"; // ← AGREGAR ESTA LÍNEA
+import API from "../api";
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-// const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000"; // ← ELIMINAR O COMENTAR
+// 🔵 GOOGLE CLIENT ID DIRECTO (sin variable de entorno)
+const GOOGLE_CLIENT_ID = "411981404482-tesgkb6vdlhsigmqgfpscu2ja4qss48m.apps.googleusercontent.com";
 
 const Login = () => {
   const [loginMethod, setLoginMethod] = useState("traditional");
@@ -28,135 +28,144 @@ const Login = () => {
     } else if (user.role_id === 2) {
       navigate("/empleado");
     } else if (user.role_id === 3) {
-      navigate("/catalogo"); // 👈 CLIENTES VAN AL CATÁLOGO
+      navigate("/catalogo");
     } else {
-      navigate("/home"); // Fallback
+      navigate("/home");
     }
   };
 
   // ========================================
   // 🔑 LOGIN TRADICIONAL
   // ========================================
-const handleLogin = async (e) => {
-  e.preventDefault();
-  setError("");
-  setMessage("");
-  setLoading(true);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    setLoading(true);
 
-  try {
-    const response = await API.post("/api/login", {
-      username: formData.username,
-      password: formData.password,
-    });
+    try {
+      const response = await API.post("/api/login", {
+        username: formData.username,
+        password: formData.password,
+      });
 
-    const data = response.data;
+      const data = response.data;
 
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-    setMessage("¡Inicio de sesión exitoso! Redirigiendo...");
+      setMessage("¡Inicio de sesión exitoso! Redirigiendo...");
 
-    setTimeout(() => {
-      redirectByRole(data.user);
-    }, 1500);
+      setTimeout(() => {
+        redirectByRole(data.user);
+      }, 1500);
 
-  } catch (err) {
-    setError(err.response?.data?.error || err.message || "Error al iniciar sesión");
-  } finally {
-    setLoading(false);
-  }
-};
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || "Error al iniciar sesión");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ========================================
   // 📧 SOLICITAR CÓDIGO POR EMAIL
   // ========================================
-const handleRequestCode = async (e) => {
-  e.preventDefault();
-  setError("");
-  setMessage("");
-  setLoading(true);
+  const handleRequestCode = async (e) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    setLoading(true);
 
-  try {
-    const response = await API.post("/api/auth/email/request-code", {
-      email: formData.email,
-    });
+    try {
+      const response = await API.post("/api/auth/email/request-code", {
+        email: formData.email,
+      });
 
-    const data = response.data;
+      const data = response.data;
 
-    setCodeSent(true);
-    setMessage("📧 Código enviado a tu correo. Revisa tu bandeja de entrada.");
+      setCodeSent(true);
+      setMessage("📧 Código enviado a tu correo. Revisa tu bandeja de entrada.");
 
-  } catch (err) {
-    setError(err.response?.data?.error || err.message || "Error al solicitar código");
-  } finally {
-    setLoading(false);
-  }
-};
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || "Error al solicitar código");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ========================================
   // ✅ VERIFICAR CÓDIGO
   // ========================================
-const handleVerifyCode = async (e) => {
-  e.preventDefault();
-  setError("");
-  setMessage("");
-  setLoading(true);
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    setLoading(true);
 
-  try {
-    const response = await API.post("/api/auth/email/verify-code", {
-      email: formData.email,
-      code: formData.code,
-    });
+    try {
+      const response = await API.post("/api/auth/email/verify-code", {
+        email: formData.email,
+        code: formData.code,
+      });
 
-    const data = response.data;
+      const data = response.data;
 
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-    setMessage("¡Verificación exitosa! Redirigiendo...");
+      setMessage("¡Verificación exitosa! Redirigiendo...");
 
-    setTimeout(() => {
-      redirectByRole(data.user);
-    }, 1500);
+      setTimeout(() => {
+        redirectByRole(data.user);
+      }, 1500);
 
-  } catch (err) {
-    setError(err.response?.data?.error || err.message || "Código inválido");
-  } finally {
-    setLoading(false);
-  }
-};
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || "Código inválido");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ========================================
-  // 🔵 LOGIN CON GOOGLE
+  // 🔵 LOGIN CON GOOGLE - CORREGIDO
   // ========================================
- const handleGoogleSuccess = async (credentialResponse) => {
-  setError("");
-  setMessage("");
-  setLoading(true);
+  const handleGoogleSuccess = async (credentialResponse) => {
+    console.log("✅ Google Login Success:", credentialResponse);
+    setError("");
+    setMessage("");
+    setLoading(true);
 
-  try {
-    const response = await API.post("/api/auth/google", {
-      credential: credentialResponse.credential,
-    });
+    try {
+      // Verificar que tenemos el credential
+      if (!credentialResponse.credential) {
+        throw new Error("No se recibió el token de Google");
+      }
 
-    const data = response.data;
+      const response = await API.post("/api/auth/google", {
+        credential: credentialResponse.credential,
+      });
 
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+      const data = response.data;
 
-    setMessage("¡Inicio de sesión con Google exitoso! Redirigiendo...");
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-    setTimeout(() => {
-      redirectByRole(data.user);
-    }, 1500);
+      setMessage("¡Inicio de sesión con Google exitoso! Redirigiendo...");
 
-  } catch (err) {
-    setError(err.response?.data?.error || err.message || "Error al iniciar sesión con Google");
-  } finally {
-    setLoading(false);
-  }
-};
+      setTimeout(() => {
+        redirectByRole(data.user);
+      }, 1500);
+
+    } catch (err) {
+      console.error("❌ Error en Google Login:", err);
+      setError(err.response?.data?.error || err.message || "Error al iniciar sesión con Google");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleGoogleError = () => {
+    console.error("❌ Google Login Error");
     setError("Error al iniciar sesión con Google. Inténtalo de nuevo.");
   };
 
@@ -298,8 +307,23 @@ const handleVerifyCode = async (e) => {
     },
     googleButtonContainer: {
       display: "flex",
-      justifyContent: "center",
+      flexDirection: "column",
+      alignItems: "center",
       marginBottom: "20px",
+    },
+    googleDebug: {
+      border: "1px dashed #bbb",
+      padding: "10px",
+      marginBottom: "15px",
+      borderRadius: "6px",
+      background: "#f9fafb",
+      width: "100%",
+    },
+    googleDebugText: {
+      fontSize: "11px",
+      margin: "0",
+      color: "#666",
+      fontFamily: "monospace",
     },
     form: {
       display: "flex",
@@ -409,16 +433,27 @@ const handleVerifyCode = async (e) => {
             <h2 style={styles.rightTitle}>Bienvenido</h2>
             <p style={styles.rightSubtitle}>Selecciona tu método de inicio de sesión</p>
 
-            {/* Botón de Google */}
+            {/* Botón de Google - CORREGIDO */}
             <div style={styles.googleButtonContainer}>
+              {/* Debug Info - Eliminar en producción */}
+              <div style={styles.googleDebug}>
+                <p style={styles.googleDebugText}>
+                  <strong>CLIENT ID:</strong> {GOOGLE_CLIENT_ID ? "✅ Configurado" : "❌ NO CONFIGURADO"}
+                </p>
+                <p style={styles.googleDebugText}>
+                  <strong>Status:</strong> {GOOGLE_CLIENT_ID.includes("apps.googleusercontent.com") ? "✅ Formato correcto" : "❌ Formato incorrecto"}
+                </p>
+              </div>
+
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleError}
                 theme="outline"
                 size="large"
-                text="signin_with"
+                text="continue_with"
                 shape="rectangular"
                 logo_alignment="left"
+                width="300"
               />
             </div>
 
@@ -646,17 +681,18 @@ const handleVerifyCode = async (e) => {
 
             {/* Link de recuperación de contraseña */}
             {loginMethod === "traditional" && (
-            <p style={styles.registerText}>
-              <Link
-                to="/forgot-password"
-                style={styles.link}
-                onMouseEnter={(e) => (e.target.style.textDecoration = "underline")}
-                onMouseLeave={(e) => (e.target.style.textDecoration = "none")}
-              >
-                ¿Olvidaste tu contraseña?
-             </Link>
-           </p>
-            )}    
+              <p style={styles.registerText}>
+                <Link
+                  to="/forgot-password"
+                  style={styles.link}
+                  onMouseEnter={(e) => (e.target.style.textDecoration = "underline")}
+                  onMouseLeave={(e) => (e.target.style.textDecoration = "none")}
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </p>
+            )}
+
             {/* Link de registro */}
             <p style={styles.registerText}>
               ¿No tienes cuenta?{" "}
