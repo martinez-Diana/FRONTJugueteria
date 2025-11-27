@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API_URL = import.meta.env.VITE_API_URL || "https://back-jugueteria-andqdrj3h-20230105-8787s-projects.vercel.app";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
