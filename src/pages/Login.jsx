@@ -436,14 +436,7 @@ const Login = () => {
             {/* Botón de Google - CORREGIDO */}
             <div style={styles.googleButtonContainer}>
               {/* Debug Info - Eliminar en producción */}
-              <div style={styles.googleDebug}>
-                <p style={styles.googleDebugText}>
-                  <strong>CLIENT ID:</strong> {GOOGLE_CLIENT_ID ? "✅ Configurado" : "❌ NO CONFIGURADO"}
-                </p>
-                <p style={styles.googleDebugText}>
-                  <strong>Status:</strong> {GOOGLE_CLIENT_ID.includes("apps.googleusercontent.com") ? "✅ Formato correcto" : "❌ Formato incorrecto"}
-                </p>
-              </div>
+
 
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
