@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import API from "../api"; // ← AGREGAR ESTA LÍNEA
+import { useNavigate } from "react-router-dom";
+import API from "../api";
 
 const styles = `
   @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
@@ -138,6 +138,35 @@ const styles = `
   .form-group {
     display: flex;
     flex-direction: column;
+  }
+
+  .password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .password-input-wrapper input {
+    flex: 1;
+    padding-right: 40px;
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #666;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .toggle-password:hover {
+    color: #ec4899;
   }
 
   label {
@@ -356,6 +385,7 @@ const styles = `
 `;
 
 const Register = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -366,16 +396,20 @@ const Register = () => {
     password: "",
     confirmPassword: "",
     username: "",
-    userType: "Cliente",
     termsAccepted: false,
     privacyAccepted: false,
   });
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [nameValidation, setNameValidation] = useState({ valid: null, message: "" });
+  const [lastNameValidation, setLastNameValidation] = useState({ valid: null, message: "" });
+  const [motherLastNameValidation, setMotherLastNameValidation] = useState({ valid: null, message: "" });
   const [emailValidation, setEmailValidation] = useState({ valid: null, message: "" });
   const [birthDateValidation, setBirthDateValidation] = useState({ valid: null, message: "" });
   const [passwordFocus, setPasswordFocus] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -385,12 +419,48 @@ const Register = () => {
     });
 
     // Validaciones en tiempo real
+    if (name === "firstName") {
+      validateName(value, setNameValidation, "nombre");
+    }
+    if (name === "lastName") {
+      validateName(value, setLastNameValidation, "apellido paterno");
+    }
+    if (name === "motherLastName") {
+      validateName(value, setMotherLastNameValidation, "apellido materno");
+    }
     if (name === "email") {
       validateEmail(value);
     }
     if (name === "birthDate") {
       validateBirthDate(value);
     }
+  };
+
+  const validateName = (name, setValidation, fieldName) => {
+    if (!name) {
+      setValidation({ valid: null, message: "" });
+      return;
+    }
+
+    // Solo permite letras y espacios
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    
+    if (!nameRegex.test(name)) {
+      setValidation({ valid: false, message: `El ${fieldName} solo puede contener letras` });
+      return;
+    }
+
+    if (name.trim().length < 2) {
+      setValidation({ valid: false, message: `El ${fieldName} debe tener al menos 2 caracteres` });
+      return;
+    }
+
+    if (name.trim().length > 50) {
+      setValidation({ valid: false, message: `El ${fieldName} no puede exceder 50 caracteres` });
+      return;
+    }
+
+    setValidation({ valid: true, message: `✓ ${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} válido` });
   };
 
   const validateEmail = (email) => {
@@ -406,41 +476,7 @@ const Register = () => {
       return;
     }
 
-    const domain = email.split("@")[1]?.toLowerCase();
-    
-    // Dominios para cada tipo de usuario
-    const adminDomains = ["admin.jugueteria.com", "admin.martinez.com"];
-    const employeeDomains = ["empleado.jugueteria.com", "staff.martinez.com"];
-    const clientDomains = ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com"];
-
-    if (formData.userType === "Administrador") {
-      if (adminDomains.includes(domain)) {
-        setEmailValidation({ valid: true, message: "✓ Correo válido para Administrador" });
-      } else {
-        setEmailValidation({ 
-          valid: false, 
-          message: `Para Administrador usa: ${adminDomains.join(", ")}` 
-        });
-      }
-    } else if (formData.userType === "Empleado") {
-      if (employeeDomains.includes(domain)) {
-        setEmailValidation({ valid: true, message: "✓ Correo válido para Empleado" });
-      } else {
-        setEmailValidation({ 
-          valid: false, 
-          message: `Para Empleado usa: ${employeeDomains.join(", ")}` 
-        });
-      }
-    } else {
-      if (clientDomains.some(d => domain?.includes(d))) {
-        setEmailValidation({ valid: true, message: "✓ Correo válido" });
-      } else {
-        setEmailValidation({ 
-          valid: false, 
-          message: "Usa correos comunes: Gmail, Hotmail, Outlook, Yahoo" 
-        });
-      }
-    }
+    setEmailValidation({ valid: true, message: "✓ Correo válido" });
   };
 
   const validateBirthDate = (date) => {
@@ -455,7 +491,6 @@ const Register = () => {
     const monthDiff = today.getMonth() - birthDate.getMonth();
     const dayDiff = today.getDate() - birthDate.getDate();
 
-    // Ajustar edad si aún no ha cumplido años este año
     const actualAge = (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) ? age - 1 : age;
 
     if (birthDate > today) {
@@ -506,23 +541,22 @@ const Register = () => {
       password,
       confirmPassword,
       username,
-      userType,
       termsAccepted,
       privacyAccepted,
     } = formData;
 
-    if (!firstName.trim()) {
-      setError("El nombre es requerido");
+    if (!nameValidation.valid) {
+      setError("El nombre no es válido");
       return;
     }
 
-    if (!lastName.trim()) {
-      setError("El apellido paterno es requerido");
+    if (!lastNameValidation.valid) {
+      setError("El apellido paterno no es válido");
       return;
     }
 
-    if (!motherLastName.trim()) {
-      setError("El apellido materno es requerido");
+    if (!motherLastNameValidation.valid) {
+      setError("El apellido materno no es válido");
       return;
     }
 
@@ -532,7 +566,7 @@ const Register = () => {
     }
 
     if (!emailValidation.valid) {
-      setError("Corrige el correo electrónico según tu tipo de usuario");
+      setError("Corrige el correo electrónico");
       return;
     }
 
@@ -556,39 +590,29 @@ const Register = () => {
       return;
     }
 
-try {
-  const response = await API.post("/api/register", {
-    first_name: firstName,
-    last_name: lastName,
-    mother_lastname: motherLastName,
-    email: email,
-    phone: phone,
-    birthdate: birthDate,
-    username: username,
-    password: password,
-    role_id: userType === "Cliente" ? 3 : userType === "Empleado" ? 2 : 1
-  });
-
-  const data = response.data;
-      setSuccess(data.message);
-      setFormData({
-        firstName: "",
-        lastName: "",
-        motherLastName: "",
-        email: "",
-        phone: "",
-        birthDate: "",
-        password: "",
-        confirmPassword: "",
-        username: "",
-        userType: "Cliente",
-        termsAccepted: false,
-        privacyAccepted: false,
+    try {
+      const response = await API.post("/api/register", {
+        first_name: firstName,
+        last_name: lastName,
+        mother_lastname: motherLastName,
+        email: email,
+        phone: phone,
+        birthdate: birthDate,
+        username: username,
+        password: password,
+        role_id: 3 // Por defecto todos se registran como Cliente
       });
-      setEmailValidation({ valid: null, message: "" });
-      setBirthDateValidation({ valid: null, message: "" });
+
+      const data = response.data;
+      setSuccess(data.message);
+      
+      // Redirigir al login después de 1.5 segundos
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+
     } catch (error) {
-      setError("Error en la conexión con el servidor");
+      setError(error.response?.data?.message || "Error en la conexión con el servidor");
     }
   };
 
@@ -621,8 +645,7 @@ try {
               {error && <div className="error-message">❌ {error}</div>}
               {success && (
                 <div className="success-message">
-                  ✅ {success} <br />
-                  <Link to="/login">Iniciar sesión</Link>
+                  ✅ {success} Redirigiendo al inicio de sesión...
                 </div>
               )}
 
@@ -636,8 +659,17 @@ try {
                     value={formData.firstName}
                     onChange={handleChange}
                     placeholder="Tu nombre"
+                    className={
+                      nameValidation.valid === true ? "input-success" : 
+                      nameValidation.valid === false ? "input-error" : ""
+                    }
                     required
                   />
+                  {nameValidation.message && (
+                    <div className={`validation-message ${nameValidation.valid ? "success" : "error"}`}>
+                      {nameValidation.message}
+                    </div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label htmlFor="lastName">Apellido Paterno</label>
@@ -648,8 +680,17 @@ try {
                     value={formData.lastName}
                     onChange={handleChange}
                     placeholder="Apellido paterno"
+                    className={
+                      lastNameValidation.valid === true ? "input-success" : 
+                      lastNameValidation.valid === false ? "input-error" : ""
+                    }
                     required
                   />
+                  {lastNameValidation.message && (
+                    <div className={`validation-message ${lastNameValidation.valid ? "success" : "error"}`}>
+                      {lastNameValidation.message}
+                    </div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label htmlFor="motherLastName">Apellido Materno</label>
@@ -660,8 +701,17 @@ try {
                     value={formData.motherLastName}
                     onChange={handleChange}
                     placeholder="Apellido materno"
+                    className={
+                      motherLastNameValidation.valid === true ? "input-success" : 
+                      motherLastNameValidation.valid === false ? "input-error" : ""
+                    }
                     required
                   />
+                  {motherLastNameValidation.message && (
+                    <div className={`validation-message ${motherLastNameValidation.valid ? "success" : "error"}`}>
+                      {motherLastNameValidation.message}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -724,20 +774,44 @@ try {
                 </div>
               </div>
 
+              <div className="form-row full">
+                <div className="form-group">
+                  <label htmlFor="username">Nombre de Usuario</label>
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    placeholder="Tu usuario"
+                    required
+                  />
+                </div>
+              </div>
+
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="password">Contraseña</label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    onFocus={() => setPasswordFocus(true)}
-                    placeholder="Min. 8 caracteres, mayúscula, número y símbolo"
-                    className={isPasswordValid() ? "input-success" : ""}
-                    required
-                  />
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      onFocus={() => setPasswordFocus(true)}
+                      placeholder="Min. 8 caracteres, mayúscula, número y símbolo"
+                      className={isPasswordValid() ? "input-success" : ""}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="toggle-password"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? "👁️" : "👁️‍🗨️"}
+                    </button>
+                  </div>
                   {(passwordFocus || formData.password) && (
                     <div className={`password-requirements ${formData.password ? "active" : ""}`}>
                       <div className={`requirement ${passwordReq.length ? "met" : "unmet"}`}>
@@ -757,22 +831,31 @@ try {
                 </div>
                 <div className="form-group">
                   <label htmlFor="confirmPassword">Confirmar Contraseña</label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="Confirmar contraseña"
-                    className={
-                      formData.confirmPassword && formData.password === formData.confirmPassword 
-                        ? "input-success" 
-                        : formData.confirmPassword && formData.password !== formData.confirmPassword
-                        ? "input-error"
-                        : ""
-                    }
-                    required
-                  />
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Confirmar contraseña"
+                      className={
+                        formData.confirmPassword && formData.password === formData.confirmPassword 
+                          ? "input-success" 
+                          : formData.confirmPassword && formData.password !== formData.confirmPassword
+                          ? "input-error"
+                          : ""
+                      }
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="toggle-password"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+                    </button>
+                  </div>
                   {formData.confirmPassword && formData.password !== formData.confirmPassword && (
                     <div className="validation-message error">
                       Las contraseñas no coinciden
@@ -783,39 +866,6 @@ try {
                       ✓ Las contraseñas coinciden
                     </div>
                   )}
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="username">Nombre de Usuario</label>
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    placeholder="Tu usuario"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="userType">Tipo de Usuario</label>
-                  <select
-                    id="userType"
-                    name="userType"
-                    value={formData.userType}
-                    onChange={(e) => {
-                      handleChange(e);
-                      // Re-validar email cuando cambie el tipo de usuario
-                      if (formData.email) validateEmail(formData.email);
-                    }}
-                    required
-                  >
-                    <option value="Cliente">Cliente</option>
-                    <option value="Empleado">Empleado</option>
-                    <option value="Administrador">Administrador</option>
-                  </select>
                 </div>
               </div>
 
