@@ -15,6 +15,11 @@ const Login = () => {
   const [codeSent, setCodeSent] = useState(false);
   const navigate = useNavigate();
 
+  // 👇 NUEVOS ESTADOS PARA LIMITADOR DE INTENTOS
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockTimer, setBlockTimer] = useState(0);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError("");
@@ -23,12 +28,12 @@ const Login = () => {
 
   // 🎯 FUNCIÓN CENTRALIZADA PARA REDIRECCIONAR SEGÚN ROL
   const redirectByRole = (user) => {
-  // Redirigir siempre al perfil después del login
-  navigate("/profile");
-};
+    // Redirigir siempre al perfil después del login
+    navigate("/profile");
+  };
 
   // ========================================
-  // 🔑 LOGIN TRADICIONAL
+  // 🔑 LOGIN TRADICIONAL - CON LIMITADOR
   // ========================================
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -49,12 +54,39 @@ const Login = () => {
 
       setMessage("¡Inicio de sesión exitoso! Redirigiendo...");
 
+      // Resetear intentos al iniciar sesión correctamente
+      setLoginAttempts(0);
+
       setTimeout(() => {
         redirectByRole(data.user);
       }, 1500);
 
     } catch (err) {
-      setError(err.response?.data?.error || err.message || "Error al iniciar sesión");
+      // 👇 NUEVO: CONTADOR DE INTENTOS FALLIDOS
+      const newAttempts = loginAttempts + 1;
+      setLoginAttempts(newAttempts);
+      
+      // Si llega a 3 intentos, bloquear por 60 segundos
+      if (newAttempts >= 3) {
+        setIsBlocked(true);
+        setBlockTimer(60);
+        
+        const countdown = setInterval(() => {
+          setBlockTimer(prev => {
+            if (prev <= 1) {
+              clearInterval(countdown);
+              setIsBlocked(false);
+              setLoginAttempts(0);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        
+        setError("⚠️ Demasiados intentos fallidos. Espera 60 segundos.");
+      } else {
+        setError(`❌ ${err.response?.data?.error || "Error al iniciar sesión"} (Intento ${newAttempts}/3)`);
+      }
     } finally {
       setLoading(false);
     }
@@ -428,9 +460,6 @@ const Login = () => {
 
             {/* Botón de Google - CORREGIDO */}
             <div style={styles.googleButtonContainer}>
-              {/* Debug Info - Eliminar en producción */}
-
-
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleError}
@@ -493,7 +522,7 @@ const Login = () => {
                   value={formData.username}
                   onChange={handleChange}
                   required
-                  disabled={loading}
+                  disabled={loading || isBlocked}
                   style={styles.input}
                   onFocus={(e) => {
                     e.target.style.borderColor = "#c084fc";
@@ -513,7 +542,7 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  disabled={loading}
+                  disabled={loading || isBlocked}
                   style={styles.input}
                   onFocus={(e) => {
                     e.target.style.borderColor = "#c084fc";
@@ -527,27 +556,32 @@ const Login = () => {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || isBlocked}
                   style={{
                     ...styles.button,
-                    ...(loading ? styles.buttonDisabled : {}),
+                    ...((loading || isBlocked) ? styles.buttonDisabled : {}),
                   }}
                   onMouseEnter={(e) => {
-                    if (!loading) {
+                    if (!loading && !isBlocked) {
                       e.target.style.backgroundColor = "#db2777";
                       e.target.style.transform = "translateY(-2px)";
                       e.target.style.boxShadow = "0 5px 16px rgba(219, 39, 119, 0.3)";
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (!loading) {
+                    if (!loading && !isBlocked) {
                       e.target.style.backgroundColor = "#ec4899";
                       e.target.style.transform = "translateY(0)";
                       e.target.style.boxShadow = "0 3px 12px rgba(236, 72, 153, 0.25)";
                     }
                   }}
                 >
-                  {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+                  {isBlocked 
+                    ? `🔒 Bloqueado (${blockTimer}s)` 
+                    : loading 
+                    ? "Iniciando sesión..." 
+                    : "Iniciar Sesión"
+                  }
                 </button>
               </form>
             )}
