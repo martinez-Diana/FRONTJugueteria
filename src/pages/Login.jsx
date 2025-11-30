@@ -23,16 +23,9 @@ const Login = () => {
 
   // 🎯 FUNCIÓN CENTRALIZADA PARA REDIRECCIONAR SEGÚN ROL
   const redirectByRole = (user) => {
-    if (user.role_id === 1) {
-      navigate("/administrador");
-    } else if (user.role_id === 2) {
-      navigate("/empleado");
-    } else if (user.role_id === 3) {
-      navigate("/catalogo");
-    } else {
-      navigate("/home");
-    }
-  };
+  // Redirigir siempre al perfil después del login
+  navigate("/profile");
+};
 
   // ========================================
   // 🔑 LOGIN TRADICIONAL
