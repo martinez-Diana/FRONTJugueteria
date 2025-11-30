@@ -8,7 +8,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import CatalogoProductos from "./pages/Catalogo_Productos";
 import UserProfile from "./pages/UserProfile";
-import ProtectedRoute from "./components/ProtectedRoute"; // 👈 NUEVO
+import ProtectedRoute from "./pages/ProtectedRoute"; // 👈 CORREGIDO
 
 function App() {
   return (
@@ -19,7 +19,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         
-        {/* 👇 RUTAS PROTEGIDAS */}
+        {/* Rutas protegidas */}
         <Route 
           path="/profile" 
           element={
