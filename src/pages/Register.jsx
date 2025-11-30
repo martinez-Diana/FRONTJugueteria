@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
+import { sanitizeInput, sanitizeFormData, isValidEmail, isValidName } from "../utils/authUtils";
 
 const styles = `
   @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
@@ -591,17 +592,41 @@ const Register = () => {
     }
 
     try {
-      const response = await API.post("/api/register", {
-        first_name: firstName,
-        last_name: lastName,
-        mother_lastname: motherLastName,
-        email: email,
-        phone: phone,
-        birthdate: birthDate,
-        username: username,
-        password: password,
-        role_id: 3 // Por defecto todos se registran como Cliente
-      });
+  // 🛡️ Sanitizar todos los datos antes de enviar
+  const sanitizedData = {
+    first_name: sanitizeInput(firstName),
+    last_name: sanitizeInput(lastName),
+    mother_lastname: sanitizeInput(motherLastName),
+    email: sanitizeInput(email),
+    phone: sanitizeInput(phone),
+    birthdate: birthDate, // Las fechas no necesitan sanitización
+    username: sanitizeInput(username),
+    password: password, // La contraseña se hashea en el backend
+    role_id: 3
+  };
+
+  // Validaciones adicionales
+  if (!isValidEmail(sanitizedData.email)) {
+    setError("El formato del correo electrónico no es válido");
+    return;
+  }
+
+  if (!isValidName(sanitizedData.first_name)) {
+    setError("El nombre solo puede contener letras");
+    return;
+  }
+
+  if (!isValidName(sanitizedData.last_name)) {
+    setError("El apellido paterno solo puede contener letras");
+    return;
+  }
+
+  if (!isValidName(sanitizedData.mother_lastname)) {
+    setError("El apellido materno solo puede contener letras");
+    return;
+  }
+
+  const response = await API.post("/api/register", sanitizedData);
 
       const data = response.data;
       setSuccess(data.message);

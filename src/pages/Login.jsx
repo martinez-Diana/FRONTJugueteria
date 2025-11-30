@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useNavigate, Link } from "react-router-dom";
 import API from "../api";
+import { sanitizeInput, isValidEmail } from "../utils/authUtils";
 
 // 🔵 GOOGLE CLIENT ID DIRECTO (sin variable de entorno)
 const GOOGLE_CLIENT_ID = "411981404482-tesgkb6vdlhsigmqgfpscu2ja4qss48m.apps.googleusercontent.com";
@@ -42,10 +43,14 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await API.post("/api/login", {
-        username: formData.username,
-        password: formData.password,
-      });
+  // 🛡️ Sanitizar datos antes de enviar
+  const sanitizedUsername = sanitizeInput(formData.username);
+  const sanitizedPassword = sanitizeInput(formData.password);
+
+  const response = await API.post("/api/login", {
+    username: sanitizedUsername,
+    password: sanitizedPassword,
+  });
 
       const data = response.data;
 
@@ -102,9 +107,16 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await API.post("/api/auth/email/request-code", {
-        email: formData.email,
-      });
+  // 🛡️ Validar email antes de enviar
+  if (!isValidEmail(formData.email)) {
+    setError("❌ El formato del correo electrónico no es válido");
+    setLoading(false);
+    return;
+  }
+
+  const response = await API.post("/api/auth/email/request-code", {
+    email: formData.email,
+  });
 
       const data = response.data;
 
@@ -128,10 +140,13 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await API.post("/api/auth/email/verify-code", {
-        email: formData.email,
-        code: formData.code,
-      });
+  // 🛡️ Sanitizar código
+  const sanitizedCode = sanitizeInput(formData.code);
+
+  const response = await API.post("/api/auth/email/verify-code", {
+    email: formData.email,
+    code: sanitizedCode,
+  });
 
       const data = response.data;
 
