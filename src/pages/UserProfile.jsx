@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 
 const UserProfile = () => {
@@ -8,21 +8,48 @@ const UserProfile = () => {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
-  const [formData, setFormData] = useState({
-    firstName: "Juan",
-    lastName: "García",
-    motherLastName: "López",
-    email: "juan@example.com",
-    phone: "+34 612 345 678",
-    birthDate: "1990-05-15",
-    username: "juangarcia",
+  // 👇 OBTENER DATOS DEL USUARIO DESDE LOCALSTORAGE
+  const [formData, setFormData] = useState(() => {
+    const userData = localStorage.getItem("user")
+    if (userData) {
+      const user = JSON.parse(userData)
+      return {
+        firstName: user.first_name || user.name || "Usuario",
+        lastName: user.last_name || "",
+        motherLastName: user.mother_last_name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        birthDate: user.birth_date || "",
+        username: user.username || user.email || "",
+      }
+    }
+    // Valores por defecto si no hay usuario
+    return {
+      firstName: "Usuario",
+      lastName: "",
+      motherLastName: "",
+      email: "",
+      phone: "",
+      birthDate: "",
+      username: "",
+    }
   })
+
+  // 👇 VERIFICAR SI HAY SESIÓN ACTIVA
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      navigate("/login")
+    }
+  }, [navigate])
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   })
+
+  // ... resto del código permanece igual (handleInputChange, handlePasswordChange, etc.)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
