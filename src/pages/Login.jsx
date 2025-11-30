@@ -21,9 +21,17 @@ const Login = () => {
     setMessage("");
   };
 
-  // 🎯 FUNCIÓN CENTRALIZADA PARA REDIRECCIONAR AL PERFIL
+  // 🎯 FUNCIÓN CENTRALIZADA PARA REDIRECCIONAR SEGÚN ROL
   const redirectByRole = (user) => {
-    navigate("/profile");
+    if (user.role_id === 1) {
+      navigate("/administrador");
+    } else if (user.role_id === 2) {
+      navigate("/empleado");
+    } else if (user.role_id === 3) {
+      navigate("/catalogo");
+    } else {
+      navigate("/home");
+    }
   };
 
   // ========================================
@@ -427,6 +435,9 @@ const Login = () => {
 
             {/* Botón de Google - CORREGIDO */}
             <div style={styles.googleButtonContainer}>
+              {/* Debug Info - Eliminar en producción */}
+
+
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleError}
