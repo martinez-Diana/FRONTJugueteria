@@ -37,28 +37,38 @@ const UserProfile = () => {
 
   // 👇 VERIFICAR TOKEN AL CARGAR Y MONITOREAR EXPIRACIÓN
   useEffect(() => {
-    const token = localStorage.getItem("token")
+  const checkTokenExpiration = setInterval(() => {
+    const currentToken = localStorage.getItem("token")
     
-    // Verificar si existe token y si es válido
-    if (!token || isTokenExpired(token)) {
+    if (!currentToken) {
       clearSession()
-      alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.")
       navigate("/login")
       return
     }
 
-    // Monitorear expiración cada 30 segundos
-    const interval = setInterval(() => {
-      const currentToken = localStorage.getItem("token")
-      if (!currentToken || isTokenExpired(currentToken)) {
-        clearSession()
-        alert("Tu sesión ha expirado por inactividad.")
-        navigate("/login")
-      }
-    }, 30000) // Cada 30 segundos
+    if (isTokenExpired(currentToken)) {
+      clearSession()
+      alert("Tu sesión ha expirado por inactividad.")
+      navigate("/login")
+      return
+    }
 
-    return () => clearInterval(interval)
-  }, [navigate])
+    // ✅ NUEVO: Advertir cuando quedan 2 minutos
+    const timeLeft = getTokenTimeRemaining(currentToken)
+    if (timeLeft > 0 && timeLeft <= 120) { // 2 minutos = 120 segundos
+      const minutes = Math.floor(timeLeft / 60)
+      const seconds = Math.floor(timeLeft % 60)
+      console.warn(`⏰ Tu sesión expirará en ${minutes}:${seconds}`)
+      
+      // Opcional: Mostrar notificación visual
+      if (timeLeft === 60) { // 1 minuto exacto
+        alert("⚠️ Tu sesión expirará en 1 minuto. Guarda tu trabajo.")
+      }
+    }
+  }, 10000)
+  
+  return () => clearInterval(checkTokenExpiration)
+}, [navigate])
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",

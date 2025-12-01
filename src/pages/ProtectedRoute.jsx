@@ -26,19 +26,18 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   // ✅ NUEVO: Monitoreo continuo de expiración
   useEffect(() => {
-    const checkTokenExpiration = setInterval(() => {
-      const currentToken = localStorage.getItem("token");
-      
-      if (!currentToken || isTokenExpired(currentToken)) {
-        clearSession();
-        alert("Tu sesión ha expirado por inactividad.");
-        window.location.href = "/login";
-      }
-    }, 60000); // Verifica cada 60 segundos
+  const checkTokenExpiration = setInterval(() => {
+    const currentToken = localStorage.getItem("token");
+    
+    if (!currentToken || isTokenExpired(currentToken)) {
+      clearSession();
+      alert("Tu sesión ha expirado por inactividad.");
+      window.location.href = "/login";
+    }
+  }, 10000); // ✅ 10 segundos
 
-    return () => clearInterval(checkTokenExpiration);
-  }, []);
-
+  return () => clearInterval(checkTokenExpiration);
+}, []);
   return children;
 };
 
