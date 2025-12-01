@@ -1046,64 +1046,6 @@ const Register = () => {
             </form>
           </div>
         </div>
-       {showPrivacy && (
-  <div className="modal-overlay">
-    <div className="modal-content">
-      <div className="modal-header">
-        <h3>AVISO DE PRIVACIDAD</h3>
-        <button className="modal-close" onClick={() => setShowPrivacy(false)}>Cerrar</button>
-      </div>
-
-      <p><strong>Juguetería y Novedades Martínez</strong>, con domicilio en Av. López Mateos S/N, Barrio Achiyotl, Ahuatitla, Orizatlán, Hidalgo, México, es responsable del uso y protección de sus datos personales.</p>
-
-      <h4>Finalidades del uso de datos:</h4>
-      <ul>
-        <li>Realizar cobros por compra</li>
-        <li>Estadísticas de consumo</li>
-        <li>Mercadotecnia y publicidad</li>
-        <li>Prospección comercial</li>
-      </ul>
-
-      <h4>Finalidades secundarias:</h4>
-      <p>Ofertas personalizadas</p>
-
-      <h4>Datos personales recabados:</h4>
-      <ul>
-        <li>Nombre</li>
-        <li>Fecha de nacimiento</li>
-        <li>Nacionalidad</li>
-        <li>Domicilio</li>
-        <li>Teléfono</li>
-        <li>Correo electrónico</li>
-        <li>Fotografía</li>
-        <li>Pasatiempos y juegos de interés</li>
-      </ul>
-
-      <h4>Datos sensibles:</h4>
-      <ul>
-        <li>Estado de salud físico</li>
-        <li>Estado de salud mental</li>
-      </ul>
-
-      <h4>Derechos ARCO:</h4>
-      <p>Puede ejercerlos vía correo electrónico.</p>
-
-      <h4>Contacto:</h4>
-      <p>
-        Correo: grismartinez2016@gmail.com <br/>
-        Teléfonos: 8110131113 - 7711722202
-      </p>
-
-      <h4>Uso de cookies:</h4>
-      <p>Se utilizan para estadísticas y publicidad personalizada.</p>
-
-      <h4>Modificaciones:</h4>
-      <p>Se notificarán directamente en el portal.</p>
-
-      <p><strong>Última actualización: 25/09/2025</strong></p>
-    </div>
-  </div>
-)}
 
 {showTerms && (
   <div className="modal-overlay">
