@@ -383,6 +383,113 @@ const styles = `
       min-width: auto;
     }
   }
+    .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: #ffffff;
+  width: 100%;
+  max-width: 750px;
+  max-height: 90vh;
+  border-radius: 16px;
+  padding: 25px 30px;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s ease;
+  font-family: Arial, sans-serif;
+}
+
+/* Encabezado */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #f2f2f2;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+}
+
+.modal-header h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ff4d6d;
+  margin: 0;
+}
+
+/* Botón cerrar */
+.modal-close {
+  background: #ff4d6d;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: 0.2s ease;
+}
+
+.modal-close:hover {
+  background: #e63950;
+}
+
+/* Títulos internos */
+.modal-content h4 {
+  margin-top: 18px;
+  margin-bottom: 6px;
+  color: #333;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* Texto */
+.modal-content p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+/* Scroll bonito */
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: #ff4d6d;
+  border-radius: 6px;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Link de términos y privacidad */
+.privacy-link {
+  color: #ff4d6d;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.privacy-link:hover {
+  color: #e63950;
+}
 `;
 
 const Register = () => {
@@ -411,6 +518,8 @@ const Register = () => {
   const [passwordFocus, setPasswordFocus] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   const handleChange = (e) => {
   const { name, value, type, checked } = e.target;
@@ -910,9 +1019,9 @@ const Register = () => {
                     onChange={handleChange}
                     required
                   />
-                  <label htmlFor="terms">
-                    Acepto términos y condiciones
-                  </label>
+                    <label htmlFor="terms">
+                      Acepto <span className="privacy-link" onClick={() => setShowTerms(true)}>términos y condiciones</span>
+                    </label>
                 </div>
 
                 <div className="checkbox-container">
@@ -924,9 +1033,10 @@ const Register = () => {
                     onChange={handleChange}
                     required
                   />
-                  <label htmlFor="privacy">
-                    Acepto política de privacidad
-                  </label>
+                    <div className="modal-header">
+                    <h3>POLITICAS DE PRIVACIDAD</h3>
+                    <button className="modal-close" onClick={() => setShowPrivacy(false)}>Cerrar</button>
+                    </div>
                 </div>
               </div>
 
@@ -936,6 +1046,209 @@ const Register = () => {
             </form>
           </div>
         </div>
+        {showPrivacy && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <div className="modal-header">
+        <h3>POLÍTICAS DE PRIVACIDAD</h3>
+        <button className="modal-close" onClick={() => setShowPrivacy(false)}>
+          Cerrar
+        </button>
+      </div>
+
+      <p><strong>Última actualización: 25/09/2025</strong></p>
+
+      <p>
+        En <strong>Juguetería y Novedades Martínez</strong> nos comprometemos a proteger la
+        privacidad y seguridad de los datos personales de nuestros usuarios, clientes y visitantes.
+        La presente Política de Privacidad describe cómo recabamos, usamos, almacenamos y protegemos su información.
+        El uso de este sitio web implica la aceptación de estas políticas.
+      </p>
+
+      <h4>1. Responsable del tratamiento de los datos</h4>
+      <p><strong>Nombre comercial:</strong> Juguetería y Novedades Martínez</p>
+      <p><strong>Razón social:</strong> Juguetería y Novedades Martínez S.A. de C.V.</p>
+      <p><strong>Domicilio:</strong> Av. López Mateos S/N, Barrio Achiyotl, Ahuatitla, Orizatlán, Hidalgo, México</p>
+      <p><strong>Correo electrónico:</strong> grismartinez2016@gmail.com</p>
+      <p><strong>Teléfono:</strong> 8110131113</p>
+
+      <h4>2. Datos personales que se recaban</h4>
+      <ul>
+        <li>Nombre completo</li>
+        <li>Domicilio</li>
+        <li>Teléfono</li>
+        <li>Correo electrónico</li>
+        <li>Datos de facturación</li>
+        <li>Fecha de nacimiento</li>
+        <li>Fotografía</li>
+        <li>Pasatiempos y preferencias de compra</li>
+        <li>Información de navegación en el sitio web</li>
+      </ul>
+      <p>En su caso, también podrán recabarse datos personales sensibles, los cuales serán tratados bajo estrictas medidas de seguridad.</p>
+
+      <h4>3. Finalidad del uso de los datos</h4>
+      <p><strong>Finalidades primarias:</strong></p>
+      <ul>
+        <li>Registro de usuarios</li>
+        <li>Procesamiento de pedidos y pagos</li>
+        <li>Envíos de productos</li>
+        <li>Atención al cliente</li>
+        <li>Cumplimiento de obligaciones legales</li>
+        <li>Emisión de comprobantes de compra</li>
+      </ul>
+
+      <p><strong>Finalidades secundarias:</strong></p>
+      <ul>
+        <li>Envío de promociones y publicidad</li>
+        <li>Análisis estadístico de consumo</li>
+        <li>Prospección comercial</li>
+      </ul>
+      <p>El usuario podrá oponerse a finalidades secundarias enviando un correo a nuestro contacto.</p>
+
+      <h4>4. Uso de cookies</h4>
+      <p>
+        Este sitio web utiliza cookies y tecnologías similares para mejorar la experiencia del usuario,
+        analizar el comportamiento de navegación y mostrar publicidad personalizada.
+        El usuario puede desactivar las cookies desde su navegador.
+      </p>
+
+      <h4>5. Transferencia de datos</h4>
+      <p>Los datos personales no serán compartidos sin consentimiento, salvo cuando sea requerido por ley o necesario para:</p>
+      <ul>
+        <li>Proveedores de servicios de pago</li>
+        <li>Servicios de mensajería</li>
+        <li>Proveedores de alojamiento web</li>
+      </ul>
+      <p>Todos los terceros están obligados a respetar la confidencialidad de la información.</p>
+
+      <h4>6. Seguridad de los datos</h4>
+      <p>
+        Juguetería y Novedades Martínez implementa medidas administrativas, técnicas y físicas para proteger los datos
+        personales contra acceso no autorizado, pérdida, alteración o uso indebido.
+      </p>
+
+      <h4>7. Derechos ARCO</h4>
+      <p>
+        El usuario podrá ejercer sus derechos de Acceso, Rectificación, Cancelación u Oposición (ARCO) enviando un correo a:
+        <br /><strong>privacidad@jugueteriamartinez.com</strong>
+      </p>
+      <p>
+        La solicitud debe incluir nombre completo, medio de contacto e identificación oficial.
+      </p>
+
+      <h4>8. Conservación de los datos</h4>
+      <p>
+        Los datos personales serán conservados únicamente por el tiempo necesario para cumplir con las finalidades para las cuales fueron recabados y conforme a la legislación aplicable.
+      </p>
+
+      <h4>9. Enlaces a sitios de terceros</h4>
+      <p>
+        Este sitio puede contener enlaces a sitios de terceros. Juguetería y Novedades Martínez no se hace responsable
+        de las prácticas de privacidad de dichos sitios.
+      </p>
+
+      <h4>10. Consentimiento</h4>
+      <p>
+        Al registrarse, comprar o navegar en este sitio web, el usuario otorga su consentimiento para el tratamiento de sus datos conforme a estas políticas.
+      </p>
+
+      <h4>11. Modificaciones</h4>
+      <p>
+        Nos reservamos el derecho de modificar estas políticas en cualquier momento. Las actualizaciones se publicarán en este mismo medio, indicando la fecha correspondiente.
+      </p>
+
+      <h4>12. Contacto</h4>
+      <p>
+        <strong>Correo electrónico:</strong> grismartinez2016@gmail.com<br/>
+        <strong>Teléfono:</strong> 8110131113
+      </p>
+
+    </div>
+  </div>
+)}
+
+
+{showTerms && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <div className="modal-header">
+        <h3>TÉRMINOS Y CONDICIONES DE SERVICIO</h3>
+        <button className="modal-close" onClick={() => setShowTerms(false)}>Cerrar</button>
+      </div>
+
+      <p><strong>Última actualización: 25/09/2025</strong></p>
+
+      <p>
+        Bienvenido a Juguetería y Novedades Martínez. Estos Términos y Condiciones regulan el acceso, uso y compras realizadas
+        en nuestra tienda en línea. Al utilizar este sitio web o efectuar una compra, usted manifiesta su consentimiento
+        expreso de aceptar lo aquí establecido.
+      </p>
+
+      <h4>1. Información de la empresa</h4>
+      <p>
+        Nombre comercial: Juguetería y Novedades Martínez <br/>
+        Razón social: Juguetería y Novedades Martínez S.A. de C.V. <br/>
+        RFC: JNM250926ABC <br/>
+        Domicilio fiscal: Av. López Mateos S/N, Barrio Achiyotl, Ahuatitla, Orizatlán, Hidalgo, México. <br/>
+        Teléfono: 8110131113 <br/>
+        Correo: grismartinez2016@gmail.com
+      </p>
+
+      <h4>2. Aceptación de los términos</h4>
+      <p>
+        Al navegar en el sitio o realizar una compra, el usuario acepta expresamente estos términos.
+        La aceptación se realiza de manera electrónica al dar clic en “Aceptar” o “Finalizar compra”.
+      </p>
+
+      <h4>3. Proceso de compra y precios</h4>
+      <p>
+        Los precios se muestran en pesos mexicanos (MXN) e incluyen IVA.
+        Se aceptan pagos con tarjetas, transferencias y pasarelas de pago autorizadas.
+      </p>
+
+      <h4>4. Envíos y entregas</h4>
+      <p>
+        Envíos de 3 a 7 días hábiles. Los costos se informan antes de confirmar la compra.
+        Daños o faltantes deben reportarse dentro de las primeras 24 horas.
+      </p>
+
+      <h4>5. Cambios, devoluciones y cancelaciones</h4>
+      <p>
+        Cambios dentro de los 5 días hábiles conforme a la LFPC.
+        No aplican en productos personalizados, de higiene o en liquidación.
+      </p>
+
+      <h4>6. Garantías</h4>
+      <p>
+        Garantía por defectos de fábrica conforme al fabricante.
+        No cubre mal uso o daños por negligencia.
+      </p>
+
+      <h4>7. Propiedad intelectual</h4>
+      <p>
+        Todo el contenido del sitio es propiedad de Juguetería y Novedades Martínez. Queda prohibida su reproducción sin autorización.
+      </p>
+
+      <h4>8. Privacidad</h4>
+      <p>
+        Los datos se manejan conforme a la LFPDPPP y al Aviso de Privacidad.
+        Derechos ARCO al correo: privacidad@jugueteriamartinez.com
+      </p>
+
+      <h4>9. Marco legal y jurisdicción</h4>
+      <p>
+        Jurisdicción en tribunales de Pachuca, Hidalgo.
+        Quejas ante PROFECO.
+      </p>
+
+      <h4>10. Modificaciones</h4>
+      <p>
+        Estos términos podrán modificarse en cualquier momento.
+      </p>
+    </div>
+  </div>
+)}
+
       </div>
     </>
   );
