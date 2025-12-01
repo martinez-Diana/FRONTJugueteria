@@ -4,90 +4,92 @@ import { sanitizeInput, isValidEmail } from "../utils/authUtils";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://back-jugueteria.vercel.app";
 
+// ✅ Función para obtener CSRF token (si lo necesitas)
+const getCSRFToken = () => {
+  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+  return token || '';
+};
+
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // 👇 NUEVO: Estados para limitador de intentos
   const [attempts, setAttempts] = useState(0);
   const [isBlocked, setIsBlocked] = useState(false);
   const [blockTimer, setBlockTimer] = useState(0);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
-  setMessage("");
+    e.preventDefault();
+    setError("");
+    setMessage("");
 
-  // 🛡️ Validar email antes de enviar
-  const sanitizedEmail = sanitizeInput(email);
-  
-  if (!isValidEmail(sanitizedEmail)) {
-    setError("❌ El formato del correo electrónico no es válido");
-    return;
-  }
+    const sanitizedEmail = sanitizeInput(email);
+    
+    if (!isValidEmail(sanitizedEmail)) {
+      setError("❌ El formato del correo electrónico no es válido");
+      return;
+    }
 
-  // 🛡️ Verificar si está bloqueado
-  if (isBlocked) {
-    setError(`⚠️ Demasiados intentos. Espera ${blockTimer} segundos.`);
-    return;
-  }
+    if (isBlocked) {
+      setError(`⚠️ Demasiados intentos. Espera ${blockTimer} segundos.`);
+      return;
+    }
 
-  // 👇 NUEVO: Incrementar contador ANTES de enviar
-  const newAttempts = attempts + 1;
-  setAttempts(newAttempts);
+    const newAttempts = attempts + 1;
+    setAttempts(newAttempts);
 
-  // 👇 NUEVO: Verificar si ya llegó al límite
-  if (newAttempts >= 3) {
-    setIsBlocked(true);
-    setBlockTimer(300); // 5 minutos
+    if (newAttempts >= 3) {
+      setIsBlocked(true);
+      setBlockTimer(300); // 5 minutos
 
-    const countdown = setInterval(() => {
-      setBlockTimer((prev) => {
-        if (prev <= 1) {
-          clearInterval(countdown);
-          setIsBlocked(false);
-          setAttempts(0);
-          return 0;
-        }
-        return prev - 1;
+      const countdown = setInterval(() => {
+        setBlockTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdown);
+            setIsBlocked(false);
+            setAttempts(0);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      setError("⚠️ Demasiados intentos. Bloqueado por 5 minutos.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // ✅ CSRF Token opcional - puedes quitarlo si no lo usas
+      const csrfToken = getCSRFToken();
+
+      const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {})
+        },
+        body: JSON.stringify({ email: sanitizedEmail }),
       });
-    }, 1000);
 
-    setError("⚠️ Demasiados intentos. Bloqueado por 5 minutos.");
-    return; // 👈 IMPORTANTE: Detener aquí, no enviar la petición
-  }
+      const data = await response.json();
 
-  setLoading(true);
+      // ✅ Mostrar mensaje genérico de seguridad
+      setMessage("✅ Si el correo existe en nuestro sistema, recibirás un enlace de recuperación. Revisa tu bandeja de entrada y spam.");
+      setEmail("");
 
-  try {
-    // 🛡️ Obtener token CSRF
-    const csrfToken = getCSRFToken();
+    } catch (err) {
+      console.error("Error en forgot-password:", err);
+      // En caso de error de red, mostrar mensaje genérico
+      setMessage("✅ Si el correo existe en nuestro sistema, recibirás un enlace de recuperación. Revisa tu bandeja de entrada y spam.");
+      setEmail("");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "X-CSRF-Token": csrfToken
-      },
-      body: JSON.stringify({ email: sanitizedEmail }),
-    });
-
-    const data = await response.json();
-
-    // 👇 SIEMPRE mostrar el mismo mensaje (seguridad)
-    setMessage("✅ Si el correo existe en nuestro sistema, recibirás un enlace de recuperación. Revisa tu bandeja de entrada y spam.");
-    setEmail("");
-
-  } catch (err) {
-    // En caso de error de red
-    setMessage("✅ Si el correo existe en nuestro sistema, recibirás un enlace de recuperación. Revisa tu bandeja de entrada y spam.");
-    setEmail("");
-  } finally {
-    setLoading(false);
-  }
-};
   const styles = {
     container: {
       minHeight: "100vh",
