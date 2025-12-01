@@ -16,76 +16,78 @@ function ForgotPassword() {
   const [blockTimer, setBlockTimer] = useState(0);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setMessage("");
+  e.preventDefault();
+  setError("");
+  setMessage("");
 
-    // 🛡️ Validar email antes de enviar
-    const sanitizedEmail = sanitizeInput(email);
-    
-    if (!isValidEmail(sanitizedEmail)) {
-      setError("❌ El formato del correo electrónico no es válido");
-      return;
-    }
+  // 🛡️ Validar email antes de enviar
+  const sanitizedEmail = sanitizeInput(email);
+  
+  if (!isValidEmail(sanitizedEmail)) {
+    setError("❌ El formato del correo electrónico no es válido");
+    return;
+  }
 
-    // 🛡️ Verificar si está bloqueado
-    if (isBlocked) {
-      setError(`⚠️ Demasiados intentos. Espera ${blockTimer} segundos.`);
-      return;
-    }
+  // 🛡️ Verificar si está bloqueado
+  if (isBlocked) {
+    setError(`⚠️ Demasiados intentos. Espera ${blockTimer} segundos.`);
+    return;
+  }
 
-    setLoading(true);
+  // 👇 NUEVO: Incrementar contador ANTES de enviar
+  const newAttempts = attempts + 1;
+  setAttempts(newAttempts);
 
-    try {
-      const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: sanitizedEmail }),
+  // 👇 NUEVO: Verificar si ya llegó al límite
+  if (newAttempts >= 3) {
+    setIsBlocked(true);
+    setBlockTimer(300); // 5 minutos
+
+    const countdown = setInterval(() => {
+      setBlockTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdown);
+          setIsBlocked(false);
+          setAttempts(0);
+          return 0;
+        }
+        return prev - 1;
       });
+    }, 1000);
 
-      const data = await response.json();
+    setError("⚠️ Demasiados intentos. Bloqueado por 5 minutos.");
+    return; // 👈 IMPORTANTE: Detener aquí, no enviar la petición
+  }
 
-      // 👇 IMPORTANTE: Siempre mostrar el mismo mensaje (no revelar si el email existe)
-      // Esto previene la enumeración de usuarios
-      setMessage("✅ Si el correo existe en nuestro sistema, recibirás un enlace de recuperación. Revisa tu bandeja de entrada y spam.");
-      setEmail("");
-      
-      // Resetear intentos si fue exitoso
-      setAttempts(0);
+  setLoading(true);
 
-    } catch (err) {
-      // 👇 NUEVO: Incrementar contador de intentos
-      const newAttempts = attempts + 1;
-      setAttempts(newAttempts);
+  try {
+    // 🛡️ Obtener token CSRF
+    const csrfToken = getCSRFToken();
 
-      // Si llega a 3 intentos, bloquear por 5 minutos (300 segundos)
-      if (newAttempts >= 3) {
-        setIsBlocked(true);
-        setBlockTimer(300); // 5 minutos
+    const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken
+      },
+      body: JSON.stringify({ email: sanitizedEmail }),
+    });
 
-        const countdown = setInterval(() => {
-          setBlockTimer((prev) => {
-            if (prev <= 1) {
-              clearInterval(countdown);
-              setIsBlocked(false);
-              setAttempts(0);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
+    const data = await response.json();
 
-        setError("⚠️ Demasiados intentos. Bloqueado por 5 minutos.");
-      } else {
-        // Siempre mostrar el mismo mensaje genérico (no revelar si el email existe)
-        setMessage("✅ Si el correo existe en nuestro sistema, recibirás un enlace de recuperación. Revisa tu bandeja de entrada y spam.");
-        setEmail("");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+    // 👇 SIEMPRE mostrar el mismo mensaje (seguridad)
+    setMessage("✅ Si el correo existe en nuestro sistema, recibirás un enlace de recuperación. Revisa tu bandeja de entrada y spam.");
+    setEmail("");
 
+  } catch (err) {
+    // En caso de error de red
+    setMessage("✅ Si el correo existe en nuestro sistema, recibirás un enlace de recuperación. Revisa tu bandeja de entrada y spam.");
+    setEmail("");
+  } finally {
+    setLoading(false);
+  }
+};
   const styles = {
     container: {
       minHeight: "100vh",
