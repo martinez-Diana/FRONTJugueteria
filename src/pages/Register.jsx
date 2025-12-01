@@ -1128,6 +1128,129 @@ const Register = () => {
   </div>
 )}
 
+
+{showPrivacy && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <div className="modal-header">
+        <h3>POLÍTICAS DE PRIVACIDAD</h3>
+        <button className="modal-close" onClick={() => setShowPrivacy(false)}>
+          Cerrar
+        </button>
+      </div>
+
+      <p><strong>Última actualización: 25/09/2025</strong></p>
+
+      <p>
+        En <strong>Juguetería y Novedades Martínez</strong> nos comprometemos a proteger la
+        privacidad y seguridad de los datos personales de nuestros usuarios, clientes y visitantes.
+        La presente Política de Privacidad describe cómo recabamos, usamos, almacenamos y protegemos su información.
+        El uso de este sitio web implica la aceptación de estas políticas.
+      </p>
+
+      <h4>1. Responsable del tratamiento de los datos</h4>
+      <p><strong>Nombre comercial:</strong> Juguetería y Novedades Martínez</p>
+      <p><strong>Razón social:</strong> Juguetería y Novedades Martínez S.A. de C.V.</p>
+      <p><strong>Domicilio:</strong> Av. López Mateos S/N, Barrio Achiyotl, Ahuatitla, Orizatlán, Hidalgo, México</p>
+      <p><strong>Correo electrónico:</strong> grismartinez2016@gmail.com</p>
+      <p><strong>Teléfono:</strong> 8110131113</p>
+
+      <h4>2. Datos personales que se recaban</h4>
+      <ul>
+        <li>Nombre completo</li>
+        <li>Domicilio</li>
+        <li>Teléfono</li>
+        <li>Correo electrónico</li>
+        <li>Datos de facturación</li>
+        <li>Fecha de nacimiento</li>
+        <li>Fotografía</li>
+        <li>Pasatiempos y preferencias de compra</li>
+        <li>Información de navegación en el sitio web</li>
+      </ul>
+      <p>En su caso, también podrán recabarse datos personales sensibles, los cuales serán tratados bajo estrictas medidas de seguridad.</p>
+
+      <h4>3. Finalidad del uso de los datos</h4>
+      <p><strong>Finalidades primarias:</strong></p>
+      <ul>
+        <li>Registro de usuarios</li>
+        <li>Procesamiento de pedidos y pagos</li>
+        <li>Envíos de productos</li>
+        <li>Atención al cliente</li>
+        <li>Cumplimiento de obligaciones legales</li>
+        <li>Emisión de comprobantes de compra</li>
+      </ul>
+
+      <p><strong>Finalidades secundarias:</strong></p>
+      <ul>
+        <li>Envío de promociones y publicidad</li>
+        <li>Análisis estadístico de consumo</li>
+        <li>Prospección comercial</li>
+      </ul>
+      <p>El usuario podrá oponerse a finalidades secundarias enviando un correo a nuestro contacto.</p>
+
+      <h4>4. Uso de cookies</h4>
+      <p>
+        Este sitio web utiliza cookies y tecnologías similares para mejorar la experiencia del usuario,
+        analizar el comportamiento de navegación y mostrar publicidad personalizada.
+        El usuario puede desactivar las cookies desde su navegador.
+      </p>
+
+      <h4>5. Transferencia de datos</h4>
+      <p>Los datos personales no serán compartidos sin consentimiento, salvo cuando sea requerido por ley o necesario para:</p>
+      <ul>
+        <li>Proveedores de servicios de pago</li>
+        <li>Servicios de mensajería</li>
+        <li>Proveedores de alojamiento web</li>
+      </ul>
+      <p>Todos los terceros están obligados a respetar la confidencialidad de la información.</p>
+
+      <h4>6. Seguridad de los datos</h4>
+      <p>
+        Juguetería y Novedades Martínez implementa medidas administrativas, técnicas y físicas para proteger los datos
+        personales contra acceso no autorizado, pérdida, alteración o uso indebido.
+      </p>
+
+      <h4>7. Derechos ARCO</h4>
+      <p>
+        El usuario podrá ejercer sus derechos de Acceso, Rectificación, Cancelación u Oposición (ARCO) enviando un correo a:
+        <br /><strong>privacidad@jugueteriamartinez.com</strong>
+      </p>
+      <p>
+        La solicitud debe incluir nombre completo, medio de contacto e identificación oficial.
+      </p>
+
+      <h4>8. Conservación de los datos</h4>
+      <p>
+        Los datos personales serán conservados únicamente por el tiempo necesario para cumplir con las finalidades para las cuales fueron recabados y conforme a la legislación aplicable.
+      </p>
+
+      <h4>9. Enlaces a sitios de terceros</h4>
+      <p>
+        Este sitio puede contener enlaces a sitios de terceros. Juguetería y Novedades Martínez no se hace responsable
+        de las prácticas de privacidad de dichos sitios.
+      </p>
+
+      <h4>10. Consentimiento</h4>
+      <p>
+        Al registrarse, comprar o navegar en este sitio web, el usuario otorga su consentimiento para el tratamiento de sus datos conforme a estas políticas.
+      </p>
+
+      <h4>11. Modificaciones</h4>
+      <p>
+        Nos reservamos el derecho de modificar estas políticas en cualquier momento. Las actualizaciones se publicarán en este mismo medio, indicando la fecha correspondiente.
+      </p>
+
+      <h4>12. Contacto</h4>
+      <p>
+        <strong>Correo electrónico:</strong> grismartinez2016@gmail.com<br/>
+        <strong>Teléfono:</strong> 8110131113
+      </p>
+
+    </div>
+  </div>
+)}
+
+
       </div>
     </>
   );
