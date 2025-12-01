@@ -1,4 +1,3 @@
-import API from "../api";
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { isTokenExpired, clearSession } from "../utils/authUtils" // 👈 AGREGAR IMPORT
@@ -133,54 +132,10 @@ const UserProfile = () => {
     }
   }
 
-  // ========================================
-// 🚪 LOGOUT - Cerrar sesión con backend
-// ========================================
-const handleLogout = async () => {
-  const confirmed = window.confirm("¿Estás seguro de que deseas cerrar sesión?");
-  if (!confirmed) return;
-
-  try {
-    const token = localStorage.getItem("token");
-    
-    if (token) {
-      // Llamar al backend para invalidar el token
-      await API.post("/api/auth/logout", {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    }
-  } catch (error) {
-    console.error("Error al cerrar sesión en backend:", error);
-  } finally {
-    // Siempre limpiar sesión local
-    clearSession();
-    navigate("/login");
+  const handleLogout = () => {
+    clearSession() // 👈 USAR clearSession en lugar de removeItem manual
+    navigate("/login")
   }
-};
-// ========================================
-// 🔒 LOGOUT ALL - Cerrar todas las sesiones
-// ========================================
-const handleLogoutAll = async () => {
-  const confirmed = window.confirm(
-    "⚠️ Esto cerrará sesión en TODOS tus dispositivos. ¿Continuar?"
-  );
-  if (!confirmed) return;
-
-  try {
-    const token = localStorage.getItem("token");
-    
-    if (token) {
-      await API.post("/api/auth/logout-all", {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    }
-  } catch (error) {
-    console.error("Error al cerrar todas las sesiones:", error);
-  } finally {
-    clearSession();
-    navigate("/login");
-  }
-};
 
   return (
     <>
@@ -838,26 +793,16 @@ const handleLogoutAll = async () => {
             </div>
 
             {/* Botones de Acción */}
-<div className="action-buttons">
-  {!isEditing && activeTab === "personal" && (
-    <button className="edit-btn" onClick={() => setIsEditing(true)}>
-      ✏️ Editar Perfil
-    </button>
-  )}
-  <button className="logout-btn" onClick={handleLogout}>
-    🚪 Cerrar Sesión
-  </button>
-  {/* 👇 NUEVO BOTÓN AGREGADO */}
-  <button 
-    className="logout-btn" 
-    onClick={handleLogoutAll}
-    style={{ background: "#dc2626" }}
-    onMouseEnter={(e) => e.target.style.background = "#b91c1c"}
-    onMouseLeave={(e) => e.target.style.background = "#dc2626"}
-  >
-    🔒 Cerrar en todos los dispositivos
-  </button>
-</div>
+            <div className="action-buttons">
+              {!isEditing && activeTab === "personal" && (
+                <button className="edit-btn" onClick={() => setIsEditing(true)}>
+                  ✏️ Editar Perfil
+                </button>
+              )}
+              <button className="logout-btn" onClick={handleLogout}>
+                🚪 Cerrar Sesión
+              </button>
+            </div>
           </div>
         </div>
       </div>
