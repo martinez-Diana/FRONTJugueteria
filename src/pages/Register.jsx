@@ -1033,10 +1033,9 @@ const Register = () => {
                     onChange={handleChange}
                     required
                   />
-                    <div className="modal-header">
-                    <h3>POLITICAS DE PRIVACIDAD</h3>
-                    <button className="modal-close" onClick={() => setShowPrivacy(false)}>Cerrar</button>
-                    </div>
+<label htmlFor="privacy">
+                    Acepto <span className="privacy-link" onClick={() => setShowPrivacy(true)}>política de privacidad</span>
+                  </label>
                 </div>
               </div>
 
@@ -1046,6 +1045,7 @@ const Register = () => {
             </form>
           </div>
         </div>
+
 
 {showTerms && (
   <div className="modal-overlay">
