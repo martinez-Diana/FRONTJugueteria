@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { sanitizeInput, isValidEmail } from "../utils/authUtils";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://back-jugueteria.vercel.app";
 
@@ -9,30 +10,77 @@ function ForgotPassword() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 👇 NUEVO: Estados para limitador de intentos
+  const [attempts, setAttempts] = useState(0);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockTimer, setBlockTimer] = useState(0);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setMessage("");
+
+    // 🛡️ Validar email antes de enviar
+    const sanitizedEmail = sanitizeInput(email);
+    
+    if (!isValidEmail(sanitizedEmail)) {
+      setError("❌ El formato del correo electrónico no es válido");
+      return;
+    }
+
+    // 🛡️ Verificar si está bloqueado
+    if (isBlocked) {
+      setError(`⚠️ Demasiados intentos. Espera ${blockTimer} segundos.`);
+      return;
+    }
+
     setLoading(true);
 
     try {
       const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: sanitizedEmail }),
       });
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Error al enviar el correo");
-      }
-
-      setMessage("✅ " + data.message + " Revisa tu bandeja de entrada y spam.");
+      // 👇 IMPORTANTE: Siempre mostrar el mismo mensaje (no revelar si el email existe)
+      // Esto previene la enumeración de usuarios
+      setMessage("✅ Si el correo existe en nuestro sistema, recibirás un enlace de recuperación. Revisa tu bandeja de entrada y spam.");
       setEmail("");
+      
+      // Resetear intentos si fue exitoso
+      setAttempts(0);
 
     } catch (err) {
-      setError(err.message);
+      // 👇 NUEVO: Incrementar contador de intentos
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+
+      // Si llega a 3 intentos, bloquear por 5 minutos (300 segundos)
+      if (newAttempts >= 3) {
+        setIsBlocked(true);
+        setBlockTimer(300); // 5 minutos
+
+        const countdown = setInterval(() => {
+          setBlockTimer((prev) => {
+            if (prev <= 1) {
+              clearInterval(countdown);
+              setIsBlocked(false);
+              setAttempts(0);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        setError("⚠️ Demasiados intentos. Bloqueado por 5 minutos.");
+      } else {
+        // Siempre mostrar el mismo mensaje genérico (no revelar si el email existe)
+        setMessage("✅ Si el correo existe en nuestro sistema, recibirás un enlace de recuperación. Revisa tu bandeja de entrada y spam.");
+        setEmail("");
+      }
     } finally {
       setLoading(false);
     }
@@ -242,7 +290,7 @@ function ForgotPassword() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={loading}
+              disabled={loading || isBlocked}
               style={styles.input}
               onFocus={(e) => {
                 e.target.style.borderColor = "#c084fc";
@@ -256,27 +304,32 @@ function ForgotPassword() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || isBlocked}
               style={{
                 ...styles.button,
-                ...(loading ? styles.buttonDisabled : {}),
+                ...((loading || isBlocked) ? styles.buttonDisabled : {}),
               }}
               onMouseEnter={(e) => {
-                if (!loading) {
+                if (!loading && !isBlocked) {
                   e.target.style.backgroundColor = "#db2777";
                   e.target.style.transform = "translateY(-2px)";
                   e.target.style.boxShadow = "0 5px 16px rgba(219, 39, 119, 0.3)";
                 }
               }}
               onMouseLeave={(e) => {
-                if (!loading) {
+                if (!loading && !isBlocked) {
                   e.target.style.backgroundColor = "#ec4899";
                   e.target.style.transform = "translateY(0)";
                   e.target.style.boxShadow = "0 3px 12px rgba(236, 72, 153, 0.25)";
                 }
               }}
             >
-              {loading ? "Enviando..." : "Enviar enlace"}
+              {isBlocked 
+                ? `🔒 Bloqueado (${Math.floor(blockTimer / 60)}:${String(blockTimer % 60).padStart(2, '0')})` 
+                : loading 
+                ? "Enviando..." 
+                : "Enviar enlace"
+              }
             </button>
           </form>
 
