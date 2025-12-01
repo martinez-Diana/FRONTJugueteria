@@ -1050,10 +1050,9 @@ const Register = () => {
   <div className="modal-overlay">
     <div className="modal-content">
       <div className="modal-header">
-        <h3>POLÍTICAS DE PRIVACIDAD</h3>
-        <button className="modal-close" onClick={() => setShowPrivacy(false)}>
-          Cerrar
-        </button>
+      <label htmlFor="privacy">
+        Acepto <span className="privacy-link" onClick={() => setShowPrivacy(true)}>política de privacidad</span>
+      </label>
       </div>
 
       <p><strong>Última actualización: 25/09/2025</strong></p>
