@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { isTokenExpired, clearSession } from "../utils/authUtils" // 👈 AGREGAR IMPORT
 
 const UserProfile = () => {
   const navigate = useNavigate()
@@ -23,7 +24,6 @@ const UserProfile = () => {
         username: user.username || user.email || "",
       }
     }
-    // Valores por defecto si no hay usuario
     return {
       firstName: "Usuario",
       lastName: "",
@@ -35,12 +35,29 @@ const UserProfile = () => {
     }
   })
 
-  // 👇 VERIFICAR SI HAY SESIÓN ACTIVA
+  // 👇 VERIFICAR TOKEN AL CARGAR Y MONITOREAR EXPIRACIÓN
   useEffect(() => {
     const token = localStorage.getItem("token")
-    if (!token) {
+    
+    // Verificar si existe token y si es válido
+    if (!token || isTokenExpired(token)) {
+      clearSession()
+      alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.")
       navigate("/login")
+      return
     }
+
+    // Monitorear expiración cada 30 segundos
+    const interval = setInterval(() => {
+      const currentToken = localStorage.getItem("token")
+      if (!currentToken || isTokenExpired(currentToken)) {
+        clearSession()
+        alert("Tu sesión ha expirado por inactividad.")
+        navigate("/login")
+      }
+    }, 30000) // Cada 30 segundos
+
+    return () => clearInterval(interval)
   }, [navigate])
 
   const [passwordData, setPasswordData] = useState({
@@ -48,8 +65,6 @@ const UserProfile = () => {
     newPassword: "",
     confirmPassword: "",
   })
-
-  // ... resto del código permanece igual (handleInputChange, handlePasswordChange, etc.)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -108,8 +123,7 @@ const UserProfile = () => {
   }
 
   const handleLogout = () => {
-    // Limpiar datos de sesión
-    localStorage.removeItem("token")
+    clearSession() // 👈 USAR clearSession en lugar de removeItem manual
     navigate("/login")
   }
 
