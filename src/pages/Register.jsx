@@ -413,29 +413,36 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+  const { name, value, type, checked } = e.target;
+  
+  // 🛡️ SANITIZAR EN TIEMPO REAL (solo para campos de texto)
+  let sanitizedValue = value;
+  if (type !== "checkbox" && typeof value === "string") {
+    sanitizedValue = sanitizeInput(value);
+  }
+  
+  setFormData({
+    ...formData,
+    [name]: type === "checkbox" ? checked : sanitizedValue,
+  });
 
-    // Validaciones en tiempo real
-    if (name === "firstName") {
-      validateName(value, setNameValidation, "nombre");
-    }
-    if (name === "lastName") {
-      validateName(value, setLastNameValidation, "apellido paterno");
-    }
-    if (name === "motherLastName") {
-      validateName(value, setMotherLastNameValidation, "apellido materno");
-    }
-    if (name === "email") {
-      validateEmail(value);
-    }
-    if (name === "birthDate") {
-      validateBirthDate(value);
-    }
-  };
+  // Validaciones en tiempo real con el valor sanitizado
+  if (name === "firstName") {
+    validateName(sanitizedValue, setNameValidation, "nombre");
+  }
+  if (name === "lastName") {
+    validateName(sanitizedValue, setLastNameValidation, "apellido paterno");
+  }
+  if (name === "motherLastName") {
+    validateName(sanitizedValue, setMotherLastNameValidation, "apellido materno");
+  }
+  if (name === "email") {
+    validateEmail(sanitizedValue);
+  }
+  if (name === "birthDate") {
+    validateBirthDate(sanitizedValue);
+  }
+};
 
   const validateName = (name, setValidation, fieldName) => {
     if (!name) {
@@ -465,20 +472,19 @@ const Register = () => {
   };
 
   const validateEmail = (email) => {
-    if (!email) {
-      setEmailValidation({ valid: null, message: "" });
-      return;
-    }
+  if (!email) {
+    setEmailValidation({ valid: null, message: "" });
+    return;
+  }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    if (!emailRegex.test(email)) {
-      setEmailValidation({ valid: false, message: "Formato de correo inválido" });
-      return;
-    }
+  // 🛡️ Usar la validación segura de authUtils
+  if (!isValidEmail(email)) {
+    setEmailValidation({ valid: false, message: "Formato de correo inválido o contiene caracteres no permitidos" });
+    return;
+  }
 
-    setEmailValidation({ valid: true, message: "✓ Correo válido" });
-  };
+  setEmailValidation({ valid: true, message: "✓ Correo válido" });
+};
 
   const validateBirthDate = (date) => {
     if (!date) {
