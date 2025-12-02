@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { sanitizeInput } from "../utils/authUtils";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://back-jugueteria.vercel.app";
 
@@ -16,6 +17,10 @@ function ResetPassword() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [passwordFocus, setPasswordFocus] = useState(false);
+  
+  // 👁️ Estados para mostrar/ocultar contraseñas
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -62,12 +67,15 @@ function ResetPassword() {
     setLoading(true);
 
     try {
+      // 🛡️ Sanitizar la contraseña antes de enviar
+      const sanitizedPassword = sanitizeInput(formData.password);
+
       const response = await fetch(`${API_URL}/api/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           token: token,
-          newPassword: formData.password,
+          newPassword: sanitizedPassword,
         }),
       });
 
@@ -77,14 +85,16 @@ function ResetPassword() {
         throw new Error(data.error || "Error al restablecer la contraseña");
       }
 
-      setMessage("✅ " + data.message + " Redirigiendo al login...");
+      // ✅ Mostrar mensaje de éxito con palomita
+      setMessage("✅ ¡Contraseña restablecida correctamente!");
       
+      // Redirigir después de 3 segundos
       setTimeout(() => {
         navigate("/login");
-      }, 2000);
+      }, 3000);
 
     } catch (err) {
-      setError(err.message);
+      setError("❌ " + err.message);
     } finally {
       setLoading(false);
     }
@@ -201,18 +211,39 @@ function ResetPassword() {
       marginBottom: "4px",
       color: "#333",
     },
+    passwordInputWrapper: {
+      position: "relative",
+      display: "flex",
+      alignItems: "center",
+      marginBottom: "15px",
+    },
     input: {
       padding: "10px 12px",
-      marginBottom: "15px",
+      paddingRight: "40px",
       border: "1px solid #ddd",
       borderRadius: "6px",
       outline: "none",
       fontSize: "14px",
       transition: "all 0.3s ease",
       fontFamily: "'Poppins', sans-serif",
+      width: "100%",
     },
     inputSuccess: {
       borderColor: "#10b981",
+    },
+    togglePassword: {
+      position: "absolute",
+      right: "10px",
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "18px",
+      color: "#666",
+      padding: "5px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "color 0.2s ease",
     },
     button: {
       backgroundColor: "#ec4899",
@@ -236,10 +267,12 @@ function ResetPassword() {
       marginTop: "15px",
       fontSize: "13px",
       textAlign: "center",
-      padding: "10px",
+      padding: "12px",
       backgroundColor: "#ecfdf5",
       borderRadius: "6px",
       borderLeft: "4px solid #10b981",
+      fontWeight: 600,
+      animation: "slideIn 0.3s ease",
     },
     error: {
       color: "#dc2626",
@@ -253,7 +286,8 @@ function ResetPassword() {
     },
     passwordRequirements: {
       fontSize: "11px",
-      marginTop: "6px",
+      marginTop: "-10px",
+      marginBottom: "15px",
       padding: "8px",
       background: "#f9fafb",
       borderRadius: "6px",
@@ -274,6 +308,20 @@ function ResetPassword() {
     requirementUnmet: {
       color: "#9ca3af",
     },
+    validationMessage: {
+      fontSize: "11px",
+      marginTop: "-10px",
+      marginBottom: "15px",
+      display: "flex",
+      alignItems: "center",
+      gap: "4px",
+    },
+    validationSuccess: {
+      color: "#10b981",
+    },
+    validationError: {
+      color: "#ef4444",
+    },
     backText: {
       fontSize: "13px",
       textAlign: "center",
@@ -289,6 +337,21 @@ function ResetPassword() {
 
   return (
     <div style={styles.container}>
+      <style>
+        {`
+          @keyframes slideIn {
+            from {
+              opacity: 0;
+              transform: translateY(-10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}
+      </style>
+      
       <div style={styles.card}>
         <div style={styles.leftPanel}>
           <h2 style={styles.leftTitle}>
@@ -315,28 +378,39 @@ function ResetPassword() {
 
           <form onSubmit={handleSubmit} style={styles.form}>
             <label style={styles.label}>Nueva Contraseña</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              onFocus={() => setPasswordFocus(true)}
-              required
-              disabled={loading || !token}
-              style={{
-                ...styles.input,
-                ...(isPasswordValid() ? styles.inputSuccess : {}),
-              }}
-              onFocusCapture={(e) => {
-                e.target.style.borderColor = "#c084fc";
-                e.target.style.boxShadow = "0 0 6px rgba(192, 132, 252, 0.25)";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "#ddd";
-                e.target.style.boxShadow = "none";
-              }}
-            />
+            <div style={styles.passwordInputWrapper}>
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
+                onFocus={() => setPasswordFocus(true)}
+                required
+                disabled={loading || !token}
+                style={{
+                  ...styles.input,
+                  ...(isPasswordValid() ? styles.inputSuccess : {}),
+                }}
+                onFocusCapture={(e) => {
+                  e.target.style.borderColor = "#c084fc";
+                  e.target.style.boxShadow = "0 0 6px rgba(192, 132, 252, 0.25)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = isPasswordValid() ? "#10b981" : "#ddd";
+                  e.target.style.boxShadow = "none";
+                }}
+              />
+              <button
+                type="button"
+                style={styles.togglePassword}
+                onClick={() => setShowPassword(!showPassword)}
+                onMouseEnter={(e) => (e.target.style.color = "#ec4899")}
+                onMouseLeave={(e) => (e.target.style.color = "#666")}
+              >
+                {showPassword ? "👁️" : "👁️‍🗨️"}
+              </button>
+            </div>
 
             {(passwordFocus || formData.password) && (
               <div
@@ -381,30 +455,53 @@ function ResetPassword() {
             )}
 
             <label style={styles.label}>Confirmar Contraseña</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="••••••••"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              disabled={loading || !token}
-              style={{
-                ...styles.input,
-                ...(formData.confirmPassword &&
-                formData.password === formData.confirmPassword
-                  ? styles.inputSuccess
-                  : {}),
-              }}
-              onFocusCapture={(e) => {
-                e.target.style.borderColor = "#c084fc";
-                e.target.style.boxShadow = "0 0 6px rgba(192, 132, 252, 0.25)";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "#ddd";
-                e.target.style.boxShadow = "none";
-              }}
-            />
+            <div style={styles.passwordInputWrapper}>
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                placeholder="••••••••"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                disabled={loading || !token}
+                style={{
+                  ...styles.input,
+                  ...(formData.confirmPassword &&
+                  formData.password === formData.confirmPassword
+                    ? styles.inputSuccess
+                    : {}),
+                }}
+                onFocusCapture={(e) => {
+                  e.target.style.borderColor = "#c084fc";
+                  e.target.style.boxShadow = "0 0 6px rgba(192, 132, 252, 0.25)";
+                }}
+                onBlur={(e) => {
+                  const isMatch = formData.confirmPassword && formData.password === formData.confirmPassword;
+                  e.target.style.borderColor = isMatch ? "#10b981" : "#ddd";
+                  e.target.style.boxShadow = "none";
+                }}
+              />
+              <button
+                type="button"
+                style={styles.togglePassword}
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                onMouseEnter={(e) => (e.target.style.color = "#ec4899")}
+                onMouseLeave={(e) => (e.target.style.color = "#666")}
+              >
+                {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+              </button>
+            </div>
+
+            {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+              <div style={{ ...styles.validationMessage, ...styles.validationError }}>
+                ❌ Las contraseñas no coinciden
+              </div>
+            )}
+            {formData.confirmPassword && formData.password === formData.confirmPassword && (
+              <div style={{ ...styles.validationMessage, ...styles.validationSuccess }}>
+                ✓ Las contraseñas coinciden
+              </div>
+            )}
 
             <button
               type="submit"
