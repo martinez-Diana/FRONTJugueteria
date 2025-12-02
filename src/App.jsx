@@ -8,7 +8,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import CatalogoProductos from "./pages/Catalogo_Productos";
 import UserProfile from "./pages/UserProfile";
-import ProtectedRoute from "./pages/ProtectedRoute"; // 👈 CORREGIDO
+import VerifyEmail from "./pages/VerifyEmail"; // 🆕 NUEVO
+import ProtectedRoute from "./pages/ProtectedRoute";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/verify-email" element={<VerifyEmail />} /> {/* 🆕 NUEVO */}
         
         {/* Rutas protegidas */}
         <Route 

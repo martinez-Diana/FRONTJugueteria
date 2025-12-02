@@ -746,13 +746,17 @@ const Register = () => {
       const data = response.data;
       setSuccess(data.message);
       
-      // Redirigir al login después de 1.5 segundos
+      // 🆕 Redirigir a verificación de email
       setTimeout(() => {
-        navigate("/login");
+        navigate("/verify-email", { 
+          state: { 
+            email: sanitizedData.email 
+          } 
+        });
       }, 1500);
 
     } catch (error) {
-      setError(error.response?.data?.message || "Error en la conexión con el servidor");
+      setError(error.response?.data?.error || error.response?.data?.message || "Error en la conexión con el servidor");
     }
   };
 
