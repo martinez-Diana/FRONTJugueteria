@@ -1,8 +1,17 @@
 import React from "react";
 import "./Home.css";
-import hotWheelsImg from "../assets/hot-wheels.png"; // Importar la imagen
+import hotWheelsImg from "../assets/hot-wheels.png";
 
 const Home = () => {
+  const productos = [
+    { tipo: "emoji", imagen: "🧸", titulo: "Osito de Peluche", descripcion: "Suave y adorable, perfecto para abrazar", precio: "$299" },
+    { tipo: "emoji", imagen: "🎮", titulo: "Consola Portátil", descripcion: "Diversión en cualquier lugar", precio: "$1,499" },
+    { tipo: "emoji", imagen: "🧩", titulo: "Rompecabezas 3D", descripcion: "Desafía tu mente y creatividad", precio: "$399" },
+    { tipo: "imagen", imagen: hotWheelsImg, titulo: "Auto Hot Wheels", descripcion: "Velocidad y diversión garantizada", precio: "$799" },
+    { tipo: "emoji", imagen: "🎨", titulo: "Set de Arte", descripcion: "Despierta el artista interior", precio: "$549" },
+    { tipo: "emoji", imagen: "🎲", titulo: "Juego de Mesa", descripcion: "Diversión para toda la familia", precio: "$449" },
+  ];
+
   return (
     <div>
       {/* Navbar */}
@@ -76,27 +85,20 @@ const Home = () => {
       <section className="products" id="productos">
         <h2 className="section-title">Productos Destacados</h2>
         <div className="products-grid">
-          {[
-            ["🧸", "Osito de Peluche", "Suave y adorable, perfecto para abrazar", "$299"],
-            ["🎮", "Consola Portátil", "Diversión en cualquier lugar", "$1,499"],
-            ["🧩", "Rompecabezas 3D", "Desafía tu mente y creatividad", "$399"],
-            [hotWheelsImg, "Auto Hot Wheels", "Velocidad y diversión garantizada", "$799"], // Imagen real aquí
-            ["🎨", "Set de Arte", "Despierta el artista interior", "$549"],
-            ["🎲", "Juego de Mesa", "Diversión para toda la familia", "$449"],
-          ].map(([emoji, title, desc, price], i) => (
+          {productos.map((producto, i) => (
             <div className="product-card" key={i}>
               <div className="product-image">
-                {typeof emoji === 'string' ? (
-                  emoji
+                {producto.tipo === "emoji" ? (
+                  producto.imagen
                 ) : (
-                  <img src={emoji} alt={title} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  <img src={producto.imagen} alt={producto.titulo} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 )}
               </div>
               <div className="product-info">
-                <h3>{title}</h3>
-                <p>{desc}</p>
+                <h3>{producto.titulo}</h3>
+                <p>{producto.descripcion}</p>
                 <div className="product-footer">
-                  <span className="product-price">{price}</span>
+                  <span className="product-price">{producto.precio}</span>
                   <button className="btn-add-cart">Agregar</button>
                 </div>
               </div>
