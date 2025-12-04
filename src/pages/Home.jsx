@@ -86,7 +86,7 @@ const Home = () => {
           ].map(([emoji, title, desc, price], i) => (
             <div className="product-card" key={i}>
               <div className="product-image">
-                {typeof emoji === 'string' && emoji.startsWith('�') ? (
+                {typeof emoji === 'string' ? (
                   emoji
                 ) : (
                   <img src={emoji} alt={title} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
