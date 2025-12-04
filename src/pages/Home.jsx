@@ -1,7 +1,6 @@
 import React from "react";
-import "./Home.css"; // Aquí pondremos los estilos
-import hotWheels from './../../assets/hot-wheels.png';
-
+import "./Home.css";
+import hotWheelsImg from "../assets/hot-wheels.png"; // Importar la imagen
 
 const Home = () => {
   return (
@@ -81,12 +80,18 @@ const Home = () => {
             ["🧸", "Osito de Peluche", "Suave y adorable, perfecto para abrazar", "$299"],
             ["🎮", "Consola Portátil", "Diversión en cualquier lugar", "$1,499"],
             ["🧩", "Rompecabezas 3D", "Desafía tu mente y creatividad", "$399"],
-            [<img src={require('./../../assets/hot-wheels.png')} alt="Hot Wheels" style={{width: '100%', height: '100%', objectFit: 'contain'}} />, "Auto a Control Remoto", "Velocidad y diversión garantizada", "$799"],
+            [hotWheelsImg, "Auto Hot Wheels", "Velocidad y diversión garantizada", "$799"], // Imagen real aquí
             ["🎨", "Set de Arte", "Despierta el artista interior", "$549"],
             ["🎲", "Juego de Mesa", "Diversión para toda la familia", "$449"],
           ].map(([emoji, title, desc, price], i) => (
             <div className="product-card" key={i}>
-              <div className="product-image">{emoji}</div>
+              <div className="product-image">
+                {typeof emoji === 'string' && emoji.startsWith('�') ? (
+                  emoji
+                ) : (
+                  <img src={emoji} alt={title} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                )}
+              </div>
               <div className="product-info">
                 <h3>{title}</h3>
                 <p>{desc}</p>
