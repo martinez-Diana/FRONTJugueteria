@@ -1,5 +1,6 @@
 import React from "react";
 import "./Home.css"; // Aquí pondremos los estilos
+import hotWheels from './../../assets/hot-wheels.png';
 
 
 const Home = () => {
@@ -80,7 +81,7 @@ const Home = () => {
             ["🧸", "Osito de Peluche", "Suave y adorable, perfecto para abrazar", "$299"],
             ["🎮", "Consola Portátil", "Diversión en cualquier lugar", "$1,499"],
             ["🧩", "Rompecabezas 3D", "Desafía tu mente y creatividad", "$399"],
-            [<img src={require('./../../assets/hot-wheels.jpg')} alt="Hot Wheels" style={{width: '100%', height: '100%', objectFit: 'contain'}} />, "Auto a Control Remoto", "Velocidad y diversión garantizada", "$799"],
+            [<img src={require('./../../assets/hot-wheels.png')} alt="Hot Wheels" style={{width: '100%', height: '100%', objectFit: 'contain'}} />, "Auto a Control Remoto", "Velocidad y diversión garantizada", "$799"],
             ["🎨", "Set de Arte", "Despierta el artista interior", "$549"],
             ["🎲", "Juego de Mesa", "Diversión para toda la familia", "$449"],
           ].map(([emoji, title, desc, price], i) => (
