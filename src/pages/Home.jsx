@@ -20,7 +20,6 @@ const Home = () => {
         <div className="nav-container">
           <div className="logo">
             <img src={logoImg} alt="Juguetería Martínez" className="logo-img" />
-            Juguetería Martínez
           </div>
           <ul className="nav-links">
             <li><a href="#inicio">Inicio</a></li>

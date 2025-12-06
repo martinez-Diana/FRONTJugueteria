@@ -37,6 +37,12 @@ body {
   background-clip: text;
 }
 
+.logo-img {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
+
 .nav-links {
   display: flex;
   gap: 2rem;
