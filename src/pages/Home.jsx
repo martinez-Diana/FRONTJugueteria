@@ -1,6 +1,7 @@
 import React from "react";
 import "./Home.css";
 import hotWheelsImg from "../assets/hot-wheels.png";
+import logoImg from "../assets/logo.png";
 
 const Home = () => {
   const productos = [
@@ -17,7 +18,10 @@ const Home = () => {
       {/* Navbar */}
       <nav className="navbar">
         <div className="nav-container">
-          <div className="logo">🧸 Juguetería Martínez</div>
+          <div className="logo">
+            <img src={logoImg} alt="Juguetería Martínez" className="logo-img" />
+            Juguetería Martínez
+          </div>
           <ul className="nav-links">
             <li><a href="#inicio">Inicio</a></li>
             <li><a href="#categorias">Categorías</a></li>
