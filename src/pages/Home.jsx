@@ -24,6 +24,7 @@ const Home = () => {
           <ul className="nav-links">
             <li><a href="#inicio">Inicio</a></li>
             <li><a href="#categorias">Categorías</a></li>
+            <li><a href="#quienes-somos">¿Quiénes Somos?</a></li>
             <li><a href="#productos">Productos</a></li>
             <li><a href="#contacto">Contacto</a></li>
           </ul>
