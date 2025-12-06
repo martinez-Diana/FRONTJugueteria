@@ -22,7 +22,7 @@ body {
 .nav-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0.5rem 2rem;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -35,10 +35,12 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  position: relative;
+  z-index: 100;
 }
 
 .logo-img {
-  height: 120px;
+  height: 150px;
   width: auto;
   object-fit: contain;
   display: block;
