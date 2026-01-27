@@ -2,6 +2,22 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { isTokenExpired, clearSession } from "../utils/authUtils" // 👈 AGREGAR IMPORT
 
+
+
+const getTokenTimeRemaining = (token) => {
+  if (!token) return 0;
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp - now;
+  } catch {
+    console.error("Token inválido");
+    return 0;
+  }
+};
+
+
 const UserProfile = () => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("personal")
