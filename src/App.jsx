@@ -8,8 +8,13 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import CatalogoProductos from "./pages/Catalogo_Productos";
 import UserProfile from "./pages/UserProfile";
-import VerifyEmail from "./pages/VerifyEmail"; // 🆕 NUEVO
+import VerifyEmail from "./pages/VerifyEmail";
 import ProtectedRoute from "./pages/ProtectedRoute";
+
+// 🆕 IMPORTAR PÁGINAS DE ERROR
+import NotFound from "./pages/NotFound";
+import BadRequest from "./pages/BadRequest";
+import ServerError from "./pages/ServerError";
 
 function App() {
   return (
@@ -19,7 +24,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/verify-email" element={<VerifyEmail />} /> {/* 🆕 NUEVO */}
+        <Route path="/verify-email" element={<VerifyEmail />} />
         
         {/* Rutas protegidas */}
         <Route 
@@ -51,6 +56,13 @@ function App() {
         
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        
+        {/* 🆕 RUTAS DE ERROR */}
+        <Route path="/400" element={<BadRequest />} />
+        <Route path="/500" element={<ServerError />} />
+        
+        {/* 🆕 RUTA 404 - DEBE IR AL FINAL */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );

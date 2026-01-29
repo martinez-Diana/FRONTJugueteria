@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import API from "../api";
 import { sanitizeInput, sanitizeFormData, isValidEmail, isValidName } from "../utils/authUtils";
 
@@ -101,6 +101,35 @@ const styles = `
     background: #fff;
     overflow-y: auto;
     max-height: 95vh;
+  }
+
+  /* 🍞 NUEVO: Estilos para las migas de pan */
+  .breadcrumb {
+    font-size: 13px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .breadcrumb a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .breadcrumb a:hover {
+    color: #2563eb;
+  }
+
+  .breadcrumb-separator {
+    color: #9ca3af;
+    margin: 0 4px;
+  }
+
+  .breadcrumb-current {
+    color: #6b7280;
   }
 
   .register-right h2 {
@@ -782,6 +811,13 @@ const Register = () => {
           </div>
 
           <div className="register-right">
+            {/* 🍞 MIGAS DE PAN - SOLO ESTA PARTE ES NUEVA */}
+            <nav className="breadcrumb">
+              <Link to="/">Inicio</Link>
+              <span className="breadcrumb-separator">/</span>
+              <Link to="/login">Login</Link>
+            </nav>
+
             <h2>Crear Cuenta</h2>
             <p>Completa tus datos para registrarte</p>
 
@@ -1039,7 +1075,7 @@ const Register = () => {
                   />
 <label htmlFor="privacy">
                     Acepto <span className="privacy-link" onClick={() => setShowPrivacy(true)}>política de privacidad</span>
-                  </label>
+                  </label>
                 </div>
               </div>
 
@@ -1080,7 +1116,7 @@ const Register = () => {
       <h4>2. Aceptación de los términos</h4>
       <p>
         Al navegar en el sitio o realizar una compra, el usuario acepta expresamente estos términos.
-        La aceptación se realiza de manera electrónica al dar clic en “Aceptar” o “Finalizar compra”.
+        La aceptación se realiza de manera electrónica al dar clic en "Aceptar" o "Finalizar compra".
       </p>
 
       <h4>3. Proceso de compra y precios</h4>

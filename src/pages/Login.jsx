@@ -297,6 +297,17 @@ const Login = () => {
       flexDirection: "column",
       justifyContent: "center",
     },
+    // 🍞 NUEVO: Estilo para las migas de pan
+    breadcrumb: {
+      fontSize: "13px",
+      marginBottom: "20px",
+    },
+    breadcrumbLink: {
+      color: "#3b82f6",
+      textDecoration: "none",
+      fontWeight: 500,
+      transition: "color 0.2s ease",
+    },
     rightTitle: {
       color: "#ec4899",
       fontSize: "22px",
@@ -470,6 +481,18 @@ const Login = () => {
 
           {/* Panel derecho */}
           <div style={styles.rightPanel}>
+            {/* 🍞 MIGAS DE PAN - SOLO ESTA PARTE ES NUEVA */}
+            <nav style={styles.breadcrumb}>
+              <Link 
+                to="/" 
+                style={styles.breadcrumbLink}
+                onMouseEnter={(e) => e.target.style.color = "#2563eb"}
+                onMouseLeave={(e) => e.target.style.color = "#3b82f6"}
+              >
+                Inicio
+              </Link>
+            </nav>
+
             <h2 style={styles.rightTitle}>Bienvenido</h2>
             <p style={styles.rightSubtitle}>Selecciona tu método de inicio de sesión</p>
 
