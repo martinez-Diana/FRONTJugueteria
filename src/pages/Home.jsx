@@ -13,7 +13,12 @@ const Home = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProductDetail, setShowProductDetail] = useState(false);
   const [showCart, setShowCart] = useState(false);
+  const [showAges, setShowAges] = useState(false);
+  const [showBrands, setShowBrands] = useState(false);
   const searchRef = useRef(null);
+  const agesRef = useRef(null);
+  const brandsRef = useRef(null);
+  const [user, setUser] = useState(null);
   
   const [filters, setFilters] = useState({
     categoria: "todas",
@@ -23,14 +28,14 @@ const Home = () => {
   });
 
   const productos = [
-    { id: 1, tipo: "emoji", imagen: "🧸", titulo: "Osito de Peluche", descripcion: "Suave y adorable, perfecto para abrazar", precio: 299, categoria: "peluches", stock: 15 },
-    { id: 2, tipo: "emoji", imagen: "🎮", titulo: "Consola Portátil", descripcion: "Diversión en cualquier lugar", precio: 1499, categoria: "videojuegos", stock: 8 },
-    { id: 3, tipo: "emoji", imagen: "🧩", titulo: "Rompecabezas 3D", descripcion: "Desafía tu mente y creatividad", precio: 399, categoria: "educativos", stock: 20 },
-    { id: 4, tipo: "imagen", imagen: hotWheelsImg, titulo: "Auto Hot Wheels", descripcion: "Velocidad y diversión garantizada", precio: 799, categoria: "vehiculos", stock: 12 },
-    { id: 5, tipo: "emoji", imagen: "🎨", titulo: "Set de Arte", descripcion: "Despierta el artista interior", precio: 549, categoria: "educativos", stock: 10 },
-    { id: 6, tipo: "emoji", imagen: "🎲", titulo: "Juego de Mesa", descripcion: "Diversión para toda la familia", precio: 449, categoria: "educativos", stock: 18 },
-    { id: 7, tipo: "emoji", imagen: "🚗", titulo: "Camión de Bomberos", descripcion: "Con luces y sonidos", precio: 899, categoria: "vehiculos", stock: 7 },
-    { id: 8, tipo: "emoji", imagen: "🐻", titulo: "Oso Gigante", descripcion: "El abrazo más grande", precio: 1299, categoria: "peluches", stock: 5 },
+    { id: 1, tipo: "emoji", imagen: "🧸", titulo: "Osito de Peluche", descripcion: "Suave y adorable, perfecto para abrazar", precio: 299, categoria: "peluches", stock: 15, edad: "0-3" },
+    { id: 2, tipo: "emoji", imagen: "🎮", titulo: "Consola Portátil", descripcion: "Diversión en cualquier lugar", precio: 1499, categoria: "videojuegos", stock: 8, edad: "10+" },
+    { id: 3, tipo: "emoji", imagen: "🧩", titulo: "Rompecabezas 3D", descripcion: "Desafía tu mente y creatividad", precio: 399, categoria: "educativos", stock: 20, edad: "5-7" },
+    { id: 4, tipo: "imagen", imagen: hotWheelsImg, titulo: "Auto Hot Wheels", descripcion: "Velocidad y diversión garantizada", precio: 799, categoria: "vehiculos", stock: 12, marca: "Hot Wheels", edad: "3-5" },
+    { id: 5, tipo: "emoji", imagen: "🎨", titulo: "Set de Arte", descripcion: "Despierta el artista interior", precio: 549, categoria: "educativos", stock: 10, edad: "5-7" },
+    { id: 6, tipo: "emoji", imagen: "🎲", titulo: "Juego de Mesa", descripcion: "Diversión para toda la familia", precio: 449, categoria: "educativos", stock: 18, edad: "7-10" },
+    { id: 7, tipo: "emoji", imagen: "🚗", titulo: "Camión de Bomberos", descripcion: "Con luces y sonidos", precio: 899, categoria: "vehiculos", stock: 7, edad: "3-5" },
+    { id: 8, tipo: "emoji", imagen: "🐻", titulo: "Oso Gigante", descripcion: "El abrazo más grande", precio: 1299, categoria: "peluches", stock: 5, edad: "0-3" },
   ];
 
   const categorias = [
@@ -39,6 +44,35 @@ const Home = () => {
     { value: "videojuegos", label: "Videojuegos" },
     { value: "educativos", label: "Educativos" },
     { value: "vehiculos", label: "Vehículos" }
+  ];
+
+  const edades = [
+    { value: "0-3", label: "0 a 36 Meses", icon: "👶" },
+    { value: "3-5", label: "3 a 5 Años", icon: "🧒" },
+    { value: "5-7", label: "5 a 7 Años", icon: "👧" },
+    { value: "7-10", label: "7 a 10 Años", icon: "🧑" },
+    { value: "10+", label: "Más de 10 Años", icon: "👨" }
+  ];
+
+  const marcas = [
+    { nombre: "LEGO", logo: "🧱", color: "#d11" },
+    { nombre: "Hot Wheels", logo: "🏎️", color: "#ff6800" },
+    { nombre: "Barbie", logo: "👸", color: "#e0218a" },
+    { nombre: "Marvel", logo: "🦸", color: "#e23636" },
+    { nombre: "Fisher-Price", logo: "🎪", color: "#f46f30" },
+    { nombre: "Jurassic World", logo: "🦖", color: "#1a1a1a" },
+    { nombre: "Star Wars", logo: "⭐", color: "#000" },
+    { nombre: "Minecraft", logo: "⛏️", color: "#8bc34a" },
+    { nombre: "Pokémon", logo: "⚡", color: "#ffcb05" },
+    { nombre: "Maisto", logo: "🚙", color: "#e31e24" },
+    { nombre: "Nerf", logo: "🎯", color: "#ff6b35" },
+    { nombre: "Paw Patrol", logo: "🐾", color: "#003da5" },
+    { nombre: "Play-Doh", logo: "🎨", color: "#ffd500" },
+    { nombre: "Disney", logo: "🏰", color: "#0066b2" },
+    { nombre: "Hasbro", logo: "🎲", color: "#0063be" },
+    { nombre: "Our Generation", logo: "💝", color: "#ff69b4" },
+    { nombre: "Mattel Games", logo: "🎮", color: "#e11f26" },
+    { nombre: "Cars", logo: "🏁", color: "#d71920" }
   ];
 
   // Cargar carrito del localStorage
@@ -54,11 +88,32 @@ const Home = () => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  // Cerrar sugerencias al hacer clic fuera
+  // 🆕 NUEVO: Cargar usuario del localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        console.log('✅ Usuario cargado:', parsedUser);
+      } catch (error) {
+        console.error('❌ Error al cargar usuario:', error);
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
+
+  // Cerrar dropdowns al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSuggestions(false);
+      }
+      if (agesRef.current && !agesRef.current.contains(event.target)) {
+        setShowAges(false);
+      }
+      if (brandsRef.current && !brandsRef.current.contains(event.target)) {
+        setShowBrands(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -66,20 +121,20 @@ const Home = () => {
   }, []);
 
   // Generar sugerencias en tiempo real
-  useEffect(() => {
-    if (searchQuery.trim().length > 0) {
-      const query = searchQuery.toLowerCase();
-      const filtered = productos.filter(producto =>
-        producto.titulo.toLowerCase().includes(query) ||
-        producto.descripcion.toLowerCase().includes(query)
-      ).slice(0, 5);
-      setSuggestions(filtered);
-      setShowSuggestions(true);
-    } else {
-      setSuggestions([]);
-      setShowSuggestions(false);
-    }
-  }, [searchQuery]);
+useEffect(() => {
+  if (searchQuery.trim().length > 0) {
+    const query = searchQuery.toLowerCase();
+    const filtered = productos.filter(producto =>
+      producto.titulo.toLowerCase().includes(query) ||
+      producto.descripcion.toLowerCase().includes(query)
+    ).slice(0, 5);
+    setSuggestions(filtered);
+    setShowSuggestions(true);
+  } else {
+    setSuggestions([]);
+    setShowSuggestions(false);
+  }
+}, [searchQuery, productos]); // 👈 Agrega productos aquí
 
   // Funciones del carrito
   const addToCart = (producto) => {
@@ -134,6 +189,16 @@ const Home = () => {
   const clearCart = () => {
     if (window.confirm('¿Estás seguro de vaciar el carrito?')) {
       setCart([]);
+    }
+  };
+
+  // 🆕 NUEVO: Función para cerrar sesión
+  const handleLogout = () => {
+    if (window.confirm('¿Estás seguro de cerrar sesión?')) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+      alert('✅ Sesión cerrada exitosamente');
     }
   };
 
@@ -221,7 +286,7 @@ const Home = () => {
   const handleProductClick = (producto) => {
     setSelectedProduct(producto);
     setShowProductDetail(true);
-    document.body.style.overflow = 'hidden'; // Prevenir scroll
+    document.body.style.overflow = 'hidden';
   };
 
   const closeProductDetail = () => {
@@ -250,10 +315,82 @@ const Home = () => {
           <div className="logo">
             <img src={logoImg} alt="Juguetería Martínez" className="logo-img" />
           </div>
+          
           <ul className="nav-links">
             <li><a href="#inicio">Inicio</a></li>
+            <li className="nav-dropdown" ref={agesRef}>
+              <a 
+                href="#edades" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowAges(!showAges);
+                  setShowBrands(false);
+                }}
+                className={showAges ? "active" : ""}
+              >
+                Edades {showAges ? "▲" : "▼"}
+              </a>
+              {showAges && (
+                <div className="dropdown-menu ages-dropdown">
+                  <div className="dropdown-header">
+                    <span className="dropdown-title">Filtrar por Edad</span>
+                  </div>
+                  <ul className="dropdown-list">
+                    {edades.map((edad) => (
+                      <li key={edad.value} className="dropdown-item">
+                        <a href="#productos" onClick={() => {
+                          handleFilterChange("edad", edad.value);
+                          realizarBusqueda();
+                          setShowAges(false);
+                        }}>
+                          <span className="age-icon">{edad.icon}</span>
+                          <span className="age-label">{edad.label}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="dropdown-footer">
+                    <a href="#productos" onClick={() => setShowAges(false)}>Ver Todo →</a>
+                  </div>
+                </div>
+              )}
+            </li>
+            <li className="nav-dropdown" ref={brandsRef}>
+              <a 
+                href="#marcas" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowBrands(!showBrands);
+                  setShowAges(false);
+                }}
+                className={showBrands ? "active" : ""}
+              >
+                Marcas {showBrands ? "▲" : "▼"}
+              </a>
+              {showBrands && (
+                <div className="dropdown-menu brands-dropdown">
+                  <div className="dropdown-header">
+                    <span className="dropdown-title">Marcas Populares</span>
+                  </div>
+                  <div className="brands-grid">
+                    {marcas.map((marca, index) => (
+                      <div key={index} className="brand-item">
+                        <a href="#productos" onClick={() => setShowBrands(false)}>
+                          <div className="brand-logo" style={{ background: marca.color }}>
+                            <span className="brand-emoji">{marca.logo}</span>
+                          </div>
+                          <span className="brand-name">{marca.nombre}</span>
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="dropdown-footer">
+                    <a href="#productos" onClick={() => setShowBrands(false)}>Ver Todas las Marcas →</a>
+                  </div>
+                </div>
+              )}
+            </li>
             <li><a href="#categorias">Categorías</a></li>
-            <li><a href="#quienes-somos">¿Quiénes Somos?</a></li>
             <li><a href="#productos">Productos</a></li>
             <li><a href="#contacto">Contacto</a></li>
           </ul>
@@ -317,13 +454,36 @@ const Home = () => {
               )}
             </button>
 
+            {/* 🆕 BOTONES CONDICIONALES: Usuario logueado o no logueado */}
+          {user ? (
+            // ===== USUARIO LOGUEADO =====
+            <div className="user-menu">
+              <button 
+                className="user-btn" 
+                onClick={() => window.location.href = '/profile'}
+                title="Ver mi perfil"
+              >
+                <span className="user-icon">👤</span>
+                <span className="user-name">{user.nombre || user.username}</span>
+              </button>
+              <button 
+                className="logout-btn" 
+                onClick={handleLogout}
+                title="Cerrar sesión"
+              >
+                <span className="logout-icon">🚪</span>
+              </button>
+            </div>
+          ) : (
+            // ===== USUARIO NO LOGUEADO =====
             <div className="nav-buttons">
               <a href="/login" className="btn-login">Iniciar Sesión</a>
               <a href="/register" className="btn-register">Registrarse</a>
             </div>
-          </div>
-        </div>
-      </nav>
+          )}
+          </div>      {/* Cierra nav-right */}
+      </div>        {/* Cierra nav-container */}
+    </nav> 
 
       {/* Hero Section */}
       <section className="hero" id="inicio">
@@ -336,7 +496,17 @@ const Home = () => {
             diversión y precios increíbles.
           </p>
           <div className="hero-buttons">
-            <a href="#productos" className="btn-primary">Ver Productos</a>
+            <button 
+              className="btn-primary"
+              onClick={() => {
+                setShowAdvancedSearch(!showAdvancedSearch);
+                setTimeout(() => {
+                  document.getElementById('productos')?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+              }}
+            >
+              {showAdvancedSearch ? "🔼 Ocultar Filtros" : "🔽 Filtros Avanzados"}
+            </button>
             <a href="#categorias" className="btn-secondary">Explorar Categorías</a>
           </div>
         </div>
