@@ -120,7 +120,8 @@ const Home = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Generar sugerencias en tiempo real
+  
+// Generar sugerencias en tiempo real
 useEffect(() => {
   if (searchQuery.trim().length > 0) {
     const query = searchQuery.toLowerCase();
@@ -134,7 +135,7 @@ useEffect(() => {
     setSuggestions([]);
     setShowSuggestions(false);
   }
-}, [searchQuery, productos]); // 👈 Agrega productos aquí
+}, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps // 👈 SOLO searchQuery, SIN productos // 👈 Agrega productos aquí
 
   // Funciones del carrito
   const addToCart = (producto) => {

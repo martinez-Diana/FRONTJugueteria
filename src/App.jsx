@@ -10,11 +10,16 @@ import CatalogoProductos from "./pages/Catalogo_Productos";
 import UserProfile from "./pages/UserProfile";
 import VerifyEmail from "./pages/VerifyEmail";
 import ProtectedRoute from "./pages/ProtectedRoute";
+import RegistrarProducto from "./pages/RegistrarProducto";
+import EditarProducto from "./pages/EditarProducto";
+
 
 // 🆕 IMPORTAR PÁGINAS DE ERROR
 import NotFound from "./pages/NotFound";
 import BadRequest from "./pages/BadRequest";
 import ServerError from "./pages/ServerError";
+import Apartados from "./pages/Apartados";
+import HistorialVentas from "./pages/HistorialVentas";
 
 function App() {
   return (
@@ -44,15 +49,60 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        
+
         <Route 
-          path="/catalogo" 
+          path="/admin/productos" 
           element={
-            <ProtectedRoute allowedRoles={[3]}>
+            <ProtectedRoute allowedRoles={[1]}>
               <CatalogoProductos />
             </ProtectedRoute>
-          } 
+        } 
         />
+
+        <Route 
+          path="/admin/productos/nuevo" 
+          element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <RegistrarProducto />
+            </ProtectedRoute>
+        } 
+        />
+        <Route 
+          path="/admin/productos/editar/:id" 
+          element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <EditarProducto />
+            </ProtectedRoute>
+        } 
+        />
+
+        {/* Rutas del panel de administrador */}
+        <Route 
+          path="/admin/apartados" 
+          element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <Apartados />
+            </ProtectedRoute>
+       } 
+      />
+
+      <Route 
+        path="/admin/ventas" 
+        element={
+          <ProtectedRoute allowedRoles={[1]}>
+            <HistorialVentas />
+        </ProtectedRoute>
+      } 
+      />
+        
+        <Route 
+        path="/catalogo" 
+        element={
+          <ProtectedRoute allowedRoles={[1, 3]}>
+            <CatalogoProductos />
+        </ProtectedRoute>
+      } 
+      />
         
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />

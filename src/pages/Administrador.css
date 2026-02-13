@@ -189,3 +189,37 @@
   font-size: 0.9rem;
   color: #6b7280;
 }
+
+/* ========================================
+   ESTILOS ADICIONALES PARA ADMINISTRADOR
+   Agrega esto al FINAL de tu Administrador.css
+   ======================================== */
+
+/* Botón de Cerrar Sesión */
+.logout-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 12px;
+}
+
+.logout-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.logout-button:active {
+  transform: scale(0.95);
+}
+
+.logout-button .icon {
+  width: 20px;
+  height: 20px;
+}

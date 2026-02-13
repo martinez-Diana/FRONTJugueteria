@@ -28,10 +28,16 @@ const Login = () => {
   };
 
   // 🎯 FUNCIÓN CENTRALIZADA PARA REDIRECCIONAR SEGÚN ROL
-const redirectByRole = (user) => {
-  // Redirigir siempre al perfil después del login
-  navigate("/");  // ✅ CAMBIO AQUÍ
-};
+  const redirectByRole = (user) => {
+  // Redirigir según el role_id del usuario
+  if (user.role_id === 1) {
+    // Si es administrador (role_id = 1), ir a /admin
+    navigate("/admin");
+  } else {
+    // Si es cliente u otro rol, ir a Home
+    navigate("/home");
+  }
+  };
 
   // ========================================
   // 🔑 LOGIN TRADICIONAL - CON LIMITADOR

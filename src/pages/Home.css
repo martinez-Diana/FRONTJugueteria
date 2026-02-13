@@ -10,9 +10,10 @@ body {
   min-height: 100vh;
 }
 
+
 /* Navbar */
 .navbar {
-  background: #ffffff;
+  background: #ffffff !important;
   box-shadow: 0 2px 10px rgba(249, 59, 154, 0.1);
   position: sticky;
   top: 0;
@@ -32,13 +33,10 @@ body {
 .logo {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #f93b9a, #ff6b9d);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  position: relative;
-  z-index: 100;
+  background: none !important;  /* 👈 Eliminar cualquier fondo */
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 .logo-img {
@@ -64,17 +62,18 @@ body {
 
 .nav-links a {
   text-decoration: none;
-  color: #1a1a1a;
+  color: #1a1a1a !important; 
   font-weight: 600;
   transition: color 0.3s;
   font-size: 1rem;
   white-space: nowrap;
   cursor: pointer;
+  display: block;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
-  color: #f93b9a;
+  color: #f93b9a !important;
 }
 
 /* ========================================
