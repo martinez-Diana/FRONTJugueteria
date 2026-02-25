@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { isTokenExpired, clearSession } from "../utils/authUtils" // 👈 AGREGAR IMPORT
-
-
+import { isTokenExpired, clearSession } from "../utils/authUtils"
 
 const getTokenTimeRemaining = (token) => {
   if (!token) return 0;
@@ -17,13 +15,14 @@ const getTokenTimeRemaining = (token) => {
   }
 };
 
-
 const UserProfile = () => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("personal")
   const [isEditing, setIsEditing] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [compras, setCompras] = useState([])
+  const [loadingCompras, setLoadingCompras] = useState(false)
 
   // 👇 OBTENER DATOS DEL USUARIO DESDE LOCALSTORAGE
   const [formData, setFormData] = useState(() => {
@@ -31,16 +30,18 @@ const UserProfile = () => {
     if (userData) {
       const user = JSON.parse(userData)
       return {
-        firstName: user.first_name || user.name || "Usuario",
-        lastName: user.last_name || "",
+        id: user.id,
+        firstName: user.first_name || user.name || user.nombre || "Usuario",
+        lastName: user.last_name || user.apellido || "",
         motherLastName: user.mother_last_name || "",
         email: user.email || "",
-        phone: user.phone || "",
+        phone: user.phone || user.telefono || "",
         birthDate: user.birth_date || "",
         username: user.username || user.email || "",
       }
     }
     return {
+      id: null,
       firstName: "Usuario",
       lastName: "",
       motherLastName: "",
@@ -53,38 +54,67 @@ const UserProfile = () => {
 
   // 👇 VERIFICAR TOKEN AL CARGAR Y MONITOREAR EXPIRACIÓN
   useEffect(() => {
-  const checkTokenExpiration = setInterval(() => {
-    const currentToken = localStorage.getItem("token")
-    
-    if (!currentToken) {
-      clearSession()
-      navigate("/login")
-      return
-    }
-
-    if (isTokenExpired(currentToken)) {
-      clearSession()
-      alert("Tu sesión ha expirado por inactividad.")
-      navigate("/login")
-      return
-    }
-
-    // ✅ NUEVO: Advertir cuando quedan 2 minutos
-    const timeLeft = getTokenTimeRemaining(currentToken)
-    if (timeLeft > 0 && timeLeft <= 120) { // 2 minutos = 120 segundos
-      const minutes = Math.floor(timeLeft / 60)
-      const seconds = Math.floor(timeLeft % 60)
-      console.warn(`⏰ Tu sesión expirará en ${minutes}:${seconds}`)
+    const checkTokenExpiration = setInterval(() => {
+      const currentToken = localStorage.getItem("token")
       
-      // Opcional: Mostrar notificación visual
-      if (timeLeft === 60) { // 1 minuto exacto
-        alert("⚠️ Tu sesión expirará en 1 minuto. Guarda tu trabajo.")
+      if (!currentToken) {
+        clearSession()
+        navigate("/login")
+        return
       }
+
+      if (isTokenExpired(currentToken)) {
+        clearSession()
+        alert("Tu sesión ha expirado por inactividad.")
+        navigate("/login")
+        return
+      }
+
+      const timeLeft = getTokenTimeRemaining(currentToken)
+      if (timeLeft > 0 && timeLeft <= 120) {
+        const minutes = Math.floor(timeLeft / 60)
+        const seconds = Math.floor(timeLeft % 60)
+        console.warn(`⏰ Tu sesión expirará en ${minutes}:${seconds}`)
+        
+        if (timeLeft === 60) {
+          alert("⚠️ Tu sesión expirará en 1 minuto. Guarda tu trabajo.")
+        }
+      }
+    }, 10000)
+    
+    return () => clearInterval(checkTokenExpiration)
+  }, [navigate])
+
+  // 🆕 CARGAR COMPRAS CUANDO SE SELECCIONA LA PESTAÑA
+  useEffect(() => {
+    if (activeTab === "compras" && formData.id) {
+      cargarCompras()
     }
-  }, 10000)
-  
-  return () => clearInterval(checkTokenExpiration)
-}, [navigate])
+  }, [activeTab, formData.id])
+
+  const cargarCompras = async () => {
+    if (!formData.id) {
+      setError("No se pudo cargar el ID del usuario")
+      return
+    }
+
+    try {
+      setLoadingCompras(true)
+      const response = await fetch(`http://localhost:4000/api/ventas/mis-compras/${formData.id}`)
+      const data = await response.json()
+
+      if (data.success) {
+        setCompras(data.ventas)
+      } else {
+        setError("Error al cargar historial de compras")
+      }
+    } catch (err) {
+      console.error('Error al cargar compras:', err)
+      setError("Error al cargar historial de compras")
+    } finally {
+      setLoadingCompras(false)
+    }
+  }
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -108,13 +138,41 @@ const UserProfile = () => {
     setSuccess("")
 
     try {
-      // Simular llamada a API
-      // const response = await API.put("/api/profile", formData);
-      setSuccess("Perfil actualizado correctamente")
-      setIsEditing(false)
-      setTimeout(() => setSuccess(""), 3000)
+      const response = await fetch(`http://localhost:4000/api/clientes/${formData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          nombre: `${formData.firstName} ${formData.lastName} ${formData.motherLastName}`.trim(),
+          email: formData.email,
+          telefono: formData.phone,
+          direccion: formData.birthDate
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Actualizar localStorage
+        const updatedUser = {
+          ...JSON.parse(localStorage.getItem('user')),
+          nombre: formData.firstName,
+          email: formData.email,
+          telefono: formData.phone
+        }
+        localStorage.setItem('user', JSON.stringify(updatedUser))
+        
+        setSuccess("Perfil actualizado correctamente")
+        setIsEditing(false)
+        setTimeout(() => setSuccess(""), 3000)
+      } else {
+        setError(data.message || "Error al guardar los cambios")
+      }
     } catch (err) {
-      setError(err.response?.data?.message || "Error al guardar los cambios")
+      console.error('Error:', err)
+      setError("Error al guardar los cambios")
     }
   }
 
@@ -134,8 +192,7 @@ const UserProfile = () => {
     }
 
     try {
-      // Simular llamada a API
-      // const response = await API.put("/api/change-password", passwordData);
+      // Aquí iría la llamada al backend para cambiar contraseña
       setSuccess("Contraseña cambiada correctamente")
       setPasswordData({
         currentPassword: "",
@@ -149,8 +206,25 @@ const UserProfile = () => {
   }
 
   const handleLogout = () => {
-    clearSession() // 👈 USAR clearSession en lugar de removeItem manual
+    clearSession()
     navigate("/login")
+  }
+
+  const formatearFecha = (fecha) => {
+    return new Date(fecha).toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  const formatearMoneda = (cantidad) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN'
+    }).format(cantidad)
   }
 
   return (
@@ -202,15 +276,6 @@ const UserProfile = () => {
           color: white;
           flex-shrink: 0;
           box-shadow: 0 5px 20px rgba(236, 72, 153, 0.3);
-        }
-
-        .profile-avatar.edit-mode {
-          cursor: pointer;
-          border: 3px dashed #c084fc;
-        }
-
-        .avatar-upload {
-          display: none;
         }
 
         .profile-info h1 {
@@ -362,30 +427,6 @@ const UserProfile = () => {
           cursor: not-allowed;
         }
 
-        input.input-error {
-          border-color: #ef4444;
-        }
-
-        input.input-success {
-          border-color: #10b981;
-        }
-
-        .validation-message {
-          font-size: 11px;
-          margin-top: 4px;
-          display: flex;
-          align-items: center;
-          gap: 4px;
-        }
-
-        .validation-message.error {
-          color: #ef4444;
-        }
-
-        .validation-message.success {
-          color: #10b981;
-        }
-
         .button-group {
           display: flex;
           gap: 10px;
@@ -414,16 +455,6 @@ const UserProfile = () => {
           background: #db2777;
           box-shadow: 0 5px 16px rgba(219, 39, 119, 0.3);
           transform: translateY(-2px);
-        }
-
-        .btn-primary:active {
-          transform: scale(0.98);
-        }
-
-        .btn-primary:disabled {
-          background: #d1d5db;
-          cursor: not-allowed;
-          transform: none;
         }
 
         .btn-secondary {
@@ -535,6 +566,147 @@ const UserProfile = () => {
           background: #e0e0e0;
         }
 
+        /* 🆕 ESTILOS PARA HISTORIAL DE COMPRAS */
+        .compras-loading {
+          text-align: center;
+          padding: 3rem;
+          color: #666;
+        }
+
+        .spinner-compras {
+          width: 40px;
+          height: 40px;
+          border: 4px solid #f0f0f0;
+          border-top-color: #ec4899;
+          border-radius: 50%;
+          margin: 0 auto 1rem;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .compras-empty {
+          text-align: center;
+          padding: 3rem;
+        }
+
+        .compras-empty-icon {
+          font-size: 4rem;
+          margin-bottom: 1rem;
+        }
+
+        .compras-lista {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .compra-card {
+          background: #f8f9fa;
+          border-radius: 12px;
+          padding: 1.5rem;
+          border-left: 4px solid #ec4899;
+        }
+
+        .compra-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          padding-bottom: 1rem;
+          border-bottom: 2px solid #e0e0e0;
+        }
+
+        .compra-header h4 {
+          margin: 0 0 0.3rem 0;
+          font-size: 1.1rem;
+          color: #333;
+        }
+
+        .compra-fecha {
+          font-size: 0.85rem;
+          color: #999;
+        }
+
+        .compra-total {
+          font-size: 1.5rem;
+          font-weight: 800;
+          color: #ec4899;
+        }
+
+        .compra-productos {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .producto-item {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          background: white;
+          padding: 1rem;
+          border-radius: 8px;
+        }
+
+        .producto-img {
+          width: 60px;
+          height: 60px;
+          flex-shrink: 0;
+        }
+
+        .producto-img img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          border-radius: 6px;
+        }
+
+        .producto-placeholder {
+          width: 60px;
+          height: 60px;
+          background: #f0f0f0;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+        }
+
+        .producto-info {
+          flex: 1;
+        }
+
+        .producto-info h5 {
+          margin: 0 0 0.3rem 0;
+          font-size: 1rem;
+          color: #333;
+        }
+
+        .producto-info p {
+          margin: 0;
+          font-size: 0.85rem;
+          color: #666;
+        }
+
+        .producto-subtotal {
+          font-weight: 700;
+          color: #333;
+          font-size: 1.1rem;
+        }
+
+        .compra-footer {
+          display: flex;
+          justify-content: space-between;
+          padding-top: 1rem;
+          margin-top: 1rem;
+          border-top: 2px solid #e0e0e0;
+          font-size: 0.9rem;
+          color: #666;
+        }
+
         @media (max-width: 768px) {
           .profile-header {
             flex-direction: column;
@@ -567,6 +739,16 @@ const UserProfile = () => {
           .tab-content {
             padding: 20px;
           }
+
+          .compra-header {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .producto-item {
+            flex-direction: column;
+            text-align: center;
+          }
         }
       `}</style>
       <div className="profile-container">
@@ -585,8 +767,8 @@ const UserProfile = () => {
               <p>@{formData.username}</p>
               <div className="profile-stats">
                 <div className="stat-item">
-                  <div className="stat-number">23</div>
-                  <div className="stat-label">Pedidos</div>
+                  <div className="stat-number">{compras.length}</div>
+                  <div className="stat-label">Compras</div>
                 </div>
                 <div className="stat-item">
                   <div className="stat-number">4.8</div>
@@ -608,6 +790,12 @@ const UserProfile = () => {
                 onClick={() => setActiveTab("personal")}
               >
                 Información Personal
+              </button>
+              <button
+                className={`tab ${activeTab === "compras" ? "active" : ""}`}
+                onClick={() => setActiveTab("compras")}
+              >
+                Mis Compras
               </button>
               <button
                 className={`tab ${activeTab === "security" ? "active" : ""}`}
@@ -739,6 +927,73 @@ const UserProfile = () => {
                   </div>
                 </form>
               )}
+            </div>
+
+            {/* 🆕 Pestaña: Mis Compras */}
+            <div className={`tab-content ${activeTab === "compras" ? "active" : ""}`}>
+              <div className="section">
+                <div className="section-title">🛍️ Historial de Compras</div>
+                
+                {loadingCompras ? (
+                  <div className="compras-loading">
+                    <div className="spinner-compras"></div>
+                    <p>Cargando compras...</p>
+                  </div>
+                ) : compras.length === 0 ? (
+                  <div className="compras-empty">
+                    <div className="compras-empty-icon">🛍️</div>
+                    <h3>No tienes compras aún</h3>
+                    <p>Explora nuestro catálogo y realiza tu primera compra</p>
+                    <button className="btn btn-primary" onClick={() => navigate('/home')}>
+                      Ver Productos
+                    </button>
+                  </div>
+                ) : (
+                  <div className="compras-lista">
+                    {compras.map((compra) => (
+                      <div key={compra.id} className="compra-card">
+                        <div className="compra-header">
+                          <div>
+                            <h4>Folio: {compra.folio}</h4>
+                            <p className="compra-fecha">{formatearFecha(compra.fecha_venta)}</p>
+                          </div>
+                          <div className="compra-total">
+                            {formatearMoneda(compra.total)}
+                          </div>
+                        </div>
+
+                        <div className="compra-productos">
+                          {compra.productos.map((prod) => (
+                            <div key={prod.id} className="producto-item">
+                              <div className="producto-img">
+                                {prod.producto_imagen ? (
+                                  <img src={prod.producto_imagen} alt={prod.producto_nombre} />
+                                ) : (
+                                  <div className="producto-placeholder">📦</div>
+                                )}
+                              </div>
+                              <div className="producto-info">
+                                <h5>{prod.producto_nombre}</h5>
+                                <p>{prod.cantidad} x {formatearMoneda(prod.precio_unitario)}</p>
+                              </div>
+                              <div className="producto-subtotal">
+                                {formatearMoneda(prod.subtotal)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="compra-footer">
+                          <div>💳 {compra.metodo_pago.toUpperCase()}</div>
+                          {compra.descuento > 0 && (
+                            <div>🎁 Descuento: {formatearMoneda(compra.descuento)}</div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Pestaña: Seguridad */}

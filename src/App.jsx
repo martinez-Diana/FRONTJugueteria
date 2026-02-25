@@ -12,6 +12,9 @@ import VerifyEmail from "./pages/VerifyEmail";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import RegistrarProducto from "./pages/RegistrarProducto";
 import EditarProducto from "./pages/EditarProducto";
+import GestionClientes from "./pages/GestionClientes";
+import NuevaVenta from "./pages/NuevaVenta";
+
 
 
 // 🆕 IMPORTAR PÁGINAS DE ERROR
@@ -20,6 +23,10 @@ import BadRequest from "./pages/BadRequest";
 import ServerError from "./pages/ServerError";
 import Apartados from "./pages/Apartados";
 import HistorialVentas from "./pages/HistorialVentas";
+import SobreNosotros from "./pages/SobreNosotros";
+import Contacto from "./pages/Contacto";
+import MensajesContacto from "./pages/MensajesContacto";
+
 
 function App() {
   return (
@@ -30,6 +37,11 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
+
+        <Route path="/home" element={<Home />} />
+        <Route path="/sobre-nosotros" element={<SobreNosotros />} />
+        <Route path="/contacto" element={<Contacto />} />
+        <Route path="/register" element={<Register />} />
         
         {/* Rutas protegidas */}
         <Route 
@@ -94,6 +106,33 @@ function App() {
         </ProtectedRoute>
       } 
       />
+
+      <Route 
+        path="/admin/ventas/nueva" 
+        element={
+          <ProtectedRoute allowedRoles={[1]}>
+            <NuevaVenta />
+          </ProtectedRoute>
+        } 
+      />
+
+      <Route 
+        path="/admin/clientes" 
+        element={
+          <ProtectedRoute allowedRoles={[1]}>
+            <GestionClientes />
+          </ProtectedRoute>
+       } 
+      />
+
+      <Route 
+      path="/admin/mensajes-contacto" 
+      element={
+        <ProtectedRoute requiredRole={1}>
+          <MensajesContacto />
+        </ProtectedRoute>
+      } 
+    />
         
         <Route 
         path="/catalogo" 

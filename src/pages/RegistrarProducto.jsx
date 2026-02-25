@@ -7,7 +7,45 @@ const RegistrarProducto = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
-  
+  const [showNuevaMarca, setShowNuevaMarca] = useState(false);
+  const [nuevaMarcaInput, setNuevaMarcaInput] = useState('');
+
+  const [marcasDisponibles, setMarcasDisponibles] = useState([
+    'Barbie', 'Hot Wheels', 'LEGO', 'Mattel', 'Hasbro',
+    'Fisher-Price', 'Nerf', 'Playmobil', 'Funko', 'Disney',
+    'Marvel', 'Star Wars', 'Paw Patrol', 'Peppa Pig', 'Pokémon',
+    'Minecraft', 'Nintendo', 'Spin Master', 'MGA Entertainment', 'Crayola'
+  ]);
+
+  const coloresDisponibles = [
+    'Rojo', 'Azul', 'Verde', 'Amarillo', 'Rosa', 'Morado',
+    'Naranja', 'Negro', 'Blanco', 'Gris', 'Café', 'Turquesa',
+    'Multicolor', 'Transparente', 'Dorado', 'Plateado'
+  ];
+
+  const edadesDisponibles = [
+    '0-6 meses', '6-12 meses', '1-2 años', '2-3 años',
+    '3-4 años', '4-5 años', '5-6 años', '6-7 años',
+    '7-8 años', '8-9 años', '9-10 años', '10-12 años',
+    '12+ años', '3+ años', '5+ años', '6+ años',
+    '8+ años', '10+ años', 'Todas las edades'
+  ];
+
+  const tiposJuguete = [
+    'Muñeca', 'Carrito', 'Bloques', 'Peluche', 'Figura de Acción',
+    'Juego de Mesa', 'Rompecabezas', 'Pistola de Juguete', 'Pelota',
+    'Robot', 'Instrumento Musical', 'Kit de Ciencia', 'Casa de Juguete',
+    'Bicicleta', 'Patineta', 'Avión', 'Barco', 'Dinosaurio',
+    'Superhéroe', 'Princesa', 'Cocina de Juguete', 'Herramientas',
+    'Disfraz', 'Set de Arte', 'Electrónico', 'Otro'
+  ];
+
+  const materialesDisponibles = [
+    'Plástico', 'Tela', 'Metal', 'Madera', 'Silicona',
+    'Goma', 'Cartón', 'Papel', 'Espuma', 'Felpa',
+    'Vinilo', 'Resina', 'Cerámica', 'Vidrio', 'Mixto'
+  ];
+
   const [form, setForm] = useState({
     nombre: '',
     descripcion: '',
@@ -16,28 +54,31 @@ const RegistrarProducto = () => {
     material: '',
     edad_recomendada: '',
     genero: 'unisex',
-    color: '',
-    dimensiones: '',
+    colores: [],
+    alto: '',
+    ancho: '',
+    largo: '',
+    peso: '',
     tipo_juguete: '',
-    proveedor: '',
     sku: '',
-    imagen: '',
+    imagenes: ['', '', '', '', ''],
     cantidad: 0,
+    stock_minimo: 10,
     precio: 0,
     precio_compra: 0
   });
 
   const categorias = [
-    { value: 'educativo', label: 'Educativo' },
-    { value: 'didactico', label: 'Didáctico' },
-    { value: 'coleccionable', label: 'Coleccionable' },
-    { value: 'electronico', label: 'Electrónico' },
-    { value: 'peluches', label: 'Peluches' },
-    { value: 'vehiculos', label: 'Vehículos' },
-    { value: 'juegos_mesa', label: 'Juegos de Mesa' },
-    { value: 'figuras_accion', label: 'Figuras de Acción' },
-    { value: 'munecas', label: 'Muñecas' },
-    { value: 'construccion', label: 'Construcción' }
+    { value: 'educativo', label: '📚 Educativo' },
+    { value: 'didactico', label: '🎯 Didáctico' },
+    { value: 'coleccionable', label: '⭐ Coleccionable' },
+    { value: 'electronico', label: '🔋 Electrónico' },
+    { value: 'peluches', label: '🧸 Peluches' },
+    { value: 'vehiculos', label: '🚗 Vehículos' },
+    { value: 'juegos_mesa', label: '🎲 Juegos de Mesa' },
+    { value: 'figuras_accion', label: '🦸 Figuras de Acción' },
+    { value: 'munecas', label: '👧 Muñecas' },
+    { value: 'construccion', label: '🏗️ Construcción' }
   ];
 
   const handleChange = (e) => {
@@ -45,61 +86,86 @@ const RegistrarProducto = () => {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleImagenChange = (index, value) => {
+    const nuevasImagenes = [...form.imagenes];
+    nuevasImagenes[index] = value;
+    setForm(prev => ({ ...prev, imagenes: nuevasImagenes }));
+  };
+
+  const handleColorToggle = (color) => {
+    setForm(prev => ({
+      ...prev,
+      colores: prev.colores.includes(color)
+        ? prev.colores.filter(c => c !== color)
+        : [...prev.colores, color]
+    }));
+  };
+
+  const handleAgregarMarca = () => {
+    const marca = nuevaMarcaInput.trim();
+    if (!marca) return;
+    if (marcasDisponibles.includes(marca)) {
+      alert('⚠️ Esta marca ya existe');
+      return;
+    }
+    setMarcasDisponibles(prev => [...prev, marca].sort());
+    setForm(prev => ({ ...prev, marca }));
+    setNuevaMarcaInput('');
+    setShowNuevaMarca(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMensaje({ tipo: '', texto: '' });
 
-    // Validaciones básicas
     if (!form.nombre.trim()) {
       setMensaje({ tipo: 'error', texto: 'El nombre es obligatorio' });
       setLoading(false);
       return;
     }
-
     if (!form.sku.trim()) {
       setMensaje({ tipo: 'error', texto: 'El SKU es obligatorio' });
       setLoading(false);
       return;
     }
-
     if (parseFloat(form.precio) <= 0) {
       setMensaje({ tipo: 'error', texto: 'El precio debe ser mayor a 0' });
       setLoading(false);
       return;
     }
 
-    try {
-      console.log('📝 Enviando producto:', form);
-      await productosService.create(form);
-      
-      setMensaje({
-        tipo: 'success',
-        texto: '¡Producto registrado exitosamente!'
-      });
+    const dimensiones = [
+      form.alto ? `Alto: ${form.alto}cm` : '',
+      form.ancho ? `Ancho: ${form.ancho}cm` : '',
+      form.largo ? `Largo: ${form.largo}cm` : '',
+      form.peso ? `Peso: ${form.peso}kg` : ''
+    ].filter(Boolean).join(' | ');
 
-      // Limpiar formulario después de 2 segundos
+    const imagenString = form.imagenes.filter(img => img.trim()).join(',');
+    const colorString = form.colores.join(', ');
+
+    const dataToSend = {
+      ...form,
+      dimensiones,
+      imagen: imagenString,
+      color: colorString,
+      stock_minimo: parseInt(form.stock_minimo) || 10
+    };
+
+    delete dataToSend.alto;
+    delete dataToSend.ancho;
+    delete dataToSend.largo;
+    delete dataToSend.peso;
+    delete dataToSend.imagenes;
+    delete dataToSend.colores;
+
+    try {
+      await productosService.create(dataToSend);
+      setMensaje({ tipo: 'success', texto: '¡Producto registrado exitosamente! Redirigiendo...' });
+
       setTimeout(() => {
-        setForm({
-          nombre: '',
-          descripcion: '',
-          categoria: 'educativo',
-          marca: '',
-          material: '',
-          edad_recomendada: '',
-          genero: 'unisex',
-          color: '',
-          dimensiones: '',
-          tipo_juguete: '',
-          proveedor: '',
-          sku: '',
-          imagen: '',
-          cantidad: 0,
-          precio: 0,
-          precio_compra: 0
-        });
-        setMensaje({ tipo: '', texto: '' });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        navigate('/admin/productos');
       }, 2000);
 
     } catch (error) {
@@ -115,13 +181,9 @@ const RegistrarProducto = () => {
 
   return (
     <div className="registrar-container">
-      {/* Header */}
       <div className="registrar-header">
         <div className="header-content">
-          <button 
-            onClick={() => navigate('/admin')}
-            className="back-button"
-          >
+          <button onClick={() => navigate('/admin')} className="back-button">
             ← Volver al Dashboard
           </button>
           <div>
@@ -131,300 +193,256 @@ const RegistrarProducto = () => {
         </div>
       </div>
 
-      {/* Formulario */}
       <div className="form-wrapper">
         <div className="form-container">
-          
-          {/* Mensaje de éxito/error */}
+
           {mensaje.texto && (
             <div className={`mensaje ${mensaje.tipo}`}>
-              <span className="mensaje-icon">
-                {mensaje.tipo === 'success' ? '✅' : '⚠️'}
-              </span>
+              <span className="mensaje-icon">{mensaje.tipo === 'success' ? '✅' : '⚠️'}</span>
               <p>{mensaje.texto}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
-            {/* Sección 1: Información Básica */}
+
+            {/* Sección 1 */}
             <div className="form-section">
               <div className="section-title">
                 <span className="section-number">1</span>
                 <h2>Información Básica</h2>
               </div>
-              
+
               <div className="form-grid">
                 <div className="form-group full-width">
                   <label>Nombre del Producto *</label>
-                  <input
-                    type="text"
-                    name="nombre"
-                    value={form.nombre}
-                    onChange={handleChange}
-                    placeholder="Ej: Barbie Fashionista"
-                    required
-                  />
+                  <input type="text" name="nombre" value={form.nombre} onChange={handleChange} placeholder="Ej: Barbie Fashionista" required />
                 </div>
 
                 <div className="form-group full-width">
                   <label>Descripción</label>
-                  <textarea
-                    name="descripcion"
-                    value={form.descripcion}
-                    onChange={handleChange}
-                    rows="3"
-                    placeholder="Descripción detallada del producto..."
-                  />
+                  <textarea name="descripcion" value={form.descripcion} onChange={handleChange} rows="3" placeholder="Descripción detallada del producto..." />
                 </div>
 
                 <div className="form-group">
                   <label>SKU (Código único) *</label>
-                  <input
-                    type="text"
-                    name="sku"
-                    value={form.sku}
-                    onChange={handleChange}
-                    placeholder="Ej: BAR-001"
-                    required
-                  />
+                  <input type="text" name="sku" value={form.sku} onChange={handleChange} placeholder="Ej: BAR-001" required />
                 </div>
 
                 <div className="form-group">
                   <label>Marca</label>
-                  <input
-                    type="text"
-                    name="marca"
-                    value={form.marca}
-                    onChange={handleChange}
-                    placeholder="Ej: Mattel"
-                  />
+                  <div className="marca-wrapper">
+                    <div className="marca-row">
+                      <select name="marca" value={form.marca} onChange={handleChange} className="marca-select">
+                        <option value="">Selecciona una marca</option>
+                        {marcasDisponibles.map(m => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                      <button type="button" className="btn-nueva-marca" onClick={() => setShowNuevaMarca(!showNuevaMarca)} title="Agregar nueva marca">
+                        {showNuevaMarca ? '✕' : '+ Nueva'}
+                      </button>
+                    </div>
+
+                    {showNuevaMarca && (
+                      <div className="nueva-marca-box">
+                        <input type="text" value={nuevaMarcaInput} onChange={(e) => setNuevaMarcaInput(e.target.value)} placeholder="Nombre de la nueva marca" onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAgregarMarca())} />
+                        <button type="button" className="btn-agregar-marca" onClick={handleAgregarMarca}>✅ Agregar</button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Sección 2: Clasificación */}
+            {/* Sección 2 */}
             <div className="form-section">
               <div className="section-title">
                 <span className="section-number">2</span>
                 <h2>Clasificación</h2>
               </div>
-              
+
               <div className="form-grid">
                 <div className="form-group">
                   <label>Categoría *</label>
-                  <select
-                    name="categoria"
-                    value={form.categoria}
-                    onChange={handleChange}
-                    required
-                  >
-                    {categorias.map(cat => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </option>
-                    ))}
+                  <select name="categoria" value={form.categoria} onChange={handleChange} required>
+                    {categorias.map(cat => <option key={cat.value} value={cat.value}>{cat.label}</option>)}
                   </select>
                 </div>
 
                 <div className="form-group">
                   <label>Género *</label>
-                  <select
-                    name="genero"
-                    value={form.genero}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="niño">Niño</option>
-                    <option value="niña">Niña</option>
-                    <option value="unisex">Unisex</option>
+                  <select name="genero" value={form.genero} onChange={handleChange} required>
+                    <option value="niño">👦 Niño</option>
+                    <option value="niña">👧 Niña</option>
+                    <option value="bebe">👶 Bebé</option>
+                    <option value="unisex">🧒 Unisex</option>
                   </select>
                 </div>
 
                 <div className="form-group">
                   <label>Tipo de Juguete</label>
-                  <input
-                    type="text"
-                    name="tipo_juguete"
-                    value={form.tipo_juguete}
-                    onChange={handleChange}
-                    placeholder="Ej: Muñeca, Carrito, Bloques"
-                  />
+                  <select name="tipo_juguete" value={form.tipo_juguete} onChange={handleChange}>
+                    <option value="">Selecciona un tipo</option>
+                    {tiposJuguete.map(tipo => <option key={tipo} value={tipo}>{tipo}</option>)}
+                  </select>
                 </div>
 
                 <div className="form-group">
                   <label>Edad Recomendada</label>
-                  <input
-                    type="text"
-                    name="edad_recomendada"
-                    value={form.edad_recomendada}
-                    onChange={handleChange}
-                    placeholder="Ej: 3+, 5-8 años"
-                  />
+                  <select name="edad_recomendada" value={form.edad_recomendada} onChange={handleChange}>
+                    <option value="">Selecciona una edad</option>
+                    {edadesDisponibles.map(edad => <option key={edad} value={edad}>{edad}</option>)}
+                  </select>
                 </div>
               </div>
             </div>
 
-            {/* Sección 3: Características Físicas */}
+            {/* Sección 3 */}
             <div className="form-section">
               <div className="section-title">
                 <span className="section-number">3</span>
                 <h2>Características Físicas</h2>
               </div>
-              
+
               <div className="form-grid">
                 <div className="form-group">
                   <label>Material</label>
-                  <input
-                    type="text"
-                    name="material"
-                    value={form.material}
-                    onChange={handleChange}
-                    placeholder="Ej: Plástico, Tela, Metal"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Color</label>
-                  <input
-                    type="text"
-                    name="color"
-                    value={form.color}
-                    onChange={handleChange}
-                    placeholder="Ej: Rosa, Azul, Multicolor"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Dimensiones</label>
-                  <input
-                    type="text"
-                    name="dimensiones"
-                    value={form.dimensiones}
-                    onChange={handleChange}
-                    placeholder="Ej: 20x15x10 cm"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Proveedor</label>
-                  <input
-                    type="text"
-                    name="proveedor"
-                    value={form.proveedor}
-                    onChange={handleChange}
-                    placeholder="Ej: Distribuidora ABC"
-                  />
+                  <select name="material" value={form.material} onChange={handleChange}>
+                    <option value="">Selecciona un material</option>
+                    {materialesDisponibles.map(material => <option key={material} value={material}>{material}</option>)}
+                  </select>
                 </div>
               </div>
+
+              <div className="form-group" style={{ gridColumn: '1 / -1', marginTop: '1rem' }}>
+                <label>Colores (puedes seleccionar varios)</label>
+                <div className="colores-grid">
+                  {coloresDisponibles.map(color => (
+                    <button key={color} type="button" onClick={() => handleColorToggle(color)} className={`color-btn ${form.colores.includes(color) ? 'selected' : ''}`}>
+                      {form.colores.includes(color) && '✓ '}
+                      {color}
+                    </button>
+                  ))}
+                </div>
+                {form.colores.length > 0 && (
+                  <div className="colores-seleccionados">
+                    <strong>Seleccionados:</strong> {form.colores.join(', ')}
+                  </div>
+                )}
+              </div>
+
+              <div className="dimensiones-titulo" style={{ marginTop: '1.5rem' }}>
+                <span>📐</span> Dimensiones del Producto
+              </div>
+              <div className="dimensiones-grid">
+                <div className="form-group">
+                  <label>Alto (cm)</label>
+                  <input type="number" name="alto" value={form.alto} onChange={handleChange} placeholder="0" min="0" step="0.1" />
+                </div>
+                <div className="form-group">
+                  <label>Ancho (cm)</label>
+                  <input type="number" name="ancho" value={form.ancho} onChange={handleChange} placeholder="0" min="0" step="0.1" />
+                </div>
+                <div className="form-group">
+                  <label>Largo (cm)</label>
+                  <input type="number" name="largo" value={form.largo} onChange={handleChange} placeholder="0" min="0" step="0.1" />
+                </div>
+                <div className="form-group">
+                  <label>Peso (kg)</label>
+                  <input type="number" name="peso" value={form.peso} onChange={handleChange} placeholder="0.0" min="0" step="0.01" />
+                </div>
+              </div>
+
+              {(form.alto || form.ancho || form.largo || form.peso) && (
+                <div className="dimensiones-preview">
+                  <span>📦 </span>
+                  {form.alto ? `Alto: ${form.alto}cm ` : ''}
+                  {form.ancho ? `Ancho: ${form.ancho}cm ` : ''}
+                  {form.largo ? `Largo: ${form.largo}cm ` : ''}
+                  {form.peso ? `Peso: ${form.peso}kg` : ''}
+                </div>
+              )}
             </div>
 
-            {/* Sección 4: Inventario y Precios */}
+            {/* Sección 4 */}
             <div className="form-section">
               <div className="section-title">
                 <span className="section-number">4</span>
                 <h2>Inventario y Precios</h2>
               </div>
-              
+
               <div className="form-grid">
                 <div className="form-group">
                   <label>Cantidad Inicial *</label>
-                  <input
-                    type="number"
-                    name="cantidad"
-                    value={form.cantidad}
-                    onChange={handleChange}
-                    min="0"
-                    required
-                  />
+                  <input type="number" name="cantidad" value={form.cantidad} onChange={handleChange} min="0" required />
+                  <span className="field-help">Unidades disponibles ahora</span>
+                </div>
+
+                <div className="form-group">
+                  <label>Stock Mínimo</label>
+                  <input type="number" name="stock_minimo" value={form.stock_minimo} onChange={handleChange} min="1" />
+                  <span className="field-help">Alerta cuando queden menos</span>
                 </div>
 
                 <div className="form-group">
                   <label>Precio de Compra</label>
-                  <input
-                    type="number"
-                    name="precio_compra"
-                    value={form.precio_compra}
-                    onChange={handleChange}
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                  />
+                  <input type="number" name="precio_compra" value={form.precio_compra} onChange={handleChange} step="0.01" min="0" placeholder="0.00" />
                 </div>
 
                 <div className="form-group">
                   <label>Precio de Venta *</label>
-                  <input
-                    type="number"
-                    name="precio"
-                    value={form.precio}
-                    onChange={handleChange}
-                    step="0.01"
-                    min="0.01"
-                    required
-                    placeholder="0.00"
-                  />
+                  <input type="number" name="precio" value={form.precio} onChange={handleChange} step="0.01" min="0.01" required placeholder="0.00" />
                 </div>
+
+                {form.precio > 0 && form.precio_compra > 0 && (
+                  <div className="form-group">
+                    <label>Margen de Ganancia</label>
+                    <div className="margen-display">
+                      {(((form.precio - form.precio_compra) / form.precio_compra) * 100).toFixed(1)}%
+                      <span className="margen-label">+${(form.precio - form.precio_compra).toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Sección 5: Imagen */}
+            {/* Sección 5 */}
             <div className="form-section">
               <div className="section-title">
                 <span className="section-number">5</span>
-                <h2>Imagen del Producto</h2>
+                <h2>Imágenes del Producto</h2>
               </div>
-              
-              <div className="form-grid">
-                <div className="form-group full-width">
-                  <label>URL de la Imagen</label>
+
+              <div style={{
+                background: '#fffbeb', border: '2px solid #fcd34d',
+                borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem',
+                fontSize: '0.9rem', color: '#92400e'
+              }}>
+                <strong>💡 Consejo:</strong> La primera imagen será la principal. Puedes agregar hasta 5 imágenes.
+              </div>
+
+              {form.imagenes.map((img, index) => (
+                <div key={index} className="form-group" style={{ marginBottom: '1rem' }}>
+                  <label>Imagen {index + 1} {index === 0 && '(Principal) *'}</label>
                   <input
                     type="url"
-                    name="imagen"
-                    value={form.imagen}
-                    onChange={handleChange}
-                    placeholder="https://ejemplo.com/imagen.jpg"
+                    value={img}
+                    onChange={(e) => handleImagenChange(index, e.target.value)}
+                    placeholder={`https://ejemplo.com/imagen-${index + 1}.jpg`}
+                    required={index === 0}
                   />
-                  {form.imagen && (
-                    <div className="image-preview">
-                      <p className="preview-label">Vista previa:</p>
-                      <img
-                        src={form.imagen}
-                        alt="Vista previa"
-                        onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/200?text=Error+al+cargar';
-                        }}
-                      />
+                  {img && (
+                    <div className="image-preview-small">
+                      <img src={img} alt={`Vista previa ${index + 1}`} onError={(e) => { e.target.src = 'https://via.placeholder.com/100?text=Error'; }} />
                     </div>
                   )}
                 </div>
-              </div>
+              ))}
             </div>
 
             {/* Botones */}
             <div className="form-actions">
-              <button
-                type="button"
-                onClick={() => navigate('/admin')}
-                className="btn-secondary"
-                disabled={loading}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="btn-primary"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <span className="spinner"></span>
-                    Registrando...
-                  </>
-                ) : (
-                  <>
-                    💾 Registrar Producto
-                  </>
-                )}
+              <button type="button" onClick={() => navigate('/admin')} className="btn-secondary" disabled={loading}>Cancelar</button>
+              <button type="submit" className="btn-primary" disabled={loading}>
+                {loading ? <><span className="spinner"></span>Registrando...</> : <>💾 Registrar Producto</>}
               </button>
             </div>
           </form>

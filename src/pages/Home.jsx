@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from 'react-router-dom'; 
 import "./Home.css";
 import hotWheelsImg from "../assets/hot-wheels.png";
 import logoImg from "../assets/logo.png";
 
 const Home = () => {
+  const navigate = useNavigate(); 
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState([]);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
@@ -137,24 +139,30 @@ useEffect(() => {
   }
 }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps // 👈 SOLO searchQuery, SIN productos // 👈 Agrega productos aquí
 
-  // Funciones del carrito
   const addToCart = (producto) => {
-    const existingItem = cart.find(item => item.id === producto.id);
-    
-    if (existingItem) {
-      if (existingItem.cantidad < producto.stock) {
-        setCart(cart.map(item =>
-          item.id === producto.id
-            ? { ...item, cantidad: item.cantidad + 1 }
-            : item
-        ));
-      } else {
-        alert('No hay más stock disponible');
-      }
+  // 🆕 VERIFICAR SI HAY USUARIO LOGUEADO
+  if (!user) {
+    alert('⚠️ Debes iniciar sesión para agregar productos al carrito');
+    navigate('/login');
+    return;
+  }
+
+  const existingItem = cart.find(item => item.id === producto.id);
+  
+  if (existingItem) {
+    if (existingItem.cantidad < producto.stock) {
+      setCart(cart.map(item =>
+        item.id === producto.id
+          ? { ...item, cantidad: item.cantidad + 1 }
+          : item
+      ));
     } else {
-      setCart([...cart, { ...producto, cantidad: 1 }]);
+      alert('No hay más stock disponible');
     }
-  };
+  } else {
+    setCart([...cart, { ...producto, cantidad: 1 }]);
+  }
+};
 
   const removeFromCart = (productId) => {
     setCart(cart.filter(item => item.id !== productId));
@@ -393,7 +401,8 @@ useEffect(() => {
             </li>
             <li><a href="#categorias">Categorías</a></li>
             <li><a href="#productos">Productos</a></li>
-            <li><a href="#contacto">Contacto</a></li>
+            <li><a onClick={() => navigate('/sobre-nosotros')} style={{ cursor: 'pointer' }}>Sobre Nosotros</a></li>
+            <li><a onClick={() => navigate('/contacto')} style={{ cursor: 'pointer' }}>Contacto</a></li>
           </ul>
           
           <div className="nav-right">
@@ -448,12 +457,14 @@ useEffect(() => {
               )}
             </div>
 
-            <button className="cart-btn" onClick={handleCartClick} title="Ver carrito">
-              <span className="cart-icon">🛒</span>
-              {getTotalItems() > 0 && (
-                <span className="cart-count">{getTotalItems()}</span>
-              )}
-            </button>
+                  {user && (
+        <button className="cart-btn" onClick={handleCartClick} title="Ver carrito">
+          <span className="cart-icon">🛒</span>
+          {getTotalItems() > 0 && (
+            <span className="cart-count">{getTotalItems()}</span>
+          )}
+        </button>
+      )}
 
             {/* 🆕 BOTONES CONDICIONALES: Usuario logueado o no logueado */}
           {user ? (
@@ -685,7 +696,7 @@ useEffect(() => {
                         addToCart(producto);
                       }}
                     >
-                      Agregar
+                      {user ? 'Agregar' : '🔒 Iniciar Sesión'}
                     </button>
                   </div>
                 </div>
@@ -731,14 +742,14 @@ useEffect(() => {
                 </div>
 
                 <div className="product-detail-actions">
-                  <button 
+                    <button 
                     className="btn-add-to-cart-detail"
                     onClick={() => {
                       addToCart(selectedProduct);
-                      closeProductDetail();
+                      if (user) closeProductDetail();
                     }}
                   >
-                    🛒 Agregar al Carrito
+                    {user ? '🛒 Agregar al Carrito' : '🔒 Iniciar Sesión para Comprar'}
                   </button>
                   <button className="btn-buy-now">
                     ⚡ Comprar Ahora

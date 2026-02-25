@@ -106,26 +106,26 @@ const Administrador = () => {
 
       <div className="admin-container">
         {/* Sidebar */}
+        
         <aside className="sidebar">
-  <nav>
-    <Link to="/admin" className="active">
-      Dashboard
-    </Link>
-    <Link to="/admin/productos">📦 Productos</Link>
-    <Link to="/admin/productos/nuevo" style={{ 
-      paddingLeft: '2rem', 
-      fontSize: '0.9rem',
-      color: '#6b7280' 
-    }}>
-      ➕ Nuevo Producto
-    </Link>
-    <Link to="/admin/ventas">Ventas</Link>
-    <Link to="/admin/inventario">Inventario</Link>
-    <Link to="/admin/apartados">Apartados</Link>
-    <Link to="/admin/clientes">Clientes</Link>
-    <Link to="/admin/reportes">Reportes</Link>
-  </nav>
-</aside>
+        <nav>
+          <Link to="/admin" className="active">📊 Dashboard</Link>
+          <Link to="/admin/productos">📦 Productos</Link>
+          <Link to="/admin/productos/nuevo" style={{ 
+            paddingLeft: '2rem', 
+            fontSize: '0.9rem',
+            color: '#6b7280' 
+         }}>
+          ➕ Nuevo Producto
+            </Link>
+            <Link to="/admin/ventas">💰 Ventas</Link>
+            <Link to="/admin/inventario">📋 Inventario</Link>
+            <Link to="/admin/apartados">🔖 Apartados</Link>
+            <Link to="/admin/clientes">👥 Clientes</Link>
+            <Link to="/admin/mensajes-contacto">📧 Mensajes</Link>
+            <Link to="/admin/reportes">📈 Reportes</Link>
+        </nav>
+        </aside>
 
         {/* Main Content */}
         <main className="main-content">
