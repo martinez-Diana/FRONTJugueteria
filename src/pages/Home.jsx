@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom'; 
 import "./Home.css";
-import hotWheelsImg from "../assets/hot-wheels.png";
 import logoImg from "../assets/logo.png";
+import productosService from "../services/productosService";
 
 const Home = () => {
   const navigate = useNavigate(); 
@@ -21,6 +21,10 @@ const Home = () => {
   const agesRef = useRef(null);
   const brandsRef = useRef(null);
   const [user, setUser] = useState(null);
+
+  // 🆕 Estados para productos reales
+  const [productos, setProductos] = useState([]);
+  const [loadingProductos, setLoadingProductos] = useState(true);
   
   const [filters, setFilters] = useState({
     categoria: "todas",
@@ -29,23 +33,16 @@ const Home = () => {
     ordenar: "relevancia"
   });
 
-  const productos = [
-    { id: 1, tipo: "emoji", imagen: "🧸", titulo: "Osito de Peluche", descripcion: "Suave y adorable, perfecto para abrazar", precio: 299, categoria: "peluches", stock: 15, edad: "0-3" },
-    { id: 2, tipo: "emoji", imagen: "🎮", titulo: "Consola Portátil", descripcion: "Diversión en cualquier lugar", precio: 1499, categoria: "videojuegos", stock: 8, edad: "10+" },
-    { id: 3, tipo: "emoji", imagen: "🧩", titulo: "Rompecabezas 3D", descripcion: "Desafía tu mente y creatividad", precio: 399, categoria: "educativos", stock: 20, edad: "5-7" },
-    { id: 4, tipo: "imagen", imagen: hotWheelsImg, titulo: "Auto Hot Wheels", descripcion: "Velocidad y diversión garantizada", precio: 799, categoria: "vehiculos", stock: 12, marca: "Hot Wheels", edad: "3-5" },
-    { id: 5, tipo: "emoji", imagen: "🎨", titulo: "Set de Arte", descripcion: "Despierta el artista interior", precio: 549, categoria: "educativos", stock: 10, edad: "5-7" },
-    { id: 6, tipo: "emoji", imagen: "🎲", titulo: "Juego de Mesa", descripcion: "Diversión para toda la familia", precio: 449, categoria: "educativos", stock: 18, edad: "7-10" },
-    { id: 7, tipo: "emoji", imagen: "🚗", titulo: "Camión de Bomberos", descripcion: "Con luces y sonidos", precio: 899, categoria: "vehiculos", stock: 7, edad: "3-5" },
-    { id: 8, tipo: "emoji", imagen: "🐻", titulo: "Oso Gigante", descripcion: "El abrazo más grande", precio: 1299, categoria: "peluches", stock: 5, edad: "0-3" },
-  ];
-
   const categorias = [
     { value: "todas", label: "Todas las categorías" },
+    { value: "munecas", label: "Muñecas" },
+    { value: "didactico", label: "Didáctico" },
+    { value: "educativo", label: "Educativo" },
+    { value: "vehiculos", label: "Vehículos" },
     { value: "peluches", label: "Peluches" },
-    { value: "videojuegos", label: "Videojuegos" },
-    { value: "educativos", label: "Educativos" },
-    { value: "vehiculos", label: "Vehículos" }
+    { value: "juegos_mesa", label: "Juegos de Mesa" },
+    { value: "outdoor", label: "Outdoor" },
+    { value: "coleccionables", label: "Coleccionables" },
   ];
 
   const edades = [
@@ -77,6 +74,38 @@ const Home = () => {
     { nombre: "Cars", logo: "🏁", color: "#d71920" }
   ];
 
+  // 🆕 Cargar productos reales del backend
+  useEffect(() => {
+    const cargarProductos = async () => {
+      try {
+        setLoadingProductos(true);
+        const data = await productosService.getAll();
+        const productosFormateados = data.map(p => ({
+          id: p.id_producto,
+          tipo: "imagen",
+          imagen: p.imagen ? p.imagen.split(',')[0] : null,
+          titulo: p.nombre,
+          descripcion: p.descripcion || "Sin descripción",
+          precio: parseFloat(p.precio) || 0,
+          categoria: p.categoria,
+          stock: p.cantidad || 0,
+          marca: p.marca || "",
+          edad: p.edad_recomendada || "",
+          sku: p.sku || "",
+          genero: p.genero || "",
+          color: p.color || "",
+          material: p.material || "",
+        }));
+        setProductos(productosFormateados);
+      } catch (error) {
+        console.error('❌ Error al cargar productos:', error);
+      } finally {
+        setLoadingProductos(false);
+      }
+    };
+    cargarProductos();
+  }, []);
+
   // Cargar carrito del localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
@@ -90,14 +119,13 @@ const Home = () => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  // 🆕 NUEVO: Cargar usuario del localStorage
+  // Cargar usuario del localStorage
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
       try {
         const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
-        console.log('✅ Usuario cargado:', parsedUser);
       } catch (error) {
         console.error('❌ Error al cargar usuario:', error);
         localStorage.removeItem('user');
@@ -122,47 +150,45 @@ const Home = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  
-// Generar sugerencias en tiempo real
-useEffect(() => {
-  if (searchQuery.trim().length > 0) {
-    const query = searchQuery.toLowerCase();
-    const filtered = productos.filter(producto =>
-      producto.titulo.toLowerCase().includes(query) ||
-      producto.descripcion.toLowerCase().includes(query)
-    ).slice(0, 5);
-    setSuggestions(filtered);
-    setShowSuggestions(true);
-  } else {
-    setSuggestions([]);
-    setShowSuggestions(false);
-  }
-}, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps // 👈 SOLO searchQuery, SIN productos // 👈 Agrega productos aquí
+  // Generar sugerencias en tiempo real
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      const query = searchQuery.toLowerCase();
+      const filtered = productos.filter(producto =>
+        producto.titulo.toLowerCase().includes(query) ||
+        producto.descripcion.toLowerCase().includes(query)
+      ).slice(0, 5);
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchQuery, productos]);
 
   const addToCart = (producto) => {
-  // 🆕 VERIFICAR SI HAY USUARIO LOGUEADO
-  if (!user) {
-    alert('⚠️ Debes iniciar sesión para agregar productos al carrito');
-    navigate('/login');
-    return;
-  }
-
-  const existingItem = cart.find(item => item.id === producto.id);
-  
-  if (existingItem) {
-    if (existingItem.cantidad < producto.stock) {
-      setCart(cart.map(item =>
-        item.id === producto.id
-          ? { ...item, cantidad: item.cantidad + 1 }
-          : item
-      ));
-    } else {
-      alert('No hay más stock disponible');
+    if (!user) {
+      alert('⚠️ Debes iniciar sesión para agregar productos al carrito');
+      navigate('/login');
+      return;
     }
-  } else {
-    setCart([...cart, { ...producto, cantidad: 1 }]);
-  }
-};
+
+    const existingItem = cart.find(item => item.id === producto.id);
+    
+    if (existingItem) {
+      if (existingItem.cantidad < producto.stock) {
+        setCart(cart.map(item =>
+          item.id === producto.id
+            ? { ...item, cantidad: item.cantidad + 1 }
+            : item
+        ));
+      } else {
+        alert('No hay más stock disponible');
+      }
+    } else {
+      setCart([...cart, { ...producto, cantidad: 1 }]);
+    }
+  };
 
   const removeFromCart = (productId) => {
     setCart(cart.filter(item => item.id !== productId));
@@ -175,7 +201,7 @@ useEffect(() => {
     }
 
     const producto = productos.find(p => p.id === productId);
-    if (newQuantity > producto.stock) {
+    if (producto && newQuantity > producto.stock) {
       alert('No hay suficiente stock');
       return;
     }
@@ -201,7 +227,6 @@ useEffect(() => {
     }
   };
 
-  // 🆕 NUEVO: Función para cerrar sesión
   const handleLogout = () => {
     if (window.confirm('¿Estás seguro de cerrar sesión?')) {
       localStorage.removeItem('token');
@@ -211,7 +236,6 @@ useEffect(() => {
     }
   };
 
-  // Funciones de búsqueda
   const realizarBusqueda = () => {
     let resultados = [...productos];
 
@@ -219,7 +243,8 @@ useEffect(() => {
       const query = searchQuery.toLowerCase();
       resultados = resultados.filter(producto => 
         producto.titulo.toLowerCase().includes(query) ||
-        producto.descripcion.toLowerCase().includes(query)
+        producto.descripcion.toLowerCase().includes(query) ||
+        (producto.marca && producto.marca.toLowerCase().includes(query))
       );
     }
 
@@ -435,10 +460,15 @@ useEffect(() => {
                         onClick={() => handleSuggestionClick(producto)}
                       >
                         <div className="suggestion-icon">
-                          {producto.tipo === "emoji" ? (
-                            <span className="suggestion-emoji">{producto.imagen}</span>
+                          {producto.imagen ? (
+                            <img 
+                              src={producto.imagen} 
+                              alt={producto.titulo} 
+                              className="suggestion-img"
+                              onError={(e) => { e.target.style.display = 'none'; }}
+                            />
                           ) : (
-                            <img src={producto.imagen} alt={producto.titulo} className="suggestion-img" />
+                            <span className="suggestion-emoji">🧸</span>
                           )}
                         </div>
                         <div className="suggestion-info">
@@ -457,45 +487,42 @@ useEffect(() => {
               )}
             </div>
 
-                  {user && (
-        <button className="cart-btn" onClick={handleCartClick} title="Ver carrito">
-          <span className="cart-icon">🛒</span>
-          {getTotalItems() > 0 && (
-            <span className="cart-count">{getTotalItems()}</span>
-          )}
-        </button>
-      )}
+            {user && (
+              <button className="cart-btn" onClick={handleCartClick} title="Ver carrito">
+                <span className="cart-icon">🛒</span>
+                {getTotalItems() > 0 && (
+                  <span className="cart-count">{getTotalItems()}</span>
+                )}
+              </button>
+            )}
 
-            {/* 🆕 BOTONES CONDICIONALES: Usuario logueado o no logueado */}
-          {user ? (
-            // ===== USUARIO LOGUEADO =====
-            <div className="user-menu">
-              <button 
-                className="user-btn" 
-                onClick={() => window.location.href = '/profile'}
-                title="Ver mi perfil"
-              >
-                <span className="user-icon">👤</span>
-                <span className="user-name">{user.nombre || user.username}</span>
-              </button>
-              <button 
-                className="logout-btn" 
-                onClick={handleLogout}
-                title="Cerrar sesión"
-              >
-                <span className="logout-icon">🚪</span>
-              </button>
-            </div>
-          ) : (
-            // ===== USUARIO NO LOGUEADO =====
-            <div className="nav-buttons">
-              <a href="/login" className="btn-login">Iniciar Sesión</a>
-              <a href="/register" className="btn-register">Registrarse</a>
-            </div>
-          )}
-          </div>      {/* Cierra nav-right */}
-      </div>        {/* Cierra nav-container */}
-    </nav> 
+            {user ? (
+              <div className="user-menu">
+                <button 
+                  className="user-btn" 
+                  onClick={() => window.location.href = '/profile'}
+                  title="Ver mi perfil"
+                >
+                  <span className="user-icon">👤</span>
+                  <span className="user-name">{user.nombre || user.username}</span>
+                </button>
+                <button 
+                  className="logout-btn" 
+                  onClick={handleLogout}
+                  title="Cerrar sesión"
+                >
+                  <span className="logout-icon">🚪</span>
+                </button>
+              </div>
+            ) : (
+              <div className="nav-buttons">
+                <a href="/login" className="btn-login">Iniciar Sesión</a>
+                <a href="/register" className="btn-register">Registrarse</a>
+              </div>
+            )}
+          </div>
+        </div>
+      </nav> 
 
       {/* Hero Section */}
       <section className="hero" id="inicio">
@@ -534,22 +561,22 @@ useEffect(() => {
       <section className="categories" id="categorias">
         <h2 className="section-title">Nuestras Categorías</h2>
         <div className="categories-grid">
-          <div className="category-card">
-            <div className="category-icon">🧸</div>
-            <h3>Peluches</h3>
-            <p>Los más suaves y adorables compañeros</p>
+          <div className="category-card" onClick={() => { handleFilterChange("categoria", "munecas"); realizarBusqueda(); }}>
+            <div className="category-icon">🪆</div>
+            <h3>Muñecas</h3>
+            <p>Las mejores muñecas para jugar</p>
           </div>
-          <div className="category-card">
-            <div className="category-icon">🎮</div>
-            <h3>Videojuegos</h3>
-            <p>Diversión digital para todas las edades</p>
+          <div className="category-card" onClick={() => { handleFilterChange("categoria", "didactico"); realizarBusqueda(); }}>
+            <div className="category-icon">🎲</div>
+            <h3>Didáctico</h3>
+            <p>Juguetes que enseñan jugando</p>
           </div>
-          <div className="category-card">
+          <div className="category-card" onClick={() => { handleFilterChange("categoria", "educativo"); realizarBusqueda(); }}>
             <div className="category-icon">🧩</div>
-            <h3>Educativos</h3>
+            <h3>Educativo</h3>
             <p>Aprende mientras te diviertes</p>
           </div>
-          <div className="category-card">
+          <div className="category-card" onClick={() => { handleFilterChange("categoria", "vehiculos"); realizarBusqueda(); }}>
             <div className="category-icon">🚗</div>
             <h3>Vehículos</h3>
             <p>Carritos, aviones y más</p>
@@ -564,8 +591,10 @@ useEffect(() => {
             <h2 className="section-title">
               {searchResults !== null ? "Resultados de búsqueda" : "Productos Destacados"}
             </h2>
-            {searchResults !== null && (
-              <span className="results-badge">{productosAMostrar.length} productos</span>
+            {!loadingProductos && (
+              <span className="results-badge">
+                {searchResults !== null ? productosAMostrar.length : productos.length} productos
+              </span>
             )}
           </div>
           
@@ -662,7 +691,7 @@ useEffect(() => {
           </div>
         )}
 
-        {searchResults !== null && productosAMostrar.length === 0 && (
+        {searchResults !== null && productosAMostrar.length === 0 && !loadingProductos && (
           <div className="no-results">
             <div className="no-results-icon">🔍</div>
             <h3>No se encontraron productos</h3>
@@ -673,22 +702,52 @@ useEffect(() => {
           </div>
         )}
 
-        {productosAMostrar.length > 0 && (
+        {/* Loading */}
+        {loadingProductos ? (
+          <div style={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '4rem',
+            color: '#6b7280'
+          }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              border: '4px solid #f3f4f6',
+              borderTop: '4px solid #ec4899',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              marginBottom: '1rem'
+            }}></div>
+            <p style={{ fontSize: '1.1rem' }}>Cargando productos...</p>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        ) : productosAMostrar.length > 0 ? (
           <div className="products-grid">
             {productosAMostrar.map((producto) => (
               <div className="product-card" key={producto.id} onClick={() => handleProductClick(producto)}>
                 <div className="product-image">
-                  {producto.tipo === "emoji" ? (
-                    producto.imagen
+                  {producto.imagen ? (
+                    <img 
+                      src={producto.imagen} 
+                      alt={producto.titulo} 
+                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                      onError={(e) => { 
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<span style="font-size:3rem">🧸</span>';
+                      }}
+                    />
                   ) : (
-                    <img src={producto.imagen} alt={producto.titulo} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    <span style={{ fontSize: '3rem' }}>🧸</span>
                   )}
                 </div>
                 <div className="product-info">
                   <h3>{producto.titulo}</h3>
                   <p>{producto.descripcion}</p>
                   <div className="product-footer">
-                    <span className="product-price">${producto.precio}</span>
+                    <span className="product-price">${producto.precio.toLocaleString('es-MX')}</span>
                     <button 
                       className="btn-add-cart"
                       onClick={(e) => {
@@ -703,6 +762,12 @@ useEffect(() => {
               </div>
             ))}
           </div>
+        ) : (
+          !loadingProductos && searchResults === null && (
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
+              <p>No hay productos disponibles en este momento.</p>
+            </div>
+          )
         )}
       </section>
 
@@ -714,10 +779,14 @@ useEffect(() => {
             
             <div className="product-detail-grid">
               <div className="product-detail-image">
-                {selectedProduct.tipo === "emoji" ? (
-                  <div className="product-detail-emoji">{selectedProduct.imagen}</div>
+                {selectedProduct.imagen ? (
+                  <img 
+                    src={selectedProduct.imagen} 
+                    alt={selectedProduct.titulo}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
                 ) : (
-                  <img src={selectedProduct.imagen} alt={selectedProduct.titulo} />
+                  <div className="product-detail-emoji">🧸</div>
                 )}
               </div>
 
@@ -728,21 +797,53 @@ useEffect(() => {
                 <div className="product-detail-meta">
                   <div className="meta-item">
                     <span className="meta-label">Categoría:</span>
-                    <span className="meta-value">{categorias.find(c => c.value === selectedProduct.categoria)?.label}</span>
+                    <span className="meta-value" style={{ textTransform: 'capitalize' }}>
+                      {selectedProduct.categoria?.replace('_', ' ')}
+                    </span>
                   </div>
+                  {selectedProduct.marca && (
+                    <div className="meta-item">
+                      <span className="meta-label">Marca:</span>
+                      <span className="meta-value">{selectedProduct.marca}</span>
+                    </div>
+                  )}
+                  {selectedProduct.edad && (
+                    <div className="meta-item">
+                      <span className="meta-label">Edad recomendada:</span>
+                      <span className="meta-value">{selectedProduct.edad}</span>
+                    </div>
+                  )}
+                  {selectedProduct.color && (
+                    <div className="meta-item">
+                      <span className="meta-label">Color:</span>
+                      <span className="meta-value">{selectedProduct.color}</span>
+                    </div>
+                  )}
+                  {selectedProduct.material && (
+                    <div className="meta-item">
+                      <span className="meta-label">Material:</span>
+                      <span className="meta-value">{selectedProduct.material}</span>
+                    </div>
+                  )}
                   <div className="meta-item">
                     <span className="meta-label">Stock disponible:</span>
                     <span className="meta-value">{selectedProduct.stock} unidades</span>
                   </div>
+                  {selectedProduct.sku && (
+                    <div className="meta-item">
+                      <span className="meta-label">SKU:</span>
+                      <span className="meta-value">{selectedProduct.sku}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="product-detail-price">
                   <span className="price-label">Precio:</span>
-                  <span className="price-value">${selectedProduct.precio}</span>
+                  <span className="price-value">${selectedProduct.precio.toLocaleString('es-MX')}</span>
                 </div>
 
                 <div className="product-detail-actions">
-                    <button 
+                  <button 
                     className="btn-add-to-cart-detail"
                     onClick={() => {
                       addToCart(selectedProduct);
@@ -795,16 +896,20 @@ useEffect(() => {
                   {cart.map((item) => (
                     <div key={item.id} className="cart-item">
                       <div className="cart-item-image">
-                        {item.tipo === "emoji" ? (
-                          <span className="cart-emoji">{item.imagen}</span>
+                        {item.imagen ? (
+                          <img 
+                            src={item.imagen} 
+                            alt={item.titulo}
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
                         ) : (
-                          <img src={item.imagen} alt={item.titulo} />
+                          <span className="cart-emoji">🧸</span>
                         )}
                       </div>
 
                       <div className="cart-item-info">
                         <h4>{item.titulo}</h4>
-                        <p className="cart-item-price">${item.precio}</p>
+                        <p className="cart-item-price">${item.precio.toLocaleString('es-MX')}</p>
                       </div>
 
                       <div className="cart-item-controls">
@@ -833,7 +938,7 @@ useEffect(() => {
                       </div>
 
                       <div className="cart-item-subtotal">
-                        ${item.precio * item.cantidad}
+                        ${(item.precio * item.cantidad).toLocaleString('es-MX')}
                       </div>
                     </div>
                   ))}
@@ -843,7 +948,7 @@ useEffect(() => {
                   <div className="cart-summary">
                     <div className="summary-row">
                       <span>Subtotal:</span>
-                      <span>${getTotalPrice()}</span>
+                      <span>${getTotalPrice().toLocaleString('es-MX')}</span>
                     </div>
                     <div className="summary-row">
                       <span>Envío:</span>
@@ -851,7 +956,7 @@ useEffect(() => {
                     </div>
                     <div className="summary-row total">
                       <span>Total:</span>
-                      <span>${getTotalPrice() >= 500 ? getTotalPrice() : getTotalPrice() + 50}</span>
+                      <span>${(getTotalPrice() >= 500 ? getTotalPrice() : getTotalPrice() + 50).toLocaleString('es-MX')}</span>
                     </div>
                   </div>
 
@@ -934,9 +1039,9 @@ useEffect(() => {
             <div className="footer-section">
               <h3>Categorías</h3>
               <ul className="footer-links">
-                <li><a href="#">Peluches</a></li>
-                <li><a href="#">Videojuegos</a></li>
-                <li><a href="#">Juguetes Educativos</a></li>
+                <li><a href="#">Muñecas</a></li>
+                <li><a href="#">Didáctico</a></li>
+                <li><a href="#">Educativo</a></li>
                 <li><a href="#">Vehículos</a></li>
               </ul>
             </div>
