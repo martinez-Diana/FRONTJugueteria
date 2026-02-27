@@ -486,59 +486,60 @@ const CatalogoProductos = () => {
       </div>
 
       {/* Image Container */}
-      <div style={{
-        position: "relative",
-        height: "240px",
-        background: `linear-gradient(135deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "16px"
-      }}>
-        <img
-          src={producto.imagen || 'https://via.placeholder.com/200?text=Sin+Imagen'}
-          alt={producto.nombre}
-          style={{
-            maxWidth: "100%",
-            maxHeight: "100%",
-            objectFit: "contain"
-          }}
-          onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/200?text=Sin+Imagen';
-          }}
-        />
-        
-        {/* Badge de stock */}
-        {producto.cantidad === 0 ? (
-          <span style={{
-            position: "absolute",
-            top: "16px",
-            right: "16px",
-            background: "#dc2626",
-            color: "white",
-            padding: "6px 14px",
-            borderRadius: "50px",
-            fontSize: "12px",
-            fontWeight: "700"
-          }}>
-            Agotado
-          </span>
-        ) : producto.cantidad < 10 ? (
-          <span style={{
-            position: "absolute",
-            top: "16px",
-            right: "16px",
-            background: "#f59e0b",
-            color: "white",
-            padding: "6px 14px",
-            borderRadius: "50px",
-            fontSize: "12px",
-            fontWeight: "700"
-          }}>
-            ¡Pocas unidades!
-          </span>
-        ) : null}
-      </div>
+<div style={{
+  position: "relative",
+  height: "240px",
+  background: `linear-gradient(135deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "0"
+}}>
+  <img
+    src={producto.imagen?.split(',')[0] || ''}
+    alt={producto.nombre}
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "contain",
+      
+    }}
+    onError={(e) => {
+      e.target.style.display = 'none';
+    }}
+  />
+  
+  {/* Badge de stock */}
+  {producto.cantidad === 0 ? (
+    <span style={{
+      position: "absolute",
+      top: "16px",
+      right: "16px",
+      background: "#dc2626",
+      color: "white",
+      padding: "6px 14px",
+      borderRadius: "50px",
+      fontSize: "12px",
+      fontWeight: "700"
+    }}>
+      Agotado
+    </span>
+  ) : producto.cantidad <= producto.stock_minimo ? (
+    <span style={{
+      position: "absolute",
+      top: "16px",
+      right: "16px",
+      background: "#f59e0b",
+      color: "white",
+      padding: "6px 14px",
+      borderRadius: "50px",
+      fontSize: "12px",
+      fontWeight: "700"
+    }}>
+      ¡Pocas unidades!
+    </span>
+  ) : null}
+</div>
 
       {/* Product Info */}
       <div style={{ padding: "20px" }}>

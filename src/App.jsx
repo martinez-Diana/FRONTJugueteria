@@ -26,6 +26,7 @@ import HistorialVentas from "./pages/HistorialVentas";
 import SobreNosotros from "./pages/SobreNosotros";
 import Contacto from "./pages/Contacto";
 import MensajesContacto from "./pages/MensajesContacto";
+import Inventario from "./pages/Inventario";
 
 
 function App() {
@@ -124,6 +125,15 @@ function App() {
           </ProtectedRoute>
        } 
       />
+
+      <Route 
+  path="/admin/inventario" 
+  element={
+    <ProtectedRoute allowedRoles={[1]}>
+      <Inventario />
+    </ProtectedRoute>
+  } 
+/>
 
       <Route 
       path="/admin/mensajes-contacto" 
