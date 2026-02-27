@@ -249,7 +249,7 @@ const Administrador = () => {
                         }}>
                           {producto.imagen ? (
                             <img 
-                              src={producto.imagen}
+                              src={producto.imagen.split(',')[0]}
                               alt={producto.nombre}
                               style={{
                                 width: '50px',
