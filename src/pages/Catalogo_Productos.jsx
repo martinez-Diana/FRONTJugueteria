@@ -12,6 +12,7 @@ const CatalogoProductos = () => {
   const [mostrarModal, setMostrarModal] = useState(false);
   const [productoEliminar, setProductoEliminar] = useState(null);
   const [eliminando, setEliminando] = useState(false);
+  const [exportExito, setExportExito] = useState(false);
 
   // Cargar productos al montar el componente
   useEffect(() => {
@@ -59,6 +60,27 @@ const CatalogoProductos = () => {
     }
   };
 
+  const exportarProductos = async () => {
+  try {
+    const response = await fetch('http://localhost:4000/api/exportar/productos', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `productos_${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setExportExito(true);
+    setTimeout(() => setExportExito(false), 4000);
+  } catch {
+  alert('Error al exportar productos');
+  }
+};
+
+
+  
   // Obtener categorías únicas de los productos
   const categorias = ["Todos", ...new Set(productos.map(p => p.categoria))];
 
@@ -255,7 +277,9 @@ const CatalogoProductos = () => {
               🔄
             </button>
 
-            <button style={{
+            <button
+              onClick={() => navigate('/admin')}
+              style={{
               background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
               color: "white",
               border: "none",
@@ -279,9 +303,56 @@ const CatalogoProductos = () => {
             }}>
               Volver al Dashboard
             </button>
+
+            <button
+                onClick={exportarProductos}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "12px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 12px rgba(16,185,129,0.3)",
+                  transition: "all 0.3s"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
+                onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+              >
+                ⬇️ Exportar CSV
+              </button>
           </div>
         </div>
       </header>
+
+      {exportExito && (
+        <div style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          background: "white",
+          border: "3px solid #10b981",
+          borderRadius: "16px",
+          padding: "32px 48px",
+          textAlign: "center",
+          zIndex: 9999,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+        }}>
+          <div style={{ fontSize: "48px", marginBottom: "12px" }}>✅</div>
+          <p style={{ fontSize: "20px", fontWeight: "700", color: "#1f2937", margin: 0 }}>
+            ¡Exportación exitosa!
+          </p>
+          <p style={{ fontSize: "14px", color: "#6b7280", marginTop: "8px" }}>
+            El archivo CSV fue descargado correctamente
+          </p>
+        </div>
+      )}
 
       {/* Main Content */}
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "32px 24px" }}>

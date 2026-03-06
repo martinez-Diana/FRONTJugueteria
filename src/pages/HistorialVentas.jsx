@@ -15,6 +15,7 @@ function HistorialVentas() {
     metodo_pago: ''
   });
   const [busqueda, setBusqueda] = useState('');
+  const [exportExito, setExportExito] = useState(false);
 
   useEffect(() => {
     cargarDatos();
@@ -40,6 +41,29 @@ function HistorialVentas() {
       setLoading(false);
     }
   };
+
+  const exportarVentas = async () => {
+  try {
+    const params = new URLSearchParams();
+    if (filtros.fecha_inicio) params.append('desde', filtros.fecha_inicio);
+    if (filtros.fecha_fin) params.append('hasta', filtros.fecha_fin);
+    
+    const response = await fetch(`http://localhost:4000/api/exportar/ventas?${params}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `ventas_${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setExportExito(true);
+    setTimeout(() => setExportExito(false), 4000);
+  } catch {
+    alert('Error al exportar ventas');
+  }
+};
 
   const formatCurrency = (num) => {
     return new Intl.NumberFormat('es-MX', {
@@ -138,22 +162,40 @@ function HistorialVentas() {
   }
 
   return (
-    <div>
-      <nav className="navbar">
-        <div className="logo">🧸 Juguetería Martínez</div>
-        <div className="nav-links">
-          <a onClick={() => navigate('/admin')} style={{ cursor: 'pointer' }}>Dashboard</a>
-          <a onClick={() => navigate('/admin/ventas')} style={{ cursor: 'pointer' }}>Punto de Venta</a>
-          <a onClick={() => navigate('/admin/productos')} style={{ cursor: 'pointer' }}>Inventario</a>
-          <a onClick={() => navigate('/admin/reportes')} style={{ cursor: 'pointer' }}>Reportes</a>
-        </div>
-      </nav>
+  <div>
+    {exportExito && (
+      <div style={{
+        position: "fixed", top: "50%", left: "50%",
+        transform: "translate(-50%, -50%)",
+        background: "white", border: "3px solid #10b981",
+        borderRadius: "16px", padding: "32px 48px",
+        textAlign: "center", zIndex: 9999,
+        boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+      }}>
+        <div style={{ fontSize: "48px", marginBottom: "12px" }}>✅</div>
+        <p style={{ fontSize: "20px", fontWeight: "700", color: "#1f2937", margin: 0 }}>
+          ¡Exportación exitosa!
+        </p>
+        <p style={{ fontSize: "14px", color: "#6b7280", marginTop: "8px" }}>
+          El archivo CSV fue descargado correctamente
+        </p>
+      </div>
+    )}
+    <nav className="navbar">
+      <div className="logo">🧸 Juguetería Martínez</div>
+      <div className="nav-links">
+        <a onClick={() => navigate('/admin')} style={{ cursor: 'pointer' }}>Dashboard</a>
+        <a onClick={() => navigate('/admin/ventas')} style={{ cursor: 'pointer' }}>Punto de Venta</a>
+        <a onClick={() => navigate('/admin/productos')} style={{ cursor: 'pointer' }}>Inventario</a>
+        <a onClick={() => navigate('/admin/reportes')} style={{ cursor: 'pointer' }}>Reportes</a>
+      </div>
+    </nav>
 
       <div className="container">
         <div className="page-header">
           <h1>Historial de Ventas</h1>
           <div className="header-actions">
-            <button className="btn btn-secondary">📊 Exportar Excel</button>
+            <button className="btn btn-secondary" onClick={exportarVentas}>📊 Exportar CSV</button>
             <button 
               className="btn btn-primary"
               onClick={() => navigate('/admin/ventas/nueva')}

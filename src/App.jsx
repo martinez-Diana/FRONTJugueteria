@@ -27,6 +27,7 @@ import SobreNosotros from "./pages/SobreNosotros";
 import Contacto from "./pages/Contacto";
 import MensajesContacto from "./pages/MensajesContacto";
 import Inventario from "./pages/Inventario";
+import RespaldosBD from "./pages/RespaldosBD";
 
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
         <Route path="/sobre-nosotros" element={<SobreNosotros />} />
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/admin/respaldos" element={<RespaldosBD />} />
         
         {/* Rutas protegidas */}
         <Route 

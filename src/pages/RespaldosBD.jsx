@@ -1,0 +1,454 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+const RespaldosBD = () => {
+  const navigate = useNavigate();
+
+  // Estado simulado de respaldos (después conectas con el backend)
+  const [respaldos, setRespaldos] = useState([
+    {
+      id: 1,
+      nombre: "respaldo_2026-03-06_17-45-00.sql",
+      fecha: "2026-03-06T17:45:00",
+      tamaño: "280.2 MB",
+      tipo: "Automático",
+      estado: "completado",
+      origen: "Aiven"
+    },
+    {
+      id: 2,
+      nombre: "respaldo_2026-03-05_17-45-00.sql",
+      fecha: "2026-03-05T17:45:00",
+      tamaño: "280.2 MB",
+      tipo: "Automático",
+      estado: "completado",
+      origen: "Aiven"
+    },
+    {
+      id: 3,
+      nombre: "respaldo_2026-03-04_17-45-00.sql",
+      fecha: "2026-03-04T17:45:00",
+      tamaño: "280.2 MB",
+      tipo: "Automático",
+      estado: "completado",
+      origen: "Aiven"
+    }
+  ]);
+
+  const [creandoRespaldo, setCreandoRespaldo] = useState(false);
+  const [progreso, setProgreso] = useState(0);
+  const [mostrarConfirm, setMostrarConfirm] = useState(false);
+  const [exito, setExito] = useState(false);
+
+  const formatDate = (fecha) => {
+    return new Date(fecha).toLocaleDateString("es-MX", {
+      year: "numeric",
+      month: "long",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  };
+
+  // Simula crear un respaldo manual (después conectas con el backend)
+  const crearRespaldo = async () => {
+    setMostrarConfirm(false);
+    setCreandoRespaldo(true);
+    setProgreso(0);
+
+    // Simulación de progreso
+    const intervalo = setInterval(() => {
+      setProgreso((prev) => {
+        if (prev >= 100) {
+          clearInterval(intervalo);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 300);
+
+    // Simula tiempo de respaldo
+    await new Promise((r) => setTimeout(r, 3500));
+    clearInterval(intervalo);
+    setProgreso(100);
+
+    const nuevoRespaldo = {
+      id: Date.now(),
+      nombre: `respaldo_${new Date().toISOString().slice(0, 19).replace("T", "_").replace(/:/g, "-")}.sql`,
+      fecha: new Date().toISOString(),
+      tamaño: "280.2 MB",
+      tipo: "Manual",
+      estado: "completado",
+      origen: "Panel Admin"
+    };
+
+    setRespaldos((prev) => [nuevoRespaldo, ...prev]);
+    setCreandoRespaldo(false);
+    setProgreso(0);
+    setExito(true);
+    setTimeout(() => setExito(false), 4000);
+  };
+
+  const totalRespaldos = respaldos.length;
+  const ultimoRespaldo = respaldos[0];
+  const respaldosAuto = respaldos.filter((r) => r.tipo === "Automático").length;
+  const respaldosManuales = respaldos.filter((r) => r.tipo === "Manual").length;
+
+  return (
+    <div className="admin-body" style={{ fontFamily: "'Poppins', sans-serif", backgroundColor: "#f9fafb", minHeight: "100vh" }}>
+
+      {/* Alerta de éxito */}
+      {exito && (
+        <div style={{
+          position: "fixed", top: "50%", left: "50%",
+          transform: "translate(-50%, -50%)",
+          background: "white", border: "3px solid #10b981",
+          borderRadius: "16px", padding: "32px 48px",
+          textAlign: "center", zIndex: 9999,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.2)"
+        }}>
+          <div style={{ fontSize: "48px", marginBottom: "12px" }}>✅</div>
+          <p style={{ fontSize: "20px", fontWeight: "700", color: "#1f2937", margin: 0 }}>
+            ¡Respaldo creado exitosamente!
+          </p>
+          <p style={{ fontSize: "14px", color: "#6b7280", marginTop: "8px" }}>
+            El respaldo fue guardado correctamente
+          </p>
+        </div>
+      )}
+
+      {/* Header */}
+      <header style={{
+        background: "linear-gradient(to right, #db2777, #be185d)",
+        color: "white",
+        boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
+      }}>
+        <div style={{
+          display: "flex", justifyContent: "space-between",
+          alignItems: "center", padding: "1rem 2rem"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <div style={{
+              width: "3rem", height: "3rem", background: "#facc15",
+              color: "#be185d", fontWeight: "bold", display: "flex",
+              alignItems: "center", justifyContent: "center", borderRadius: "50%"
+            }}>JM</div>
+            <div>
+              <h1 style={{ fontSize: "1.2rem", fontWeight: "700", margin: 0 }}>Juguetería Martínez</h1>
+              <p style={{ fontSize: "0.85rem", color: "#ffddee", margin: 0 }}>Panel Administrativo</p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/admin")}
+            style={{
+              background: "rgba(255,255,255,0.2)", border: "2px solid rgba(255,255,255,0.4)",
+              color: "white", padding: "10px 20px", borderRadius: "10px",
+              cursor: "pointer", fontSize: "14px", fontWeight: "600"
+            }}
+          >
+            ← Volver al Dashboard
+          </button>
+        </div>
+      </header>
+
+      <div style={{ display: "flex" }}>
+
+        {/* Sidebar */}
+        <aside style={{
+          width: "16rem", background: "white", minHeight: "100vh",
+          boxShadow: "2px 0 10px rgba(0,0,0,0.05)", padding: "1rem"
+        }}>
+          <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            {[
+              { to: "/admin", label: "📊 Dashboard" },
+              { to: "/admin/productos", label: "📦 Productos" },
+              { to: "/admin/ventas", label: "💰 Ventas" },
+              { to: "/admin/inventario", label: "📋 Inventario" },
+              { to: "/admin/clientes", label: "👥 Clientes" },
+              { to: "/admin/reportes", label: "📈 Reportes" },
+              { to: "/admin/respaldos", label: "🗄️ Respaldos", active: true },
+            ].map((item) => (
+              <a
+                key={item.to}
+                onClick={() => navigate(item.to)}
+                style={{
+                  textDecoration: "none", cursor: "pointer",
+                  color: item.active ? "#db2777" : "#555",
+                  padding: "0.75rem 1rem", borderRadius: "0.75rem",
+                  fontWeight: item.active ? "600" : "500",
+                  background: item.active ? "#fce7f3" : "transparent",
+                  transition: "all 0.3s"
+                }}
+                onMouseEnter={(e) => { if (!item.active) e.currentTarget.style.background = "#f3f4f6"; }}
+                onMouseLeave={(e) => { if (!item.active) e.currentTarget.style.background = "transparent"; }}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <main style={{ flex: 1, padding: "2rem" }}>
+
+          {/* Título */}
+          <div style={{ marginBottom: "2rem" }}>
+            <h2 style={{ fontSize: "1.8rem", fontWeight: "700", margin: 0 }}>🗄️ Respaldos de Base de Datos</h2>
+            <p style={{ color: "#6b7280", marginTop: "0.25rem" }}>Gestión y monitoreo de respaldos del sistema</p>
+          </div>
+
+          {/* Tarjetas de resumen */}
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "1rem", marginBottom: "2rem"
+          }}>
+            {[
+              { label: "Total Respaldos", value: totalRespaldos, icon: "🗄️", color: "linear-gradient(to bottom right, #ec4899, #db2777)" },
+              { label: "Último Respaldo", value: ultimoRespaldo ? new Date(ultimoRespaldo.fecha).toLocaleDateString("es-MX") : "N/A", icon: "🕐", color: "linear-gradient(to bottom right, #06b6d4, #0891b2)" },
+              { label: "Automáticos", value: respaldosAuto, icon: "⚙️", color: "linear-gradient(to bottom right, #10b981, #059669)" },
+              { label: "Manuales", value: respaldosManuales, icon: "👆", color: "linear-gradient(to bottom right, #8b5cf6, #7c3aed)" },
+            ].map((card, i) => (
+              <div key={i} style={{
+                background: card.color, color: "white",
+                borderRadius: "1rem", padding: "1.5rem",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
+              }}>
+                <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>{card.icon}</div>
+                <h3 style={{ fontSize: "1.8rem", fontWeight: "700", margin: 0 }}>{card.value}</h3>
+                <p style={{ margin: "0.25rem 0 0", fontSize: "0.9rem", opacity: 0.9 }}>{card.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Sección Aiven + Botón crear */}
+          <div style={{
+            display: "grid", gridTemplateColumns: "1fr 1fr",
+            gap: "1.5rem", marginBottom: "2rem"
+          }}>
+
+            {/* Info Aiven */}
+            <div style={{
+              background: "white", borderRadius: "1rem",
+              padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+              borderLeft: "4px solid #06b6d4"
+            }}>
+              <h3 style={{ fontWeight: "700", marginBottom: "1rem", fontSize: "1rem" }}>
+                ☁️ Respaldos Automáticos — Aiven
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {[
+                  { label: "Frecuencia", value: "Cada 24 horas" },
+                  { label: "Último backup", value: "Hace 21 horas" },
+                  { label: "Ubicación", value: "do-blr1 (DigitalOcean)" },
+                  { label: "Total almacenado", value: "841 MB" },
+                  { label: "Retención", value: "3 días" },
+                ].map((item, i) => (
+                  <div key={i} style={{
+                    display: "flex", justifyContent: "space-between",
+                    padding: "0.5rem 0", borderBottom: "1px solid #f3f4f6"
+                  }}>
+                    <span style={{ color: "#6b7280", fontSize: "0.9rem" }}>{item.label}</span>
+                    <span style={{ fontWeight: "600", fontSize: "0.9rem" }}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{
+                marginTop: "1rem", background: "#ecfdf5", borderRadius: "8px",
+                padding: "0.75rem", display: "flex", alignItems: "center", gap: "0.5rem"
+              }}>
+                <span style={{ color: "#10b981", fontSize: "1.2rem" }}>✅</span>
+                <span style={{ color: "#065f46", fontSize: "0.85rem", fontWeight: "600" }}>
+                  Servicio activo y funcionando correctamente
+                </span>
+              </div>
+            </div>
+
+            {/* Crear respaldo manual */}
+            <div style={{
+              background: "white", borderRadius: "1rem",
+              padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+              borderLeft: "4px solid #ec4899",
+              display: "flex", flexDirection: "column", justifyContent: "space-between"
+            }}>
+              <div>
+                <h3 style={{ fontWeight: "700", marginBottom: "0.75rem", fontSize: "1rem" }}>
+                  👆 Crear Respaldo Manual
+                </h3>
+                <p style={{ color: "#6b7280", fontSize: "0.9rem", marginBottom: "1rem" }}>
+                  Genera un respaldo inmediato de toda la base de datos. 
+                  El proceso puede tardar unos segundos dependiendo del tamaño.
+                </p>
+                <div style={{
+                  background: "#fef3c7", borderRadius: "8px",
+                  padding: "0.75rem", marginBottom: "1rem",
+                  display: "flex", alignItems: "flex-start", gap: "0.5rem"
+                }}>
+                  <span>⚠️</span>
+                  <span style={{ color: "#92400e", fontSize: "0.82rem" }}>
+                    Se recomienda crear respaldos antes de realizar cambios importantes en el sistema.
+                  </span>
+                </div>
+              </div>
+
+              {/* Barra de progreso */}
+              {creandoRespaldo && (
+                <div style={{ marginBottom: "1rem" }}>
+                  <div style={{
+                    display: "flex", justifyContent: "space-between",
+                    marginBottom: "0.5rem", fontSize: "0.85rem", color: "#6b7280"
+                  }}>
+                    <span>Generando respaldo...</span>
+                    <span>{progreso}%</span>
+                  </div>
+                  <div style={{
+                    width: "100%", height: "10px",
+                    background: "#f3f4f6", borderRadius: "5px", overflow: "hidden"
+                  }}>
+                    <div style={{
+                      width: `${progreso}%`, height: "100%",
+                      background: "linear-gradient(to right, #ec4899, #db2777)",
+                      borderRadius: "5px", transition: "width 0.3s ease"
+                    }}></div>
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={() => setMostrarConfirm(true)}
+                disabled={creandoRespaldo}
+                style={{
+                  background: creandoRespaldo
+                    ? "#9ca3af"
+                    : "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
+                  color: "white", border: "none", padding: "14px 24px",
+                  borderRadius: "12px", fontSize: "15px", fontWeight: "700",
+                  cursor: creandoRespaldo ? "not-allowed" : "pointer",
+                  boxShadow: "0 4px 12px rgba(236,72,153,0.3)",
+                  transition: "all 0.3s", width: "100%"
+                }}
+                onMouseEnter={(e) => { if (!creandoRespaldo) e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
+              >
+                {creandoRespaldo ? "⏳ Creando respaldo..." : "🗄️ Crear Respaldo Ahora"}
+              </button>
+            </div>
+          </div>
+
+          {/* Historial de respaldos */}
+          <div style={{
+            background: "white", borderRadius: "1rem",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.05)", overflow: "hidden"
+          }}>
+            <div style={{
+              padding: "1.25rem 1.5rem",
+              borderBottom: "2px solid #f3f4f6",
+              display: "flex", justifyContent: "space-between", alignItems: "center"
+            }}>
+              <h3 style={{ fontWeight: "700", margin: 0 }}>📋 Historial de Respaldos</h3>
+              <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>
+                {respaldos.length} respaldos registrados
+              </span>
+            </div>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
+              <thead>
+                <tr style={{ background: "#f9fafb" }}>
+                  {["#", "Nombre del Archivo", "Fecha y Hora", "Tamaño", "Tipo", "Origen", "Estado"].map((h) => (
+                    <th key={h} style={{
+                      padding: "0.9rem 1rem", textAlign: "left",
+                      color: "#374151", fontWeight: "700", fontSize: "0.85rem",
+                      borderBottom: "2px solid #e5e7eb"
+                    }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {respaldos.map((r, index) => (
+                  <tr
+                    key={r.id}
+                    style={{ borderBottom: "1px solid #f3f4f6", transition: "background 0.2s" }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = "#fef3f7"}
+                    onMouseLeave={(e) => e.currentTarget.style.background = "white"}
+                  >
+                    <td style={{ padding: "1rem", color: "#db2777", fontWeight: "700" }}>#{index + 1}</td>
+                    <td style={{ padding: "1rem", fontFamily: "monospace", fontSize: "0.82rem", color: "#374151" }}>
+                      {r.nombre}
+                    </td>
+                    <td style={{ padding: "1rem", color: "#374151" }}>{formatDate(r.fecha)}</td>
+                    <td style={{ padding: "1rem", color: "#6b7280" }}>{r.tamaño}</td>
+                    <td style={{ padding: "1rem" }}>
+                      <span style={{
+                        padding: "4px 12px", borderRadius: "20px", fontSize: "0.8rem", fontWeight: "600",
+                        background: r.tipo === "Automático" ? "#dbeafe" : "#fce7f3",
+                        color: r.tipo === "Automático" ? "#1d4ed8" : "#db2777"
+                      }}>
+                        {r.tipo === "Automático" ? "⚙️ Automático" : "👆 Manual"}
+                      </span>
+                    </td>
+                    <td style={{ padding: "1rem", color: "#6b7280", fontSize: "0.85rem" }}>{r.origen}</td>
+                    <td style={{ padding: "1rem" }}>
+                      <span style={{
+                        padding: "4px 12px", borderRadius: "20px", fontSize: "0.8rem", fontWeight: "600",
+                        background: "#d1fae5", color: "#065f46"
+                      }}>
+                        ✅ Completado
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+
+      {/* Modal de confirmación */}
+      {mostrarConfirm && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.5)", display: "flex",
+          alignItems: "center", justifyContent: "center", zIndex: 1000
+        }}>
+          <div style={{
+            background: "white", borderRadius: "16px", padding: "2rem",
+            maxWidth: "450px", width: "90%", textAlign: "center",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.3)"
+          }}>
+            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🗄️</div>
+            <h2 style={{ fontWeight: "700", color: "#1f2937", marginBottom: "0.75rem" }}>
+              ¿Crear respaldo ahora?
+            </h2>
+            <p style={{ color: "#6b7280", marginBottom: "1.5rem", fontSize: "0.95rem" }}>
+              Se generará un respaldo completo de la base de datos. Este proceso puede tardar unos segundos.
+            </p>
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+              <button
+                onClick={() => setMostrarConfirm(false)}
+                style={{
+                  padding: "10px 24px", background: "white",
+                  border: "2px solid #e5e7eb", borderRadius: "12px",
+                  fontWeight: "600", cursor: "pointer", color: "#374151"
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={crearRespaldo}
+                style={{
+                  padding: "10px 24px",
+                  background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
+                  border: "none", borderRadius: "12px",
+                  fontWeight: "600", cursor: "pointer", color: "white",
+                  boxShadow: "0 4px 12px rgba(236,72,153,0.3)"
+                }}
+              >
+                ✅ Sí, crear respaldo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default RespaldosBD;

@@ -124,6 +124,7 @@ const Administrador = () => {
             <Link to="/admin/clientes">👥 Clientes</Link>
             <Link to="/admin/mensajes-contacto">📧 Mensajes</Link>
             <Link to="/admin/reportes">📈 Reportes</Link>
+            <Link to="/admin/respaldos">🗄️ Respaldos</Link>
         </nav>
         </aside>
 

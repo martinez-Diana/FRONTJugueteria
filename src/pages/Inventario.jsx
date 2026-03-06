@@ -9,6 +9,7 @@ const Inventario = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroStock, setFiltroStock] = useState("todos");
   const [ordenar, setOrdenar] = useState("nombre");
+  const [exportExito, setExportExito] = useState(false);
 
   useEffect(() => {
     cargarProductos();
@@ -25,6 +26,25 @@ const Inventario = () => {
       setLoading(false);
     }
   };
+
+  const exportarInventario = async () => {
+  try {
+    const response = await fetch('http://localhost:4000/api/exportar/inventario', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `inventario_${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setExportExito(true);
+    setTimeout(() => setExportExito(false), 4000);
+  } catch {
+  alert('Error al exportar inventario');
+}
+};
 
   const formatCurrency = (num) =>
     new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(num || 0);
@@ -83,19 +103,54 @@ const Inventario = () => {
 
       {/* Header */}
       <div style={{ background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)", padding: "24px 32px", color: "white" }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h1 style={{ fontSize: "28px", fontWeight: "800", margin: 0 }}>📋 Inventario</h1>
-            <p style={{ margin: "4px 0 0", opacity: 0.9, fontSize: "14px" }}>Control de stock y productos</p>
+          <div style={{ maxWidth: "1400px", margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <h1 style={{ fontSize: "28px", fontWeight: "800", margin: 0 }}>📋 Inventario</h1>
+              <p style={{ margin: "4px 0 0", opacity: 0.9, fontSize: "14px" }}>Control de stock y productos</p>
+            </div>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                onClick={() => navigate("/admin")}
+                style={{ background: "rgba(255,255,255,0.2)", border: "2px solid rgba(255,255,255,0.4)", color: "white", padding: "10px 20px", borderRadius: "10px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}
+              >
+                ← Volver al Dashboard
+              </button>
+              <button
+                onClick={exportarInventario}
+                style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", border: "none", color: "white", padding: "10px 20px", borderRadius: "10px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}
+              >
+                ⬇️ Exportar CSV
+              </button>
+            </div>
           </div>
-          <button
-            onClick={() => navigate("/admin")}
-            style={{ background: "rgba(255,255,255,0.2)", border: "2px solid rgba(255,255,255,0.4)", color: "white", padding: "10px 20px", borderRadius: "10px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}
-          >
-            ← Volver al Dashboard
-          </button>
+
         </div>
-      </div>
+
+        {exportExito && (
+            <div style={{
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              background: "white",
+              border: "3px solid #10b981",
+              borderRadius: "16px",
+              padding: "32px 48px",
+              textAlign: "center",
+              zIndex: 9999,
+              boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+            }}>
+              <div style={{ fontSize: "48px", marginBottom: "12px" }}>✅</div>
+              <p style={{ fontSize: "20px", fontWeight: "700", color: "#1f2937", margin: 0 }}>
+                ¡Exportación exitosa!
+              </p>
+              <p style={{ fontSize: "14px", color: "#6b7280", marginTop: "8px" }}>
+                El archivo CSV fue descargado correctamente
+              </p>
+            </div>
+          )}
+
+
 
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "32px 24px" }}>
 

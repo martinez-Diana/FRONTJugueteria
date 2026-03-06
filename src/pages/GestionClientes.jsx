@@ -22,6 +22,7 @@ const GestionClientes = () => {
   const [mostrarModalSinCuenta, setMostrarModalSinCuenta] = useState(false);
   const [clienteEditar, setClienteEditar] = useState(null);
   const [guardando, setGuardando] = useState(false);
+  const [exportExito, setExportExito] = useState(false);
 
   // Estado para cliente sin cuenta
   const [clienteSinCuenta, setClienteSinCuenta] = useState({
@@ -94,6 +95,25 @@ const GestionClientes = () => {
       alert('Error al eliminar el cliente');
     }
   };
+
+  const exportarClientes = async () => {
+  try {
+    const response = await fetch('http://localhost:4000/api/exportar/clientes', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `clientes_${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setExportExito(true);
+    setTimeout(() => setExportExito(false), 4000);
+  } catch {
+    alert('Error al exportar clientes');
+  }
+};
 
   // ✅ REGISTRAR CLIENTE SIN CUENTA
   const handleRegistrarSinCuenta = async (e) => {
@@ -238,9 +258,35 @@ const GestionClientes = () => {
             <button onClick={() => navigate('/admin')} className="btn-back">
               ← Volver al Dashboard
             </button>
+
+            <button
+              onClick={exportarClientes}
+              style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", border: "none", color: "white", padding: "10px 20px", borderRadius: "10px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}
+            >
+              ⬇️ Exportar CSV
+            </button>
           </div>
         </div>
       </header>
+
+      {exportExito && (
+        <div style={{
+          position: "fixed", top: "50%", left: "50%",
+          transform: "translate(-50%, -50%)",
+          background: "white", border: "3px solid #10b981",
+          borderRadius: "16px", padding: "32px 48px",
+          textAlign: "center", zIndex: 9999,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+        }}>
+          <div style={{ fontSize: "48px", marginBottom: "12px" }}>✅</div>
+          <p style={{ fontSize: "20px", fontWeight: "700", color: "#1f2937", margin: 0 }}>
+            ¡Exportación exitosa!
+          </p>
+          <p style={{ fontSize: "14px", color: "#6b7280", marginTop: "8px" }}>
+            El archivo CSV fue descargado correctamente
+          </p>
+        </div>
+      )}
 
       {/* Estadísticas */}
       {stats && (
