@@ -48,7 +48,7 @@ function HistorialVentas() {
     if (filtros.fecha_inicio) params.append('desde', filtros.fecha_inicio);
     if (filtros.fecha_fin) params.append('hasta', filtros.fecha_fin);
     
-    const response = await fetch(`http://localhost:4000/api/exportar/ventas?${params}`, {
+    const response = await fetch('https://back-jugueteria.vercel.app/api/exportar/ventas?${params}', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     });
     const blob = await response.blob();

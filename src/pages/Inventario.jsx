@@ -29,7 +29,7 @@ const Inventario = () => {
 
   const exportarInventario = async () => {
   try {
-    const response = await fetch('http://localhost:4000/api/exportar/inventario', {
+    const response = await fetch('https://back-jugueteria.vercel.app/api/exportar/inventario', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     });
     const blob = await response.blob();

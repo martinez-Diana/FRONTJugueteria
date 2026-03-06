@@ -146,7 +146,7 @@ const GestionClientes = () => {
         notas: clienteSinCuenta.notas
       };
 
-      const response = await fetch('http://localhost:4000/api/register', {
+      const response = await fetch('https://back-jugueteria.vercel.app/api/exportar/clientes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nuevoCliente)
