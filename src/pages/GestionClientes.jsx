@@ -98,7 +98,7 @@ const GestionClientes = () => {
 
   const exportarClientes = async () => {
   try {
-    const response = await fetch('http://localhost:4000/api/exportar/clientes', {
+    const response = await fetch('https://back-jugueteria.vercel.app/api/exportar/clientes', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     });
     const blob = await response.blob();
