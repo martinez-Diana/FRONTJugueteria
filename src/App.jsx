@@ -30,6 +30,8 @@ import Inventario from "./pages/Inventario";
 import RespaldosBD from "./pages/RespaldosBD";
 
 
+
+
 function App() {
   return (
     <Router>
@@ -45,6 +47,7 @@ function App() {
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/register" element={<Register />} />
         <Route path="/admin/respaldos" element={<RespaldosBD />} />
+        
         
         {/* Rutas protegidas */}
         <Route 
