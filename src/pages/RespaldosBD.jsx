@@ -30,11 +30,14 @@ const RespaldosBD = () => {
   }, []);
 
   const formatFecha = (fechaStr) => {
-    if (!fechaStr) return "N/A";
-    const [year, month, day] = fechaStr.split("-");
-    const fecha = new Date(Number(year), Number(month) - 1, Number(day));
+  if (!fechaStr) return "N/A";
+  try {
+    const fecha = new Date(fechaStr + "T12:00:00");
     return fecha.toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "2-digit" });
-  };
+  } catch {
+    return fechaStr;
+  }
+};
 
   const formatHora = (horaStr) => {
     if (!horaStr) return "N/A";
@@ -102,13 +105,17 @@ const RespaldosBD = () => {
     }
   };
 
-  const descargarRespaldo = (nombre) => {
-    const url = `${SUPABASE_URL}/storage/v1/object/public/backups/${nombre}`;
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = nombre;
-    link.click();
-  };
+  const descargarRespaldo = async (nombre) => {
+  const url = `${SUPABASE_URL}/storage/v1/object/public/backups/${nombre}`;
+  const response = await fetch(url);
+  const blob = await response.blob();
+  const blobUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = nombre;
+  link.click();
+  URL.revokeObjectURL(blobUrl);
+};
 
   const totalRespaldos = respaldos.length;
   const ultimoRespaldo = respaldos[0];
