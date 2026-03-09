@@ -30,14 +30,17 @@ const RespaldosBD = () => {
   }, []);
 
   const formatFecha = (fechaStr) => {
-  if (!fechaStr) return "N/A";
-  try {
-    const fecha = new Date(fechaStr + "T12:00:00");
-    return fecha.toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "2-digit" });
-  } catch {
-    return fechaStr;
-  }
-};
+    if (!fechaStr) return "N/A";
+    try {
+        const fecha = new Date(fechaStr);
+        return fecha.toLocaleDateString("es-MX", { 
+        year: "numeric", month: "long", day: "2-digit",
+        timeZone: "America/Mexico_City"
+        });
+    } catch {
+        return fechaStr;
+    }
+    };
 
   const formatHora = (horaStr) => {
     if (!horaStr) return "N/A";
