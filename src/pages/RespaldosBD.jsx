@@ -207,28 +207,8 @@ const RespaldosBD = () => {
             ))}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "2rem" }}>
-            <div style={{ background: "white", borderRadius: "1rem", padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", borderLeft: "4px solid #06b6d4" }}>
-              <h3 style={{ fontWeight: "700", marginBottom: "1rem", fontSize: "1rem" }}>☁️ Respaldos Automáticos — Aiven</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {[
-                  { label: "Frecuencia", value: "Cada 24 horas" },
-                  { label: "Último backup", value: "Hace 21 horas" },
-                  { label: "Ubicación", value: "do-blr1 (DigitalOcean)" },
-                  { label: "Total almacenado", value: "841 MB" },
-                  { label: "Retención", value: "3 días" },
-                ].map((item, i) => (
-                  <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 0", borderBottom: "1px solid #f3f4f6" }}>
-                    <span style={{ color: "#6b7280", fontSize: "0.9rem" }}>{item.label}</span>
-                    <span style={{ fontWeight: "600", fontSize: "0.9rem" }}>{item.value}</span>
-                  </div>
-                ))}
-              </div>
-              <div style={{ marginTop: "1rem", background: "#ecfdf5", borderRadius: "8px", padding: "0.75rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <span style={{ color: "#10b981" }}>✅</span>
-                <span style={{ color: "#065f46", fontSize: "0.85rem", fontWeight: "600" }}>Servicio activo y funcionando correctamente</span>
-              </div>
-            </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1.5rem", marginBottom: "2rem" }}>
+            
 
             <div style={{ background: "white", borderRadius: "1rem", padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", borderLeft: "4px solid #ec4899", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
