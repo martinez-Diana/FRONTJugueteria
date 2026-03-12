@@ -43,14 +43,12 @@ const RespaldosBD = () => {
 };
 
   const formatHora = (horaStr) => {
-    if (!horaStr) return "N/A";
-    const [h, m, s] = horaStr.split(":").map(Number);
-    let hMx = h - 6;
-    if (hMx < 0) hMx += 24;
-    const ampm = hMx >= 12 ? "PM" : "AM";
-    const h12 = hMx % 12 === 0 ? 12 : hMx % 12;
-    return `${String(h12).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")} ${ampm}`;
-  };
+  if (!horaStr) return "N/A";
+  const [h, m, s] = horaStr.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${String(h12).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")} ${ampm}`;
+};
 
   const diasDesdeUltimoRespaldo = () => {
     if (!respaldos[0]) return null;
