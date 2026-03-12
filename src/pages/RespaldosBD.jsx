@@ -247,7 +247,7 @@ const RespaldosBD = () => {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
               <thead>
                 <tr style={{ background: "#f9fafb" }}>
-                  {["#", "Nombre del Archivo", "Fecha", "Hora (CST)", "Tamaño", "Tipo", "Estado", "Acciones"].map((h) => (
+                  {["#", "Nombre del Archivo", "Fecha", "Hora", "Tamaño", "Tipo", "Estado", "Acciones"].map((h) => (
                     <th key={h} style={{ padding: "0.9rem 1rem", textAlign: "left", color: "#374151", fontWeight: "700", fontSize: "0.85rem", borderBottom: "2px solid #e5e7eb" }}>{h}</th>
                   ))}
                 </tr>
