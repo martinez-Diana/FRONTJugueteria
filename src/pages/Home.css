@@ -1891,10 +1891,8 @@ body {
 }
 
   .logo-img {
-    height: 120px;
-    margin-top: -25px;
-    margin-bottom: -25px;
-  }
+  height: 70px;
+}
 
   .nav-right {
     gap: 0.6rem;
@@ -2072,10 +2070,8 @@ body {
   }
 
   .logo-img {
-    height: 100px;
-    margin-top: -20px;
-    margin-bottom: -20px;
-  }
+  height: 60px;
+}
 
   .nav-right {
     flex-wrap: wrap;
