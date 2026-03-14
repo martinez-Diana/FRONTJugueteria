@@ -40,10 +40,12 @@ body {
 }
 
 .logo-img {
-  height: 70px;
+  height: 90px;
   width: auto;
   object-fit: contain;
   display: block;
+  margin-top: -15px;
+  margin-bottom: -15px;
 }
 
 .nav-links {
@@ -1891,7 +1893,9 @@ body {
 }
 
   .logo-img {
-  height: 70px;
+  height: 80px;
+  margin-top: -10px;
+  margin-bottom: -10px;
 }
 
   .nav-right {
@@ -2070,7 +2074,9 @@ body {
   }
 
   .logo-img {
-  height: 60px;
+  height: 70px;
+  margin-top: -10px;
+  margin-bottom: -10px;
 }
 
   .nav-right {
