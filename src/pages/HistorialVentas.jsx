@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ventasService from "../services/ventasService";
+import styles from "./HistorialVentas.module.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://back-jugueteria.vercel.app/api";
 
@@ -21,9 +22,7 @@ function HistorialVentas() {
   const [modalVisible, setModalVisible] = useState(false);
   const [loadingDetalle, setLoadingDetalle] = useState(false);
 
-  useEffect(() => {
-    cargarDatos();
-  }, []);
+  useEffect(() => { cargarDatos(); }, []);
 
   const cargarDatos = async () => {
     try {
@@ -124,6 +123,7 @@ function HistorialVentas() {
     new Date(fecha).toLocaleDateString("es-MX", {
       year: "numeric", month: "2-digit", day: "2-digit",
       hour: "2-digit", minute: "2-digit",
+      timeZone: "America/Mexico_City",
     });
 
   const getMetodoPagoNombre = (metodo) =>
@@ -132,14 +132,11 @@ function HistorialVentas() {
   const getMetodoPagoIcon = (metodo) =>
     ({ efectivo: "💵", tarjeta: "💳", transferencia: "🏦", otro: "💰" }[metodo] || "💰");
 
-  const getEstadoStyle = (estado) => {
-    const estilos = {
-      completada: { background: "#d1fae5", color: "#065f46" },
-      pendiente: { background: "#fef3c7", color: "#92400e" },
-      cancelada: { background: "#fee2e2", color: "#991b1b" },
-    };
-    return estilos[estado] || estilos.pendiente;
-  };
+  const getEstadoStyle = (estado) => ({
+    completada: { background: "#d1fae5", color: "#065f46" },
+    pendiente:  { background: "#fef3c7", color: "#92400e" },
+    cancelada:  { background: "#fee2e2", color: "#991b1b" },
+  }[estado] || { background: "#fef3c7", color: "#92400e" });
 
   const getEstadoNombre = (estado) =>
     ({ completada: "Completada", pendiente: "Pendiente", cancelada: "Cancelada" }[estado] || estado);
@@ -155,130 +152,133 @@ function HistorialVentas() {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#f9fafb" }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ width: 60, height: 60, border: "4px solid #f3f4f6", borderTop: "4px solid #ec4899", borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 16px" }}></div>
+      <div className={styles.loading}>
+        <div className={styles.loadingInner}>
+          <div className={styles.spinner}></div>
           <p style={{ color: "#374151", fontWeight: 600 }}>Cargando ventas...</p>
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ fontFamily: "'Poppins', sans-serif", backgroundColor: "#f9fafb", minHeight: "100vh" }}>
+    <div className={styles.wrapper}>
 
       {/* Alerta exportación */}
       {exportExito && (
-        <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", background: "white", border: "3px solid #10b981", borderRadius: 16, padding: "32px 48px", textAlign: "center", zIndex: 9999, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
-          <p style={{ fontSize: 20, fontWeight: 700, color: "#1f2937", margin: 0 }}>¡Exportación exitosa!</p>
-          <p style={{ fontSize: 14, color: "#6b7280", marginTop: 8 }}>El archivo CSV fue descargado correctamente</p>
+        <div className={styles.alertaExito}>
+          <div className={styles.icono}>✅</div>
+          <p className={styles.titulo}>¡Exportación exitosa!</p>
+          <p className={styles.subtitulo}>El archivo CSV fue descargado correctamente</p>
         </div>
       )}
 
       {/* Header */}
-      <header style={{ background: "linear-gradient(to right, #db2777, #be185d)", color: "white", boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem 2rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div style={{ width: "3rem", height: "3rem", background: "#facc15", color: "#be185d", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", fontSize: "1rem" }}>JM</div>
-            <div>
-              <h1 style={{ fontSize: "1.2rem", fontWeight: 700, margin: 0 }}>Juguetería Martínez</h1>
-              <p style={{ fontSize: "0.85rem", color: "#ffddee", margin: 0 }}>Panel Administrativo</p>
+      <header className={styles.header}>
+        <div className={styles.headerInner}>
+          <div className={styles.logoGroup}>
+            <div className={styles.logoCircle}>JM</div>
+            <div className={styles.logoInfo}>
+              <h1>Juguetería Martínez</h1>
+              <p>Panel Administrativo</p>
             </div>
           </div>
-          <button onClick={() => navigate("/admin")} style={{ background: "rgba(255,255,255,0.2)", border: "2px solid rgba(255,255,255,0.4)", color: "white", padding: "10px 20px", borderRadius: 10, cursor: "pointer", fontSize: 14, fontWeight: 600 }}>
+          <button className={styles.btnVolver} onClick={() => navigate("/admin")}>
             ← Volver al Dashboard
           </button>
         </div>
       </header>
 
-      <div style={{ display: "flex" }}>
+      <div className={styles.layout}>
+
         {/* Sidebar */}
-        <aside style={{ width: "16rem", background: "white", minHeight: "100vh", boxShadow: "2px 0 10px rgba(0,0,0,0.05)", padding: "1rem" }}>
-          <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <aside className={styles.sidebar}>
+          <nav className={styles.sidebarNav}>
             {[
-              { to: "/admin", label: "📊 Dashboard" },
-              { to: "/admin/productos", label: "📦 Productos" },
-              { to: "/admin/ventas", label: "💰 Ventas", active: true },
+              { to: "/admin",            label: "📊 Dashboard" },
+              { to: "/admin/productos",  label: "📦 Productos" },
+              { to: "/admin/ventas",     label: "💰 Ventas", active: true },
               { to: "/admin/inventario", label: "📋 Inventario" },
-              { to: "/admin/clientes", label: "👥 Clientes" },
-              { to: "/admin/reportes", label: "📈 Reportes" },
-              { to: "/admin/respaldos", label: "🗄️ Respaldos" },
+              { to: "/admin/clientes",   label: "👥 Clientes" },
+              { to: "/admin/reportes",   label: "📈 Reportes" },
+              { to: "/admin/respaldos",  label: "🗄️ Respaldos" },
             ].map((item) => (
-              <a key={item.to} onClick={() => navigate(item.to)} style={{ textDecoration: "none", cursor: "pointer", color: item.active ? "#db2777" : "#555", padding: "0.75rem 1rem", borderRadius: "0.75rem", fontWeight: item.active ? 600 : 500, background: item.active ? "#fce7f3" : "transparent", transition: "all 0.3s" }}
-                onMouseEnter={(e) => { if (!item.active) e.currentTarget.style.background = "#f3f4f6"; }}
-                onMouseLeave={(e) => { if (!item.active) e.currentTarget.style.background = "transparent"; }}>
+              <button
+                key={item.to}
+                onClick={() => navigate(item.to)}
+                className={`${styles.sidebarLink} ${item.active ? styles.sidebarLinkActive : ""}`}
+              >
                 {item.label}
-              </a>
+              </button>
             ))}
           </nav>
         </aside>
 
         {/* Main */}
-        <main style={{ flex: 1, padding: "2rem" }}>
-          {/* Título */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+        <main className={styles.main}>
+
+          {/* Título + botones */}
+          <div className={styles.pageHeader}>
             <div>
-              <h2 style={{ fontSize: "1.8rem", fontWeight: 700, margin: 0 }}>💰 Historial de Ventas</h2>
-              <p style={{ color: "#6b7280", marginTop: "0.25rem" }}>{ventas.length} ventas registradas en total</p>
+              <h2>💰 Historial de Ventas</h2>
+              <p>{ventas.length} ventas registradas en total</p>
             </div>
-            <div style={{ display: "flex", gap: "0.75rem" }}>
-              <button onClick={exportarVentas} style={{ background: "white", border: "2px solid #db2777", color: "#db2777", padding: "10px 20px", borderRadius: 10, cursor: "pointer", fontWeight: 600, fontSize: 14 }}>
+            <div className={styles.headerBtns}>
+              <button className={styles.btnSecundario} onClick={exportarVentas}>
                 📊 Exportar CSV
               </button>
-              <button onClick={() => navigate("/admin/ventas/nueva")} style={{ background: "linear-gradient(135deg, #ec4899, #db2777)", border: "none", color: "white", padding: "10px 20px", borderRadius: 10, cursor: "pointer", fontWeight: 600, fontSize: 14 }}>
+              <button className={styles.btnPrimario} onClick={() => navigate("/admin/ventas/nueva")}>
                 + Nueva Venta
               </button>
             </div>
           </div>
 
-          {/* Tarjetas de estadísticas */}
+          {/* Tarjetas estadísticas */}
           {stats && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
+            <div className={styles.statsGrid}>
               {[
-                { label: "Ingresos Totales", value: formatCurrency(stats.resumen.ventas_totales), icon: "💰", color: "linear-gradient(135deg, #ec4899, #db2777)" },
-                { label: "Total de Ventas", value: stats.resumen.total_ventas, icon: "🛒", color: "linear-gradient(135deg, #06b6d4, #0891b2)" },
-                { label: "Ticket Promedio", value: formatCurrency(stats.resumen.ticket_promedio), icon: "📈", color: "linear-gradient(135deg, #f59e0b, #d97706)" },
-                { label: "Completadas", value: stats.resumen.ventas_completadas, icon: "✅", color: "linear-gradient(135deg, #10b981, #059669)" },
+                { label: "Ingresos Totales", value: formatCurrency(stats.resumen.ventas_totales),   icon: "💰", color: "linear-gradient(135deg,#ec4899,#db2777)" },
+                { label: "Total de Ventas",  value: stats.resumen.total_ventas,                      icon: "🛒", color: "linear-gradient(135deg,#06b6d4,#0891b2)" },
+                { label: "Ticket Promedio",  value: formatCurrency(stats.resumen.ticket_promedio),   icon: "📈", color: "linear-gradient(135deg,#f59e0b,#d97706)" },
+                { label: "Completadas",      value: stats.resumen.ventas_completadas,                icon: "✅", color: "linear-gradient(135deg,#10b981,#059669)" },
               ].map((card, i) => (
-                <div key={i} style={{ background: card.color, color: "white", borderRadius: "1rem", padding: "1.25rem", boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
-                  <div style={{ fontSize: "1.8rem", marginBottom: "0.4rem" }}>{card.icon}</div>
-                  <h3 style={{ fontSize: "1.5rem", fontWeight: 700, margin: 0 }}>{card.value}</h3>
-                  <p style={{ margin: "0.2rem 0 0", fontSize: "0.85rem", opacity: 0.9 }}>{card.label}</p>
+                <div key={i} className={styles.statCard} style={{ background: card.color }}>
+                  <div className={styles.icono}>{card.icon}</div>
+                  <h3>{card.value}</h3>
+                  <p>{card.label}</p>
                 </div>
               ))}
             </div>
           )}
 
           {/* Filtros */}
-          <div style={{ background: "white", borderRadius: "1rem", padding: "1.25rem", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", marginBottom: "1.5rem" }}>
-            <p style={{ fontWeight: 600, margin: "0 0 1rem", color: "#374151" }}>🔍 Filtros</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem" }}>
-              {[
-                { label: "Fecha Inicio", type: "date", key: "fecha_inicio" },
-                { label: "Fecha Fin", type: "date", key: "fecha_fin" },
-              ].map((f) => (
-                <div key={f.key}>
-                  <label style={{ fontSize: "0.85rem", color: "#6b7280", display: "block", marginBottom: 4 }}>{f.label}</label>
-                  <input type={f.type} value={filtros[f.key]} onChange={(e) => setFiltros({ ...filtros, [f.key]: e.target.value })}
-                    style={{ width: "100%", padding: "0.6rem", borderRadius: 8, border: "2px solid #e5e7eb", fontSize: "0.9rem" }} />
-                </div>
-              ))}
-              <div>
-                <label style={{ fontSize: "0.85rem", color: "#6b7280", display: "block", marginBottom: 4 }}>Estado</label>
-                <select value={filtros.estado} onChange={(e) => setFiltros({ ...filtros, estado: e.target.value })}
-                  style={{ width: "100%", padding: "0.6rem", borderRadius: 8, border: "2px solid #e5e7eb", fontSize: "0.9rem" }}>
+          <div className={styles.filtrosCard}>
+            <p className={styles.titulo}>🔍 Filtros</p>
+            <div className={styles.filtrosGrid}>
+              <div className={styles.filtroItem}>
+                <label>Fecha Inicio</label>
+                <input type="date" value={filtros.fecha_inicio}
+                  onChange={(e) => setFiltros({ ...filtros, fecha_inicio: e.target.value })} />
+              </div>
+              <div className={styles.filtroItem}>
+                <label>Fecha Fin</label>
+                <input type="date" value={filtros.fecha_fin}
+                  onChange={(e) => setFiltros({ ...filtros, fecha_fin: e.target.value })} />
+              </div>
+              <div className={styles.filtroItem}>
+                <label>Estado</label>
+                <select value={filtros.estado}
+                  onChange={(e) => setFiltros({ ...filtros, estado: e.target.value })}>
                   <option value="">Todos</option>
                   <option value="completada">Completada</option>
                   <option value="pendiente">Pendiente</option>
                   <option value="cancelada">Cancelada</option>
                 </select>
               </div>
-              <div>
-                <label style={{ fontSize: "0.85rem", color: "#6b7280", display: "block", marginBottom: 4 }}>Método de Pago</label>
-                <select value={filtros.metodo_pago} onChange={(e) => setFiltros({ ...filtros, metodo_pago: e.target.value })}
-                  style={{ width: "100%", padding: "0.6rem", borderRadius: 8, border: "2px solid #e5e7eb", fontSize: "0.9rem" }}>
+              <div className={styles.filtroItem}>
+                <label>Método de Pago</label>
+                <select value={filtros.metodo_pago}
+                  onChange={(e) => setFiltros({ ...filtros, metodo_pago: e.target.value })}>
                   <option value="">Todos</option>
                   <option value="efectivo">Efectivo</option>
                   <option value="tarjeta">Tarjeta</option>
@@ -289,58 +289,58 @@ function HistorialVentas() {
           </div>
 
           {/* Tabla */}
-          <div style={{ background: "white", borderRadius: "1rem", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", overflow: "hidden" }}>
-            <div style={{ padding: "1.25rem 1.5rem", borderBottom: "2px solid #f3f4f6", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ fontWeight: 700, margin: 0 }}>📋 Registro de Ventas</h3>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "#f9fafb", borderRadius: 8, padding: "0.5rem 0.75rem" }}>
+          <div className={styles.tablaCard}>
+            <div className={styles.tablaHeader}>
+              <h3>📋 Registro de Ventas</h3>
+              <div className={styles.buscador}>
                 <span>🔍</span>
-                <input type="text" placeholder="Buscar por folio o cliente..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
-                  style={{ border: "none", outline: "none", background: "transparent", fontSize: "0.9rem", width: 220 }} />
+                <input
+                  type="text"
+                  placeholder="Buscar por folio o cliente..."
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                />
               </div>
             </div>
 
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
+            <table className={styles.tabla}>
               <thead>
-                <tr style={{ background: "#f9fafb" }}>
-                  {["Folio", "Fecha", "Cliente", "Productos", "Total", "Método de Pago", "Estado", "Acciones"].map((h) => (
-                    <th key={h} style={{ padding: "0.9rem 1rem", textAlign: "left", color: "#374151", fontWeight: 700, fontSize: "0.85rem", borderBottom: "2px solid #e5e7eb" }}>{h}</th>
+                <tr>
+                  {["Folio","Fecha","Cliente","Productos","Total","Método de Pago","Estado","Acciones"].map(h => (
+                    <th key={h}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {ventasFiltradas.length === 0 ? (
                   <tr>
-                    <td colSpan="8" style={{ textAlign: "center", padding: "3rem", color: "#6b7280" }}>
-                      <div style={{ fontSize: "3rem", marginBottom: "0.5rem" }}>📦</div>
-                      <p>No se encontraron ventas</p>
+                    <td colSpan="8">
+                      <div className={styles.sinResultados}>
+                        <div className={styles.iconoGrande}>📦</div>
+                        <p>No se encontraron ventas</p>
+                      </div>
                     </td>
                   </tr>
                 ) : (
                   ventasFiltradas.map((venta) => (
-                    <tr key={venta.id_venta} style={{ borderBottom: "1px solid #f3f4f6" }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = "#fef3f7"}
-                      onMouseLeave={(e) => e.currentTarget.style.background = "white"}>
-                      <td style={{ padding: "1rem", color: "#db2777", fontWeight: 700 }}>#{venta.folio}</td>
-                      <td style={{ padding: "1rem", color: "#374151" }}>{formatDate(venta.fecha_venta)}</td>
-                      <td style={{ padding: "1rem", color: "#374151" }}>
-                        {venta.first_name && venta.last_name ? `${venta.first_name} ${venta.last_name}` : "Cliente General"}
-                      </td>
-                      <td style={{ padding: "1rem", color: "#6b7280" }}>{venta.total_productos} producto(s)</td>
-                      <td style={{ padding: "1rem", fontWeight: 700, color: "#374151" }}>{formatCurrency(venta.total)}</td>
-                      <td style={{ padding: "1rem", color: "#374151" }}>{getMetodoPagoIcon(venta.metodo_pago)} {getMetodoPagoNombre(venta.metodo_pago)}</td>
-                      <td style={{ padding: "1rem" }}>
-                        <span style={{ padding: "4px 12px", borderRadius: 20, fontSize: "0.8rem", fontWeight: 600, ...getEstadoStyle(venta.estado) }}>
+                    <tr key={venta.id_venta}>
+                      <td className={styles.folioCell}>#{venta.folio}</td>
+                      <td>{formatDate(venta.fecha_venta)}</td>
+                      <td>{venta.first_name && venta.last_name ? `${venta.first_name} ${venta.last_name}` : "Cliente General"}</td>
+                      <td style={{ color: "#6b7280" }}>{venta.total_productos} producto(s)</td>
+                      <td style={{ fontWeight: 700 }}>{formatCurrency(venta.total)}</td>
+                      <td>{getMetodoPagoIcon(venta.metodo_pago)} {getMetodoPagoNombre(venta.metodo_pago)}</td>
+                      <td>
+                        <span className={styles.badge} style={getEstadoStyle(venta.estado)}>
                           {getEstadoNombre(venta.estado)}
                         </span>
                       </td>
-                      <td style={{ padding: "1rem" }}>
-                        <div style={{ display: "flex", gap: "0.5rem" }}>
-                          <button onClick={() => verDetalle(venta.id_venta)}
-                            style={{ background: "#dbeafe", color: "#1d4ed8", border: "none", padding: "6px 12px", borderRadius: 8, fontSize: "0.8rem", fontWeight: 600, cursor: "pointer" }}>
+                      <td>
+                        <div className={styles.accionesCelda}>
+                          <button className={`${styles.btnAccion} ${styles.btnVer}`} onClick={() => verDetalle(venta.id_venta)}>
                             👁️ Ver
                           </button>
-                          <button onClick={() => imprimirTicket(venta)}
-                            style={{ background: "#f3e8ff", color: "#7c3aed", border: "none", padding: "6px 12px", borderRadius: 8, fontSize: "0.8rem", fontWeight: 600, cursor: "pointer" }}>
+                          <button className={`${styles.btnAccion} ${styles.btnTicket}`} onClick={() => imprimirTicket(venta)}>
                             🖨️ Ticket
                           </button>
                         </div>
@@ -354,73 +354,71 @@ function HistorialVentas() {
         </main>
       </div>
 
-      {/* Modal Ver Detalle */}
+      {/* Modal detalle */}
       {modalVisible && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-          <div style={{ background: "white", borderRadius: 16, padding: "2rem", maxWidth: 600, width: "90%", maxHeight: "85vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox}>
             {loadingDetalle ? (
               <div style={{ textAlign: "center", padding: "2rem" }}>
                 <p>Cargando detalle...</p>
               </div>
             ) : ventaDetalle ? (
               <>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-                  <h2 style={{ fontWeight: 700, margin: 0, color: "#db2777" }}>#{ventaDetalle.folio}</h2>
-                  <button onClick={() => { setModalVisible(false); setVentaDetalle(null); }}
-                    style={{ background: "#f3f4f6", border: "none", borderRadius: "50%", width: 36, height: 36, cursor: "pointer", fontSize: 18 }}>✕</button>
+                <div className={styles.modalTitulo}>
+                  <h2>#{ventaDetalle.folio}</h2>
+                  <button className={styles.btnCerrarModal}
+                    onClick={() => { setModalVisible(false); setVentaDetalle(null); }}>
+                    ✕
+                  </button>
                 </div>
 
-                {/* Info general */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
+                <div className={styles.modalInfoGrid}>
                   {[
-                    { label: "Fecha", value: formatDate(ventaDetalle.fecha_venta) },
-                    { label: "Cliente", value: ventaDetalle.first_name ? `${ventaDetalle.first_name} ${ventaDetalle.last_name}` : "Cliente General" },
+                    { label: "Fecha",          value: formatDate(ventaDetalle.fecha_venta) },
+                    { label: "Cliente",        value: ventaDetalle.first_name ? `${ventaDetalle.first_name} ${ventaDetalle.last_name}` : "Cliente General" },
                     { label: "Método de Pago", value: `${getMetodoPagoIcon(ventaDetalle.metodo_pago)} ${getMetodoPagoNombre(ventaDetalle.metodo_pago)}` },
-                    { label: "Estado", value: getEstadoNombre(ventaDetalle.estado) },
+                    { label: "Estado",         value: getEstadoNombre(ventaDetalle.estado) },
                   ].map((item, i) => (
-                    <div key={i} style={{ background: "#f9fafb", borderRadius: 8, padding: "0.75rem" }}>
-                      <p style={{ fontSize: "0.8rem", color: "#6b7280", margin: "0 0 4px" }}>{item.label}</p>
-                      <p style={{ fontWeight: 600, margin: 0, color: "#374151" }}>{item.value}</p>
+                    <div key={i} className={styles.modalInfoItem}>
+                      <p className={styles.label}>{item.label}</p>
+                      <p className={styles.valor}>{item.value}</p>
                     </div>
                   ))}
                 </div>
 
-                {/* Productos */}
-                <h3 style={{ fontWeight: 700, marginBottom: "0.75rem", color: "#374151" }}>Productos</h3>
-                <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "1rem" }}>
+                <p className={styles.modalProductosTitulo}>Productos</p>
+                <table className={styles.tablaModal}>
                   <thead>
-                    <tr style={{ background: "#f9fafb" }}>
-                      {["Producto", "Cant.", "Precio", "Subtotal"].map(h => (
-                        <th key={h} style={{ padding: "0.6rem 0.75rem", textAlign: "left", fontSize: "0.82rem", color: "#6b7280", fontWeight: 700 }}>{h}</th>
-                      ))}
+                    <tr>
+                      {["Producto","Cant.","Precio","Subtotal"].map(h => <th key={h}>{h}</th>)}
                     </tr>
                   </thead>
                   <tbody>
                     {(ventaDetalle.productos || []).map((p, i) => (
-                      <tr key={i} style={{ borderBottom: "1px solid #f3f4f6" }}>
-                        <td style={{ padding: "0.6rem 0.75rem", fontSize: "0.88rem" }}>{p.nombre_producto}</td>
-                        <td style={{ padding: "0.6rem 0.75rem", fontSize: "0.88rem" }}>{p.cantidad}</td>
-                        <td style={{ padding: "0.6rem 0.75rem", fontSize: "0.88rem" }}>{formatCurrency(p.precio_unitario)}</td>
-                        <td style={{ padding: "0.6rem 0.75rem", fontSize: "0.88rem", fontWeight: 600 }}>{formatCurrency(p.subtotal)}</td>
+                      <tr key={i}>
+                        <td>{p.nombre_producto}</td>
+                        <td>{p.cantidad}</td>
+                        <td>{formatCurrency(p.precio_unitario)}</td>
+                        <td className={styles.negrita}>{formatCurrency(p.subtotal)}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
 
-                {/* Totales */}
-                <div style={{ background: "#fce7f3", borderRadius: 8, padding: "1rem" }}>
+                <div className={styles.totalBox}>
                   {ventaDetalle.descuento > 0 && (
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, color: "#6b7280" }}>
-                      <span>Descuento:</span><span>-{formatCurrency(ventaDetalle.descuento)}</span>
+                    <div className={styles.descuentoRow}>
+                      <span>Descuento:</span>
+                      <span>-{formatCurrency(ventaDetalle.descuento)}</span>
                     </div>
                   )}
-                  <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: "1.1rem", color: "#db2777" }}>
-                    <span>Total:</span><span>{formatCurrency(ventaDetalle.total)}</span>
+                  <div className={styles.totalRow}>
+                    <span>Total:</span>
+                    <span>{formatCurrency(ventaDetalle.total)}</span>
                   </div>
                 </div>
 
-                <button onClick={() => imprimirTicket(ventaDetalle)}
-                  style={{ marginTop: "1rem", width: "100%", background: "linear-gradient(135deg, #ec4899, #db2777)", border: "none", color: "white", padding: "12px", borderRadius: 10, fontWeight: 700, cursor: "pointer", fontSize: 15 }}>
+                <button className={styles.btnImprimirModal} onClick={() => imprimirTicket(ventaDetalle)}>
                   🖨️ Imprimir Ticket
                 </button>
               </>

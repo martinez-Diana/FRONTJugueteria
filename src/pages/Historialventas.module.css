@@ -1,0 +1,367 @@
+/* HistorialVentas.module.css */
+
+.wrapper {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+/* ---- ALERTA ÉXITO ---- */
+.alertaExito {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: 3px solid #10b981;
+  border-radius: 16px;
+  padding: 32px 48px;
+  text-align: center;
+  z-index: 9999;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.alertaExito .icono { font-size: 48px; margin-bottom: 12px; }
+.alertaExito .titulo { font-size: 20px; font-weight: 700; color: #1f2937; margin: 0; }
+.alertaExito .subtitulo { font-size: 14px; color: #6b7280; margin-top: 8px; }
+
+/* ---- HEADER ---- */
+.header {
+  background: linear-gradient(to right, #db2777, #be185d);
+  color: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.headerInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+.logoCircle {
+  width: 3rem;
+  height: 3rem;
+  background: #facc15;
+  color: #be185d;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1rem;
+}
+.logoInfo h1 { font-size: 1.2rem; font-weight: 700; margin: 0; }
+.logoInfo p { font-size: 0.85rem; color: #ffddee; margin: 0; }
+.logoGroup { display: flex; align-items: center; gap: 1rem; }
+.btnVolver {
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.4);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---- LAYOUT ---- */
+.layout { display: flex; }
+.sidebar {
+  width: 16rem;
+  background: white;
+  min-height: 100vh;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+  padding: 1rem;
+}
+.sidebarNav { display: flex; flex-direction: column; gap: 0.5rem; }
+.sidebarLink {
+  text-decoration: none;
+  cursor: pointer;
+  color: #555;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  background: transparent;
+  transition: all 0.3s;
+  display: block;
+  border: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  text-align: left;
+}
+.sidebarLink:hover { background: #f3f4f6; }
+.sidebarLinkActive {
+  color: #db2777;
+  font-weight: 600;
+  background: #fce7f3;
+}
+
+/* ---- MAIN ---- */
+.main { flex: 1; padding: 2rem; }
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.pageHeader h2 { font-size: 1.8rem; font-weight: 700; margin: 0; }
+.pageHeader p { color: #6b7280; margin-top: 0.25rem; }
+.headerBtns { display: flex; gap: 0.75rem; }
+
+.btnSecundario {
+  background: white;
+  border: 2px solid #db2777;
+  color: #db2777;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+}
+.btnPrimario {
+  background: linear-gradient(135deg, #ec4899, #db2777);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ---- TARJETAS STATS ---- */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.statCard {
+  color: white;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.statCard .icono { font-size: 1.8rem; margin-bottom: 0.4rem; }
+.statCard h3 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+.statCard p { margin: 0.2rem 0 0; font-size: 0.85rem; opacity: 0.9; }
+
+/* ---- FILTROS ---- */
+.filtrosCard {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  margin-bottom: 1.5rem;
+}
+.filtrosCard .titulo { font-weight: 600; margin: 0 0 1rem; color: #374151; }
+.filtrosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.filtroItem label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 4px;
+}
+.filtroItem input,
+.filtroItem select {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  font-size: 0.9rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ---- TABLA ---- */
+.tablaCard {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+.tablaHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 2px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tablaHeader h3 { font-weight: 700; margin: 0; }
+.buscador {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+.buscador input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.9rem;
+  width: 220px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.tabla { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.tabla thead tr { background: #f9fafb; }
+.tabla th {
+  padding: 0.9rem 1rem;
+  text-align: left;
+  color: #374151;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+.tabla td { padding: 1rem; border-bottom: 1px solid #f3f4f6; }
+.tabla tbody tr:hover td { background: #fef3f7; }
+
+.folioCell { color: #db2777; font-weight: 700; }
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+}
+.btnAccion {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+}
+.btnVer { background: #dbeafe; color: #1d4ed8; }
+.btnTicket { background: #f3e8ff; color: #7c3aed; }
+.accionesCelda { display: flex; gap: 0.5rem; }
+
+.sinResultados { text-align: center; padding: 3rem; color: #6b7280; }
+.sinResultados .iconoGrande { font-size: 3rem; margin-bottom: 0.5rem; }
+
+/* ---- LOADING ---- */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f9fafb;
+}
+.loadingInner { text-align: center; }
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #ec4899;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- MODAL ---- */
+.modalOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modalBox {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.modalTitulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.modalTitulo h2 { font-weight: 700; margin: 0; color: #db2777; }
+.btnCerrarModal {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 18px;
+}
+.modalInfoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.modalInfoItem {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+.modalInfoItem .label { font-size: 0.8rem; color: #6b7280; margin: 0 0 4px; }
+.modalInfoItem .valor { font-weight: 600; margin: 0; color: #374151; }
+
+.modalProductosTitulo { font-weight: 700; margin-bottom: 0.75rem; color: #374151; }
+.tablaModal { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+.tablaModal th {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  font-size: 0.82rem;
+  color: #6b7280;
+  font-weight: 700;
+  background: #f9fafb;
+}
+.tablaModal td {
+  padding: 0.6rem 0.75rem;
+  font-size: 0.88rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+.tablaModal td.negrita { font-weight: 600; }
+
+.totalBox {
+  background: #fce7f3;
+  border-radius: 8px;
+  padding: 1rem;
+}
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #db2777;
+}
+.descuentoRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: #6b7280;
+}
+
+.btnImprimirModal {
+  margin-top: 1rem;
+  width: 100%;
+  background: linear-gradient(135deg, #ec4899, #db2777);
+  border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
+}
