@@ -101,26 +101,28 @@ function HistorialVentas() {
   };
 
   const exportarVentas = async () => {
-    try {
-      const params = new URLSearchParams();
-      if (filtros.fecha_inicio) params.append("desde", filtros.fecha_inicio);
-      if (filtros.fecha_fin) params.append("hasta", filtros.fecha_fin);
-      const response = await fetch(`${API_URL}/exportar/ventas?${params}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `ventas_${new Date().toISOString().slice(0, 10)}.csv`;
-      link.click();
-      URL.revokeObjectURL(url);
-      setExportExito(true);
-      setTimeout(() => setExportExito(false), 4000);
-    } catch {
-      alert("Error al exportar ventas");
-    }
-  };
+  try {
+    const params = new URLSearchParams();
+    if (filtros.fecha_inicio) params.append("desde", filtros.fecha_inicio);
+    if (filtros.fecha_fin) params.append("hasta", filtros.fecha_fin);
+    if (filtros.estado) params.append("estado", filtros.estado);
+    if (filtros.metodo_pago) params.append("metodo_pago", filtros.metodo_pago);
+    const response = await fetch(`${API_URL}/exportar/ventas?${params}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `ventas_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setExportExito(true);
+    setTimeout(() => setExportExito(false), 4000);
+  } catch {
+    alert("Error al exportar ventas");
+  }
+};
 
   const formatCurrency = (num) =>
     new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(num || 0);
@@ -310,7 +312,7 @@ function HistorialVentas() {
           {/* Tabla */}
           <div className={styles.tablaCard}>
             <div className={styles.tablaHeader}>
-              <h3>📋 Registro de Ventas</h3>
+              <h3>📋 Registro de Ventas <span style={{ fontSize: "0.85rem", color: "#6b7280", fontWeight: 400 }}>— Mostrando {ventasFiltradas.length} de {ventas.length} ventas</span></h3>
               <div className={styles.buscador}>
                 <span>🔍</span>
                 <input
