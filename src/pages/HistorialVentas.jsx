@@ -24,21 +24,27 @@ function HistorialVentas() {
 
   useEffect(() => { cargarDatos(); }, []);
 
-  const cargarDatos = async () => {
-    try {
-      setLoading(true);
-      const [ventasData, statsData] = await Promise.all([
-        ventasService.getAll(),
-        ventasService.getStats(),
-      ]);
-      setVentas(ventasData);
-      setStats(statsData);
-    } catch (error) {
-      console.error("Error al cargar datos:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const cargarDatos = async (filtrosActuales = filtros) => {
+  try {
+    setLoading(true);
+    const params = {};
+    if (filtrosActuales.fecha_inicio) params.fecha_inicio = filtrosActuales.fecha_inicio;
+    if (filtrosActuales.fecha_fin) params.fecha_fin = filtrosActuales.fecha_fin;
+    if (filtrosActuales.estado) params.estado = filtrosActuales.estado;
+    if (filtrosActuales.metodo_pago) params.metodo_pago = filtrosActuales.metodo_pago;
+
+    const [ventasData, statsData] = await Promise.all([
+      ventasService.getAll(params),
+      ventasService.getStats(),
+    ]);
+    setVentas(ventasData);
+    setStats(statsData);
+  } catch (error) {
+    console.error("Error al cargar datos:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const verDetalle = async (id) => {
     setLoadingDetalle(true);
@@ -287,6 +293,18 @@ function HistorialVentas() {
                 </select>
               </div>
             </div>
+            <div style={{ marginTop: "1rem", display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>
+  <button className={styles.btnSecundario} onClick={() => {
+    const filtrosVacios = { fecha_inicio: "", fecha_fin: "", estado: "", metodo_pago: "" };
+    setFiltros(filtrosVacios);
+    cargarDatos(filtrosVacios);
+  }}>
+    🔄 Limpiar
+  </button>
+  <button className={styles.btnPrimario} onClick={() => cargarDatos(filtros)}>
+    🔍 Aplicar Filtros
+  </button>
+</div>
           </div>
 
           {/* Tabla */}
