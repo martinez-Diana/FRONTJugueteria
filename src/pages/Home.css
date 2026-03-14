@@ -40,17 +40,17 @@ body {
 }
 
 .logo-img {
-  height: 120px;
+  height: 140px;
   width: auto;
   object-fit: contain;
   display: block;
-  margin-top: -25px;
-  margin-bottom: -25px;
+  margin-top: -30px;
+  margin-bottom: -30px;
 }
 
 .nav-links {
   display: flex;
-  gap: 2.5rem;
+  gap: 1.2rem;
   list-style: none;
   flex: 1;
   justify-content: center;
