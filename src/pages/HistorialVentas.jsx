@@ -21,6 +21,12 @@ function HistorialVentas() {
   const [ventaDetalle, setVentaDetalle] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [loadingDetalle, setLoadingDetalle] = useState(false);
+  const [modalExportar, setModalExportar] = useState(false);
+const [columnasSeleccionadas, setColumnasSeleccionadas] = useState({
+  "Folio": true, "Fecha": true, "Cliente": true, "Email": false,
+  "Producto": true, "Cantidad": false, "Precio Unitario": false,
+  "Subtotal": false, "Total": true, "Metodo Pago": true, "Estado": true
+});
 
   useEffect(() => { cargarDatos(); }, []);
 
@@ -101,12 +107,15 @@ function HistorialVentas() {
   };
 
   const exportarVentas = async () => {
+  const columnas = Object.entries(columnasSeleccionadas)
+    .filter(([, v]) => v).map(([k]) => k).join(',');
   try {
     const params = new URLSearchParams();
     if (filtros.fecha_inicio) params.append("desde", filtros.fecha_inicio);
     if (filtros.fecha_fin) params.append("hasta", filtros.fecha_fin);
     if (filtros.estado) params.append("estado", filtros.estado);
     if (filtros.metodo_pago) params.append("metodo_pago", filtros.metodo_pago);
+    params.append("columnas", columnas);
     const response = await fetch(`${API_URL}/exportar/ventas?${params}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
@@ -117,6 +126,7 @@ function HistorialVentas() {
     link.download = `ventas_${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
+    setModalExportar(false);
     setExportExito(true);
     setTimeout(() => setExportExito(false), 4000);
   } catch {
@@ -233,7 +243,7 @@ function HistorialVentas() {
               <p>{ventas.length} ventas registradas en total</p>
             </div>
             <div className={styles.headerBtns}>
-              <button className={styles.btnSecundario} onClick={exportarVentas}>
+              <button className={styles.btnSecundario} onClick={() => setModalExportar(true)}>
                 📊 Exportar CSV
               </button>
               <button className={styles.btnPrimario} onClick={() => navigate("/admin/ventas/nueva")}>
@@ -447,6 +457,53 @@ function HistorialVentas() {
           </div>
         </div>
       )}
+      {modalExportar && (
+  <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+    <div style={{ background: "white", borderRadius: 16, padding: "2rem", maxWidth: 500, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+        <h2 style={{ fontWeight: 700, margin: 0, color: "#db2777" }}>📊 Exportar Ventas</h2>
+        <button onClick={() => setModalExportar(false)} style={{ background: "#f3f4f6", border: "none", borderRadius: "50%", width: 36, height: 36, cursor: "pointer", fontSize: 18 }}>✕</button>
+      </div>
+      <p style={{ fontWeight: 600, color: "#374151", marginBottom: "0.75rem" }}>📋 Plantillas rápidas</p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginBottom: "1.5rem" }}>
+        {[
+          { label: "💰 Financiero", cols: { "Folio": true, "Fecha": true, "Total": true, "Metodo Pago": true, "Estado": true, "Cliente": false, "Email": false, "Producto": false, "Cantidad": false, "Precio Unitario": false, "Subtotal": false } },
+          { label: "👥 Clientes", cols: { "Folio": true, "Fecha": true, "Cliente": true, "Email": true, "Total": true, "Estado": true, "Metodo Pago": false, "Producto": false, "Cantidad": false, "Precio Unitario": false, "Subtotal": false } },
+          { label: "📦 Productos", cols: { "Folio": true, "Producto": true, "Cantidad": true, "Precio Unitario": true, "Subtotal": true, "Total": true, "Fecha": false, "Cliente": false, "Email": false, "Metodo Pago": false, "Estado": false } },
+          { label: "📋 Completo", cols: { "Folio": true, "Fecha": true, "Cliente": true, "Email": true, "Producto": true, "Cantidad": true, "Precio Unitario": true, "Subtotal": true, "Total": true, "Metodo Pago": true, "Estado": true } },
+        ].map((p, i) => (
+          <button key={i} onClick={() => setColumnasSeleccionadas(p.cols)}
+            style={{ padding: "8px 12px", borderRadius: 8, border: "2px solid #e5e7eb", background: "white", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem", textAlign: "left" }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = "#db2777"}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = "#e5e7eb"}>
+            {p.label}
+          </button>
+        ))}
+      </div>
+      <p style={{ fontWeight: 600, color: "#374151", marginBottom: "0.75rem" }}>🔧 Columnas a incluir</p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginBottom: "1.5rem" }}>
+        {Object.keys(columnasSeleccionadas).map((col) => (
+          <label key={col} style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontSize: "0.9rem" }}>
+            <input type="checkbox" checked={columnasSeleccionadas[col]}
+              onChange={(e) => setColumnasSeleccionadas({ ...columnasSeleccionadas, [col]: e.target.checked })}
+              style={{ accentColor: "#db2777", width: 16, height: 16 }} />
+            {col}
+          </label>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: "0.75rem" }}>
+        <button onClick={() => setModalExportar(false)}
+          style={{ flex: 1, padding: "10px", background: "white", border: "2px solid #e5e7eb", borderRadius: 10, fontWeight: 600, cursor: "pointer" }}>
+          Cancelar
+        </button>
+        <button onClick={exportarVentas}
+          style={{ flex: 1, padding: "10px", background: "linear-gradient(135deg, #ec4899, #db2777)", border: "none", borderRadius: 10, color: "white", fontWeight: 600, cursor: "pointer" }}>
+          ⬇️ Descargar CSV
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
