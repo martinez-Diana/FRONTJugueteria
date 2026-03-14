@@ -40,12 +40,12 @@ body {
 }
 
 .logo-img {
-  height: 90px;
+  height: 120px;
   width: auto;
   object-fit: contain;
   display: block;
-  margin-top: -15px;
-  margin-bottom: -15px;
+  margin-top: -25px;
+  margin-bottom: -25px;
 }
 
 .nav-links {
@@ -405,6 +405,8 @@ body {
 .nav-buttons {
   display: flex;
   gap: 0.8rem;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .btn-login,
@@ -1893,9 +1895,9 @@ body {
 }
 
   .logo-img {
-  height: 80px;
-  margin-top: -10px;
-  margin-bottom: -10px;
+  height: 100px;
+  margin-top: -20px;
+  margin-bottom: -20px;
 }
 
   .nav-right {
@@ -2074,9 +2076,9 @@ body {
   }
 
   .logo-img {
-  height: 70px;
-  margin-top: -10px;
-  margin-bottom: -10px;
+  height: 80px;
+  margin-top: -15px;
+  margin-bottom: -15px;
 }
 
   .nav-right {
