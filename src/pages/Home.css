@@ -40,12 +40,10 @@ body {
 }
 
 .logo-img {
-  height: 140px;
+  height: 70px;
   width: auto;
   object-fit: contain;
   display: block;
-  margin-top: -30px;
-  margin-bottom: -30px;
 }
 
 .nav-links {
@@ -276,6 +274,8 @@ body {
   align-items: center;
   gap: 0.8rem;
   flex-shrink: 0;
+  overflow: visible;
+  max-width: fit-content;
 }
 
 /* ========================================
@@ -1880,8 +1880,15 @@ body {
   }
 
   .nav-container {
-    padding: 0.8rem 1rem;
-  }
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.8rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  overflow: visible;
+}
 
   .logo-img {
     height: 120px;
