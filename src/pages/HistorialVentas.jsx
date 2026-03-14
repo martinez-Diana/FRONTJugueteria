@@ -120,11 +120,12 @@ function HistorialVentas() {
     new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(num || 0);
 
   const formatDate = (fecha) =>
-    new Date(fecha).toLocaleDateString("es-MX", {
-      year: "numeric", month: "2-digit", day: "2-digit",
-      hour: "2-digit", minute: "2-digit",
-      timeZone: "America/Mexico_City",
-    });
+  new Date(fecha).toLocaleString("es-MX", {
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit",
+    hour12: true,
+    timeZone: "America/Mexico_City",
+  });
 
   const getMetodoPagoNombre = (metodo) =>
     ({ efectivo: "Efectivo", tarjeta: "Tarjeta", transferencia: "Transferencia", otro: "Otro" }[metodo] || metodo);
