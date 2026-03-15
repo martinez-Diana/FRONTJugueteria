@@ -62,25 +62,7 @@ const CatalogoProductos = () => {
     }
   };
 
-  const exportarProductos = async () => {
-  try {
-    const response = await fetch('https://back-jugueteria.vercel.app/api/exportar/productos', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    });
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `productos_${new Date().toISOString().slice(0,10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-    setExportExito(true);
-    setTimeout(() => setExportExito(false), 4000);
-  } catch {
-  alert('Error al exportar productos');
-  }
-};
-
+  
 
   
   // Obtener categorías únicas de los productos
@@ -307,7 +289,7 @@ const CatalogoProductos = () => {
             </button>
 
             <button
-                onClick={exportarProductos}
+                onClick={() => setModalExportar(true)}
                 style={{
                   display: "flex",
                   alignItems: "center",
