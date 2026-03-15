@@ -13,7 +13,7 @@ const ModalExportar = ({ titulo, plantillas, columnasIniciales, onExportar, onCe
   };
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 }}>
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
       <div style={{ background: "white", borderRadius: 16, padding: "2rem", maxWidth: 500, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", maxHeight: "90vh", overflowY: "auto" }}>
         
         {/* Título */}
