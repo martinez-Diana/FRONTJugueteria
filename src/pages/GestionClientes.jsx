@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import clientesService from '../services/clientesService';
 import './GestionClientes.css';
+import ModalExportar from '../components/ModalExportar';
 
 const capitalizarNombre = (texto) => {
   if (!texto) return '';
@@ -23,6 +24,7 @@ const GestionClientes = () => {
   const [clienteEditar, setClienteEditar] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [exportExito, setExportExito] = useState(false);
+  const [modalExportar, setModalExportar] = useState(false);
 
   // Estado para cliente sin cuenta
   const [clienteSinCuenta, setClienteSinCuenta] = useState({
@@ -96,24 +98,7 @@ const GestionClientes = () => {
     }
   };
 
-  const exportarClientes = async () => {
-  try {
-    const response = await fetch('https://back-jugueteria.vercel.app/api/exportar/clientes', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    });
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `clientes_${new Date().toISOString().slice(0,10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-    setExportExito(true);
-    setTimeout(() => setExportExito(false), 4000);
-  } catch {
-    alert('Error al exportar clientes');
-  }
-};
+
 
   // ✅ REGISTRAR CLIENTE SIN CUENTA
   const handleRegistrarSinCuenta = async (e) => {
@@ -260,7 +245,7 @@ const GestionClientes = () => {
             </button>
 
             <button
-              onClick={exportarClientes}
+              onClick={() => setModalExportar(true)}
               style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", border: "none", color: "white", padding: "10px 20px", borderRadius: "10px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}
             >
               ⬇️ Exportar CSV
@@ -605,6 +590,38 @@ const GestionClientes = () => {
           </div>
         </div>
       )}
+
+      {modalExportar && (
+        <ModalExportar
+          titulo="Exportar Clientes"
+          plantillas={[
+            { label: "📋 Completo", cols: { "ID": true, "Nombre": true, "Apellido Paterno": true, "Apellido Materno": true, "Email": true, "Telefono": true, "Usuario": true, "Estado": true, "Fecha Registro": true } },
+            { label: "📞 Contacto", cols: { "Nombre": true, "Apellido Paterno": true, "Email": true, "Telefono": true, "ID": false, "Apellido Materno": false, "Usuario": false, "Estado": false, "Fecha Registro": false } },
+            { label: "👤 Básico", cols: { "Nombre": true, "Apellido Paterno": true, "Email": true, "ID": false, "Apellido Materno": false, "Telefono": false, "Usuario": false, "Estado": false, "Fecha Registro": false } },
+            { label: "🗓️ Registro", cols: { "Nombre": true, "Apellido Paterno": true, "Email": true, "Fecha Registro": true, "Estado": true, "ID": false, "Apellido Materno": false, "Telefono": false, "Usuario": false } },
+          ]}
+          columnasIniciales={{ "ID": true, "Nombre": true, "Apellido Paterno": true, "Apellido Materno": false, "Email": true, "Telefono": true, "Usuario": false, "Estado": true, "Fecha Registro": true }}
+          onExportar={async (cols) => {
+            const params = new URLSearchParams();
+            params.append("columnas", cols.join(','));
+            const response = await fetch(`https://back-jugueteria.vercel.app/api/exportar/clientes?${params}`, {
+              headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `clientes_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+            setModalExportar(false);
+            setExportExito(true);
+            setTimeout(() => setExportExito(false), 4000);
+          }}
+          onCerrar={() => setModalExportar(false)}
+        />
+      )}
+
     </div>
   );
 };

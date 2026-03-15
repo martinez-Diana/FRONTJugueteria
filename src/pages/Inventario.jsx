@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import productosService from "../services/productosService";
+import ModalExportar from '../components/ModalExportar';
 
 const Inventario = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const Inventario = () => {
   const [filtroStock, setFiltroStock] = useState("todos");
   const [ordenar, setOrdenar] = useState("nombre");
   const [exportExito, setExportExito] = useState(false);
+  const [modalExportar, setModalExportar] = useState(false);
 
   useEffect(() => {
     cargarProductos();
@@ -27,24 +29,7 @@ const Inventario = () => {
     }
   };
 
-  const exportarInventario = async () => {
-  try {
-    const response = await fetch('https://back-jugueteria.vercel.app/api/exportar/inventario', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    });
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `inventario_${new Date().toISOString().slice(0,10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-    setExportExito(true);
-    setTimeout(() => setExportExito(false), 4000);
-  } catch {
-  alert('Error al exportar inventario');
-}
-};
+  
 
   const formatCurrency = (num) =>
     new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(num || 0);
@@ -116,7 +101,7 @@ const Inventario = () => {
                 ← Volver al Dashboard
               </button>
               <button
-                onClick={exportarInventario}
+                onClick={() => setModalExportar(true)}
                 style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", border: "none", color: "white", padding: "10px 20px", borderRadius: "10px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}
               >
                 ⬇️ Exportar CSV
@@ -339,6 +324,36 @@ const Inventario = () => {
           )}
         </div>
       </div>
+      {modalExportar && (
+  <ModalExportar
+    titulo="Exportar Inventario"
+    plantillas={[
+      { label: "📋 Completo", cols: { "SKU": true, "Producto": true, "Categoria": true, "Stock Actual": true, "Stock Minimo": true, "Estado": true, "Precio Compra": true, "Precio Venta": true, "Ganancia Unitaria": true, "Valor en Inventario": true } },
+      { label: "📦 Stock", cols: { "SKU": true, "Producto": true, "Stock Actual": true, "Stock Minimo": true, "Estado": true, "Categoria": false, "Precio Compra": false, "Precio Venta": false, "Ganancia Unitaria": false, "Valor en Inventario": false } },
+      { label: "💰 Financiero", cols: { "SKU": true, "Producto": true, "Precio Compra": true, "Precio Venta": true, "Ganancia Unitaria": true, "Valor en Inventario": true, "Categoria": false, "Stock Actual": false, "Stock Minimo": false, "Estado": false } },
+      { label: "⚠️ Stock Bajo", cols: { "SKU": true, "Producto": true, "Stock Actual": true, "Stock Minimo": true, "Estado": true, "Categoria": true, "Precio Compra": false, "Precio Venta": false, "Ganancia Unitaria": false, "Valor en Inventario": false } },
+    ]}
+    columnasIniciales={{ "SKU": true, "Producto": true, "Categoria": true, "Stock Actual": true, "Stock Minimo": false, "Estado": true, "Precio Compra": false, "Precio Venta": true, "Ganancia Unitaria": false, "Valor en Inventario": false }}
+    onExportar={async (cols) => {
+      const params = new URLSearchParams();
+      params.append("columnas", cols.join(','));
+      const response = await fetch(`https://back-jugueteria.vercel.app/api/exportar/inventario?${params}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `inventario_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setModalExportar(false);
+      setExportExito(true);
+      setTimeout(() => setExportExito(false), 4000);
+    }}
+    onCerrar={() => setModalExportar(false)}
+  />
+)}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import productosService from '../services/productosService';
+import ModalExportar from '../components/ModalExportar';
 
 const CatalogoProductos = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const CatalogoProductos = () => {
   const [productoEliminar, setProductoEliminar] = useState(null);
   const [eliminando, setEliminando] = useState(false);
   const [exportExito, setExportExito] = useState(false);
+  const [modalExportar, setModalExportar] = useState(false);
 
   // Cargar productos al montar el componente
   useEffect(() => {
@@ -784,6 +786,36 @@ const CatalogoProductos = () => {
           </div>
         </div>
       )}
+      {modalExportar && (
+  <ModalExportar
+    titulo="Exportar Productos"
+    plantillas={[
+      { label: "📋 Completo", cols: { "SKU": true, "Nombre": true, "Categoria": true, "Marca": true, "Precio Venta": true, "Precio Compra": true, "Stock": true, "Stock Minimo": true, "Edad Recomendada": true } },
+      { label: "🏪 Catálogo", cols: { "SKU": true, "Nombre": true, "Categoria": true, "Marca": true, "Precio Venta": true, "Stock": true, "Precio Compra": false, "Stock Minimo": false, "Edad Recomendada": false } },
+      { label: "💰 Precios", cols: { "SKU": true, "Nombre": true, "Precio Venta": true, "Precio Compra": true, "Categoria": false, "Marca": false, "Stock": false, "Stock Minimo": false, "Edad Recomendada": false } },
+      { label: "📦 Stock", cols: { "SKU": true, "Nombre": true, "Stock": true, "Stock Minimo": true, "Categoria": true, "Precio Venta": false, "Precio Compra": false, "Marca": false, "Edad Recomendada": false } },
+    ]}
+    columnasIniciales={{ "SKU": true, "Nombre": true, "Categoria": true, "Marca": false, "Precio Venta": true, "Precio Compra": false, "Stock": true, "Stock Minimo": false, "Edad Recomendada": false }}
+    onExportar={async (cols) => {
+      const params = new URLSearchParams();
+      params.append("columnas", cols.join(','));
+      const response = await fetch(`https://back-jugueteria.vercel.app/api/exportar/productos?${params}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `productos_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setModalExportar(false);
+      setExportExito(true);
+      setTimeout(() => setExportExito(false), 4000);
+    }}
+    onCerrar={() => setModalExportar(false)}
+  />
+)}
     </div>
   );
 };
