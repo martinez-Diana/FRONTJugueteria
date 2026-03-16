@@ -17,6 +17,8 @@ const GestionEmpleados = () => {
   const [modalEditar, setModalEditar] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [exito, setExito] = useState('');
+  const [modalReset, setModalReset] = useState(null);
+const [nuevaPassword, setNuevaPassword] = useState('');
 
   const [nuevoEmpleado, setNuevoEmpleado] = useState({
     first_name: '', last_name: '', mother_lastname: '',
@@ -111,6 +113,34 @@ const GestionEmpleados = () => {
       alert('Error al cambiar estado');
     }
   };
+
+  const resetPassword = async (e) => {
+  e.preventDefault();
+  if (nuevaPassword.length < 6) {
+    alert('La contraseña debe tener al menos 6 caracteres');
+    return;
+  }
+  try {
+    setGuardando(true);
+    const res = await fetch(`${API}/empleados/${modalReset.id}/reset-password`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      body: JSON.stringify({ nueva_password: nuevaPassword })
+    });
+    const data = await res.json();
+    if (data.success) {
+      setModalReset(null);
+      setNuevaPassword('');
+      mostrarExito('¡Contraseña actualizada exitosamente!');
+    } else {
+      alert(data.error || 'Error al resetear contraseña');
+    }
+  } catch {
+    alert('Error al conectar con el servidor');
+  } finally {
+    setGuardando(false);
+  }
+};
 
   const empleadosFiltrados = empleados.filter(e =>
     e.first_name?.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -232,7 +262,7 @@ const GestionEmpleados = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
               <thead>
                 <tr style={{ background: '#f9fafb' }}>
-                  {['ID', 'Nombre Completo', 'Email', 'Teléfono', 'Usuario', 'Estado', 'Fecha Registro', 'Acciones'].map(h => (
+                  {['ID', 'Nombre Completo', 'Email', 'Teléfono', 'Usuario', 'Estado', 'Último Acceso', 'Acciones'].map(h => (
                     <th key={h} style={{ padding: '0.9rem 1rem', textAlign: 'left', color: '#374151', fontWeight: 700, fontSize: '0.85rem', borderBottom: '2px solid #e5e7eb' }}>{h}</th>
                   ))}
                 </tr>
@@ -261,16 +291,20 @@ const GestionEmpleados = () => {
                         <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 600, background: emp.status === 'active' ? '#d1fae5' : '#fee2e2', color: emp.status === 'active' ? '#065f46' : '#991b1b' }}>
                           {emp.status === 'active' ? '✅ Activo' : '⛔ Inactivo'}
                         </span>
-                      </td>
+                        </td>
                       <td style={{ padding: '1rem', color: '#6b7280' }}>
-                        {new Date(emp.created_at).toLocaleDateString('es-MX')}
-                      </td>
+                            {emp.last_login ? new Date(emp.last_login).toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }) : 'Nunca'}
+                            </td>
                       <td style={{ padding: '1rem' }}>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           <button onClick={() => setModalEditar({ ...emp })}
                             style={{ background: '#dbeafe', color: '#1d4ed8', border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
                             ✏️ Editar
                           </button>
+                          <button onClick={() => { setModalReset(emp); setNuevaPassword(''); }}
+                            style={{ background: '#fef3c7', color: '#d97706', border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
+                            🔑 Reset
+                            </button>
                           <button onClick={() => cambiarEstado(emp.id, emp.status === 'active' ? 'inactive' : 'active')}
                             style={{ background: emp.status === 'active' ? '#fee2e2' : '#d1fae5', color: emp.status === 'active' ? '#dc2626' : '#059669', border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
                             {emp.status === 'active' ? '⛔ Inactivar' : '✅ Activar'}
