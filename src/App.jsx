@@ -28,6 +28,7 @@ import Contacto from "./pages/Contacto";
 import MensajesContacto from "./pages/MensajesContacto";
 import Inventario from "./pages/Inventario";
 import RespaldosBD from "./pages/RespaldosBD";
+import GestionEmpleados from "./pages/GestionEmpleados";
 
 
 
@@ -47,6 +48,7 @@ function App() {
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/register" element={<Register />} />
         <Route path="/admin/respaldos" element={<RespaldosBD />} />
+        <Route path="/admin/empleados" element={<GestionEmpleados />} />
         
         
         {/* Rutas protegidas */}

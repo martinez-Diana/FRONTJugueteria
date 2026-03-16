@@ -121,6 +121,7 @@ const Administrador = () => {
             <Link to="/admin/ventas">💰 Ventas</Link>
             <Link to="/admin/inventario">📋 Inventario</Link>
             <Link to="/admin/apartados">🔖 Apartados</Link>
+          <Link to="/admin/empleados">👨‍💼 Empleados</Link>
             <Link to="/admin/clientes">👥 Clientes</Link>
             <Link to="/admin/mensajes-contacto">📧 Mensajes</Link>
             <Link to="/admin/reportes">📈 Reportes</Link>
