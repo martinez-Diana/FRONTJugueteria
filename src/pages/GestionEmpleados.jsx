@@ -407,7 +407,38 @@ const [nuevaPassword, setNuevaPassword] = useState('');
           </div>
         </div>
       )}
+
+      {modalReset && (
+  <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+    <div style={{ background: 'white', borderRadius: 16, padding: '2rem', maxWidth: 400, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h2 style={{ fontWeight: 700, margin: 0, color: '#d97706' }}>🔑 Resetear Contraseña</h2>
+        <button onClick={() => setModalReset(null)} style={{ background: '#f3f4f6', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18 }}>✕</button>
+      </div>
+      <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
+        Empleado: <strong>{modalReset.first_name} {modalReset.last_name}</strong>
+      </p>
+      <form onSubmit={resetPassword}>
+        <label style={{ fontSize: '0.85rem', color: '#6b7280', display: 'block', marginBottom: 4 }}>Nueva Contraseña *</label>
+        <input type="password" value={nuevaPassword} onChange={(e) => setNuevaPassword(e.target.value)} required minLength={6}
+          placeholder="Mínimo 6 caracteres"
+          style={{ width: '100%', padding: '0.6rem', borderRadius: 8, border: '2px solid #e5e7eb', fontFamily: "'Poppins', sans-serif", marginBottom: '1.5rem', boxSizing: 'border-box' }} />
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button type="button" onClick={() => setModalReset(null)}
+            style={{ flex: 1, padding: '10px', background: 'white', border: '2px solid #e5e7eb', borderRadius: 10, fontWeight: 600, cursor: 'pointer', fontFamily: "'Poppins', sans-serif" }}>
+            Cancelar
+          </button>
+          <button type="submit" disabled={guardando}
+            style={{ flex: 1, padding: '10px', background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', borderRadius: 10, color: 'white', fontWeight: 600, cursor: 'pointer', fontFamily: "'Poppins', sans-serif" }}>
+            {guardando ? 'Guardando...' : '🔑 Actualizar'}
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
+)}
+    </div>
+    
   );
 };
 
