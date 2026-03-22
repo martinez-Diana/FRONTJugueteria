@@ -118,6 +118,7 @@ const Administrador = () => {
          }}>
           ➕ Nuevo Producto
             </Link>
+            <Link to="/admin/importar-productos">📂 Importar Productos</Link>
             <Link to="/admin/ventas">💰 Ventas</Link>
             <Link to="/admin/inventario">📋 Inventario</Link>
             <Link to="/admin/apartados">🔖 Apartados</Link>
@@ -126,6 +127,7 @@ const Administrador = () => {
             <Link to="/admin/mensajes-contacto">📧 Mensajes</Link>
             <Link to="/admin/reportes">📈 Reportes</Link>
             <Link to="/admin/respaldos">🗄️ Respaldos</Link>
+            
         </nav>
         </aside>
 
