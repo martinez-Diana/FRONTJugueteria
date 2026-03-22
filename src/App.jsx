@@ -29,6 +29,8 @@ import MensajesContacto from "./pages/MensajesContacto";
 import Inventario from "./pages/Inventario";
 import RespaldosBD from "./pages/RespaldosBD";
 import GestionEmpleados from "./pages/GestionEmpleados";
+import Reportes from "./pages/Reportes";
+import ImportarProductos from "./pages/ImportarProductos";
 
 
 
@@ -162,6 +164,24 @@ function App() {
         
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+
+        <Route 
+  path="/admin/reportes" 
+  element={
+    <ProtectedRoute allowedRoles={[1]}>
+      <Reportes />
+    </ProtectedRoute>
+  } 
+/>
+
+<Route 
+  path="/admin/importar-productos" 
+  element={
+    <ProtectedRoute allowedRoles={[1]}>
+      <ImportarProductos />
+    </ProtectedRoute>
+  } 
+/>
         
         {/* 🆕 RUTAS DE ERROR */}
         <Route path="/400" element={<BadRequest />} />
