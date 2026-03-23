@@ -31,6 +31,7 @@ import RespaldosBD from "./pages/RespaldosBD";
 import GestionEmpleados from "./pages/GestionEmpleados";
 import Reportes from "./pages/Reportes";
 import ImportarProductos from "./pages/ImportarProductos";
+import ImportarInventario from "./pages/ImportarInventario";
 
 
 
@@ -182,6 +183,15 @@ function App() {
     </ProtectedRoute>
   } 
 />
+
+
+<Route 
+path="/admin/importar-inventario" 
+element={
+  <ProtectedRoute allowedRoles={[1]}>
+    <ImportarInventario />
+  </ProtectedRoute>
+} />
         
         {/* 🆕 RUTAS DE ERROR */}
         <Route path="/400" element={<BadRequest />} />

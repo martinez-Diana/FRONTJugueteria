@@ -121,6 +121,13 @@ const Administrador = () => {
             <Link to="/admin/importar-productos">📂 Importar Productos</Link>
             <Link to="/admin/ventas">💰 Ventas</Link>
             <Link to="/admin/inventario">📋 Inventario</Link>
+            <Link to="/admin/importar-inventario" style={{ 
+            paddingLeft: '2rem', 
+            fontSize: '0.9rem',
+            color: '#6b7280' 
+          }}>
+            📦 Importar Stock
+          </Link>
             <Link to="/admin/apartados">🔖 Apartados</Link>
           <Link to="/admin/empleados">👨‍💼 Empleados</Link>
             <Link to="/admin/clientes">👥 Clientes</Link>
