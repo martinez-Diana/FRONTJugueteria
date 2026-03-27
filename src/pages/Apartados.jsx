@@ -135,7 +135,7 @@ const Apartados = () => {
         headers: { Authorization: `Bearer ${token()}` }
       });
       await cargarDatos();
-    } catch (e) {
+    } catch{
       alert("Error al cancelar");
     }
   };
@@ -144,10 +144,27 @@ const Apartados = () => {
     try {
       const res = await fetch(`${API}/apartados/${id}`, { headers: { Authorization: `Bearer ${token()}` } });
       setModalDetalle(await res.json());
-    } catch (e) {
+    } catch{
       alert("Error al cargar detalle");
     }
   };
+
+  const exportarCSV = async () => {
+  try {
+    const res = await fetch(`${API}/exportar/apartados`, {
+      headers: { Authorization: `Bearer ${token()}` }
+    });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `apartados_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch{
+    alert("Error al exportar");
+  }
+};
 
   const getEstadoStyle = (estado) => ({
     activo:    { bg: "#d1fae5", color: "#065f46", label: "✅ Activo" },
@@ -221,10 +238,16 @@ const Apartados = () => {
               <h2 style={{ fontSize: "1.8rem", fontWeight: 700, margin: 0 }}>🏷️ Gestión de Apartados</h2>
               <p style={{ color: "#6b7280", marginTop: "0.25rem" }}>Control de reservas y pagos</p>
             </div>
-            <button onClick={() => { setModalNuevo(true); cargarClientesProductos(); }}
-              style={{ background: "linear-gradient(135deg, #7e3ff2, #db2777)", border: "none", color: "white", padding: "10px 20px", borderRadius: 10, cursor: "pointer", fontWeight: 600, fontSize: 14 }}>
-              + Nuevo Apartado
-            </button>
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+  <button onClick={exportarCSV}
+    style={{ background: "linear-gradient(135deg, #10b981, #059669)", border: "none", color: "white", padding: "10px 20px", borderRadius: 10, cursor: "pointer", fontWeight: 600, fontSize: 14 }}>
+    ⬇️ Exportar CSV
+  </button>
+  <button onClick={() => { setModalNuevo(true); cargarClientesProductos(); }}
+    style={{ background: "linear-gradient(135deg, #7e3ff2, #db2777)", border: "none", color: "white", padding: "10px 20px", borderRadius: 10, cursor: "pointer", fontWeight: 600, fontSize: 14 }}>
+    + Nuevo Apartado
+  </button>
+</div>
           </div>
 
           {/* Stats */}
@@ -269,6 +292,9 @@ const Apartados = () => {
                 const progreso = Math.round((a.total_abonado / a.precio_total) * 100);
                 const estilo = getEstadoStyle(a.estado);
                 const proximoVencer = a.estado === "activo" && new Date(a.fecha_limite) - new Date() < 3 * 24 * 60 * 60 * 1000;
+
+
+                
 
                 return (
                   <div key={a.id_apartado} style={{ background: "white", borderRadius: "1rem", padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", border: proximoVencer ? "2px solid #f59e0b" : "2px solid #f3f4f6", backgroundColor: proximoVencer ? "#fffbeb" : "white" }}>
@@ -356,6 +382,7 @@ const Apartados = () => {
                           👁️ Ver Detalles
                         </button>
                       </div>
+                      
                     </div>
                   </div>
                 );
@@ -363,7 +390,10 @@ const Apartados = () => {
             </div>
           )}
         </main>
+        
       </div>
+
+      
 
       {/* Modal Nuevo Apartado */}
       {modalNuevo && (
