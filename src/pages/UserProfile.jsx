@@ -2,20 +2,17 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { isTokenExpired, clearSession } from "../utils/authUtils"
 
-const getTokenTimeRemaining = (token) => {
-  if (!token) return 0;
+const API = "https://back-jugueteria.vercel.app/api"
 
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const now = Math.floor(Date.now() / 1000);
-    return payload.exp - now;
-  } catch {
-    console.error("Token inválido");
-    return 0;
-  }
-};
+const fmt = (n) => new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(n || 0)
+const fmtDate = (d) => new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Mexico_City" })
+const fmtDateTime = (d) => new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Mexico_City" })
 
-const UserProfile = () => {
+const ROSA = "#db2777"
+const ROSA_DARK = "#be185d"
+const ROSA_LIGHT = "#fce7f3"
+
+export default function UserProfile() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("personal")
   const [isEditing, setIsEditing] = useState(false)
@@ -23,1062 +20,362 @@ const UserProfile = () => {
   const [success, setSuccess] = useState("")
   const [compras, setCompras] = useState([])
   const [loadingCompras, setLoadingCompras] = useState(false)
+  const [compraExpandida, setCompraExpandida] = useState(null)
 
-  // 👇 OBTENER DATOS DEL USUARIO DESDE LOCALSTORAGE
   const [formData, setFormData] = useState(() => {
     const userData = localStorage.getItem("user")
     if (userData) {
       const user = JSON.parse(userData)
       return {
         id: user.id,
-        firstName: user.first_name || user.name || user.nombre || "Usuario",
-        lastName: user.last_name || user.apellido || "",
+        firstName: user.first_name || user.name || "Usuario",
+        lastName: user.last_name || "",
         motherLastName: user.mother_last_name || "",
         email: user.email || "",
-        phone: user.phone || user.telefono || "",
+        phone: user.phone || "",
         birthDate: user.birth_date || "",
         username: user.username || user.email || "",
       }
     }
-    return {
-      id: null,
-      firstName: "Usuario",
-      lastName: "",
-      motherLastName: "",
-      email: "",
-      phone: "",
-      birthDate: "",
-      username: "",
-    }
+    return { id: null, firstName: "Usuario", lastName: "", motherLastName: "", email: "", phone: "", birthDate: "", username: "" }
   })
 
-  // 👇 VERIFICAR TOKEN AL CARGAR Y MONITOREAR EXPIRACIÓN
+  const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" })
+
   useEffect(() => {
-    const checkTokenExpiration = setInterval(() => {
-      const currentToken = localStorage.getItem("token")
-      
-      if (!currentToken) {
-        clearSession()
-        navigate("/login")
-        return
-      }
-
-      if (isTokenExpired(currentToken)) {
-        clearSession()
-        alert("Tu sesión ha expirado por inactividad.")
-        navigate("/login")
-        return
-      }
-
-      const timeLeft = getTokenTimeRemaining(currentToken)
-      if (timeLeft > 0 && timeLeft <= 120) {
-        const minutes = Math.floor(timeLeft / 60)
-        const seconds = Math.floor(timeLeft % 60)
-        console.warn(`⏰ Tu sesión expirará en ${minutes}:${seconds}`)
-        
-        if (timeLeft === 60) {
-          alert("⚠️ Tu sesión expirará en 1 minuto. Guarda tu trabajo.")
-        }
-      }
+    const check = setInterval(() => {
+      const token = localStorage.getItem("token")
+      if (!token || isTokenExpired(token)) { clearSession(); navigate("/login") }
     }, 10000)
-    
-    return () => clearInterval(checkTokenExpiration)
+    return () => clearInterval(check)
   }, [navigate])
 
-  // 🆕 CARGAR COMPRAS CUANDO SE SELECCIONA LA PESTAÑA
   useEffect(() => {
-    if (activeTab === "compras" && formData.id) {
-      cargarCompras()
-    }
+    if (activeTab === "compras" && formData.id) cargarCompras()
   }, [activeTab, formData.id])
 
   const cargarCompras = async () => {
-    if (!formData.id) {
-      setError("No se pudo cargar el ID del usuario")
-      return
-    }
-
     try {
       setLoadingCompras(true)
-      const response = await fetch(`http://localhost:4000/api/ventas/mis-compras/${formData.id}`)
-      const data = await response.json()
-
-      if (data.success) {
-        setCompras(data.ventas)
-      } else {
-        setError("Error al cargar historial de compras")
-      }
-    } catch (err) {
-      console.error('Error al cargar compras:', err)
-      setError("Error al cargar historial de compras")
-    } finally {
-      setLoadingCompras(false)
-    }
-  }
-
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  })
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
-  }
-
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target
-    setPasswordData({ ...passwordData, [name]: value })
+      const res = await fetch(`${API}/ventas/mis-compras/${formData.id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      })
+      const data = await res.json()
+      if (data.success) setCompras(data.ventas)
+      else setError("Error al cargar compras")
+    } catch { setError("Error al cargar compras") }
+    finally { setLoadingCompras(false) }
   }
 
   const handleSaveProfile = async (e) => {
     e.preventDefault()
-    setError("")
-    setSuccess("")
-
+    setError(""); setSuccess("")
     try {
-      const response = await fetch(`http://localhost:4000/api/clientes/${formData.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          nombre: `${formData.firstName} ${formData.lastName} ${formData.motherLastName}`.trim(),
-          email: formData.email,
-          telefono: formData.phone,
-          direccion: formData.birthDate
-        })
+      const res = await fetch(`${API}/clientes/${formData.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
+        body: JSON.stringify({ nombre: `${formData.firstName} ${formData.lastName}`.trim(), email: formData.email, telefono: formData.phone })
       })
-
-      const data = await response.json()
-
-      if (data.success) {
-        // Actualizar localStorage
-        const updatedUser = {
-          ...JSON.parse(localStorage.getItem('user')),
-          nombre: formData.firstName,
-          email: formData.email,
-          telefono: formData.phone
-        }
-        localStorage.setItem('user', JSON.stringify(updatedUser))
-        
-        setSuccess("Perfil actualizado correctamente")
-        setIsEditing(false)
-        setTimeout(() => setSuccess(""), 3000)
-      } else {
-        setError(data.message || "Error al guardar los cambios")
-      }
-    } catch (err) {
-      console.error('Error:', err)
-      setError("Error al guardar los cambios")
-    }
+      const data = await res.json()
+      if (data.success) { setSuccess("Perfil actualizado"); setIsEditing(false); setTimeout(() => setSuccess(""), 3000) }
+      else setError(data.message || "Error al guardar")
+    } catch { setError("Error al guardar") }
   }
 
   const handleChangePassword = async (e) => {
     e.preventDefault()
-    setError("")
-    setSuccess("")
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError("Las contraseñas no coinciden")
-      return
-    }
-
-    if (passwordData.newPassword.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres")
-      return
-    }
-
-    try {
-      // Aquí iría la llamada al backend para cambiar contraseña
-      setSuccess("Contraseña cambiada correctamente")
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      })
-      setTimeout(() => setSuccess(""), 3000)
-    } catch (err) {
-      setError(err.response?.data?.message || "Error al cambiar la contraseña")
-    }
+    setError(""); setSuccess("")
+    if (passwordData.newPassword !== passwordData.confirmPassword) return setError("Las contraseñas no coinciden")
+    if (passwordData.newPassword.length < 8) return setError("Mínimo 8 caracteres")
+    setSuccess("Contraseña actualizada")
+    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
+    setTimeout(() => setSuccess(""), 3000)
   }
 
-  const handleLogout = () => {
-    clearSession()
-    navigate("/login")
-  }
+  const initials = `${formData.firstName.charAt(0)}${formData.lastName.charAt(0)}`.toUpperCase()
 
-  const formatearFecha = (fecha) => {
-    return new Date(fecha).toLocaleDateString('es-MX', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
-  const formatearMoneda = (cantidad) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN'
-    }).format(cantidad)
-  }
+  const tabs = [
+    { key: "personal", icon: "👤", label: "Mi Perfil" },
+    { key: "compras", icon: "🛍️", label: "Mis Compras" },
+    { key: "security", icon: "🔒", label: "Seguridad" },
+  ]
 
   return (
-    <>
-      <style>{`
-        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
-        
-        body {
-          margin: 0;
-          font-family: "Poppins", sans-serif;
-          background: #fef5fb;
-        }
-
-        .profile-container {
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-          min-height: 100vh;
-          padding: 40px 20px;
-          background: #fef5fb;
-        }
-
-        .profile-wrapper {
-          width: 100%;
-          max-width: 1200px;
-        }
-
-        .profile-header {
-          display: flex;
-          align-items: center;
-          gap: 30px;
-          background: white;
-          padding: 40px;
-          border-radius: 16px;
-          box-shadow: 0 10px 40px rgba(139, 92, 246, 0.08);
-          margin-bottom: 30px;
-        }
-
-        .profile-avatar {
-          position: relative;
-          width: 150px;
-          height: 150px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #ec4899, #f472b6);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 60px;
-          color: white;
-          flex-shrink: 0;
-          box-shadow: 0 5px 20px rgba(236, 72, 153, 0.3);
-        }
-
-        .profile-info h1 {
-          font-size: 28px;
-          font-weight: 700;
-          color: #333;
-          margin: 0;
-        }
-
-        .profile-info p {
-          color: #666;
-          font-size: 14px;
-          margin: 5px 0 0 0;
-        }
-
-        .profile-email {
-          font-weight: 500;
-          color: #ec4899;
-          margin-top: 8px;
-        }
-
-        .profile-stats {
-          display: flex;
-          gap: 30px;
-          margin-top: 20px;
-        }
-
-        .stat-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .stat-number {
-          font-size: 24px;
-          font-weight: 700;
-          color: #ec4899;
-        }
-
-        .stat-label {
-          font-size: 12px;
-          color: #999;
-          margin-top: 5px;
-        }
-
-        .profile-content {
-          background: white;
-          border-radius: 16px;
-          box-shadow: 0 10px 40px rgba(139, 92, 246, 0.08);
-          overflow: hidden;
-        }
-
-        .tabs {
-          display: flex;
-          border-bottom: 2px solid #f0f0f0;
-          background: #fafafa;
-        }
-
-        .tab {
-          flex: 1;
-          padding: 20px;
-          text-align: center;
-          font-weight: 600;
-          cursor: pointer;
-          color: #999;
-          border-bottom: 3px solid transparent;
-          transition: all 0.3s ease;
-          font-size: 15px;
-        }
-
-        .tab.active {
-          color: #ec4899;
-          border-bottom-color: #ec4899;
-          background: white;
-        }
-
-        .tab:hover {
-          color: #db2777;
-        }
-
-        .tab-content {
-          display: none;
-          padding: 40px;
-        }
-
-        .tab-content.active {
-          display: block;
-        }
-
-        .section {
-          margin-bottom: 30px;
-        }
-
-        .section-title {
-          font-size: 16px;
-          font-weight: 700;
-          color: #333;
-          margin-bottom: 15px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .form-row {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 15px;
-          margin-bottom: 15px;
-        }
-
-        .form-row.full {
-          grid-template-columns: 1fr;
-        }
-
-        .form-group {
-          display: flex;
-          flex-direction: column;
-        }
-
-        label {
-          font-weight: 500;
-          margin-bottom: 6px;
-          color: #333;
-          font-size: 13px;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="date"],
-        input[type="tel"] {
-          padding: 10px 12px;
-          border: 1px solid #ddd;
-          border-radius: 6px;
-          font-size: 13px;
-          outline: none;
-          font-family: "Poppins", sans-serif;
-          transition: all 0.3s ease;
-        }
-
-        input:focus {
-          border-color: #c084fc;
-          box-shadow: 0 0 6px rgba(192, 132, 252, 0.25);
-        }
-
-        input:disabled {
-          background: #f5f5f5;
-          color: #999;
-          cursor: not-allowed;
-        }
-
-        .button-group {
-          display: flex;
-          gap: 10px;
-          margin-top: 20px;
-        }
-
-        .btn {
-          padding: 11px 20px;
-          border: none;
-          border-radius: 6px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          font-size: 14px;
-          font-family: "Poppins", sans-serif;
-        }
-
-        .btn-primary {
-          background: #ec4899;
-          color: white;
-          flex: 1;
-          box-shadow: 0 3px 12px rgba(236, 72, 153, 0.25);
-        }
-
-        .btn-primary:hover {
-          background: #db2777;
-          box-shadow: 0 5px 16px rgba(219, 39, 119, 0.3);
-          transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-          background: #f0f0f0;
-          color: #333;
-          flex: 1;
-        }
-
-        .btn-secondary:hover {
-          background: #e0e0e0;
-        }
-
-        .btn-outline {
-          background: transparent;
-          color: #ec4899;
-          border: 1px solid #ec4899;
-          flex: 1;
-        }
-
-        .btn-outline:hover {
-          background: #fce4ec;
-        }
-
-        .message {
-          padding: 12px;
-          border-radius: 6px;
-          margin-bottom: 15px;
-          font-size: 13px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .message.error {
-          background: #fef2f2;
-          color: #dc2626;
-          border-left: 4px solid #ef4444;
-        }
-
-        .message.success {
-          background: #ecfdf5;
-          color: #059669;
-          border-left: 4px solid #10b981;
-        }
-
-        .password-strength {
-          margin-top: 8px;
-          padding: 8px;
-          background: #f9fafb;
-          border-radius: 6px;
-          border-left: 3px solid #e5e7eb;
-        }
-
-        .requirement {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 11px;
-          margin: 3px 0;
-        }
-
-        .requirement.met {
-          color: #10b981;
-        }
-
-        .requirement.unmet {
-          color: #9ca3af;
-        }
-
-        .action-buttons {
-          display: flex;
-          gap: 15px;
-          padding: 20px 40px;
-          border-top: 1px solid #f0f0f0;
-          justify-content: flex-end;
-        }
-
-        .edit-btn {
-          background: #ec4899;
-          color: white;
-          padding: 10px 25px;
-          border: none;
-          border-radius: 6px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          font-size: 14px;
-          box-shadow: 0 3px 12px rgba(236, 72, 153, 0.25);
-        }
-
-        .edit-btn:hover {
-          background: #db2777;
-          transform: translateY(-2px);
-        }
-
-        .logout-btn {
-          background: #f0f0f0;
-          color: #333;
-          padding: 10px 25px;
-          border: none;
-          border-radius: 6px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          font-size: 14px;
-        }
-
-        .logout-btn:hover {
-          background: #e0e0e0;
-        }
-
-        /* 🆕 ESTILOS PARA HISTORIAL DE COMPRAS */
-        .compras-loading {
-          text-align: center;
-          padding: 3rem;
-          color: #666;
-        }
-
-        .spinner-compras {
-          width: 40px;
-          height: 40px;
-          border: 4px solid #f0f0f0;
-          border-top-color: #ec4899;
-          border-radius: 50%;
-          margin: 0 auto 1rem;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-
-        .compras-empty {
-          text-align: center;
-          padding: 3rem;
-        }
-
-        .compras-empty-icon {
-          font-size: 4rem;
-          margin-bottom: 1rem;
-        }
-
-        .compras-lista {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-        }
-
-        .compra-card {
-          background: #f8f9fa;
-          border-radius: 12px;
-          padding: 1.5rem;
-          border-left: 4px solid #ec4899;
-        }
-
-        .compra-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1rem;
-          padding-bottom: 1rem;
-          border-bottom: 2px solid #e0e0e0;
-        }
-
-        .compra-header h4 {
-          margin: 0 0 0.3rem 0;
-          font-size: 1.1rem;
-          color: #333;
-        }
-
-        .compra-fecha {
-          font-size: 0.85rem;
-          color: #999;
-        }
-
-        .compra-total {
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: #ec4899;
-        }
-
-        .compra-productos {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .producto-item {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          background: white;
-          padding: 1rem;
-          border-radius: 8px;
-        }
-
-        .producto-img {
-          width: 60px;
-          height: 60px;
-          flex-shrink: 0;
-        }
-
-        .producto-img img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          border-radius: 6px;
-        }
-
-        .producto-placeholder {
-          width: 60px;
-          height: 60px;
-          background: #f0f0f0;
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.5rem;
-        }
-
-        .producto-info {
-          flex: 1;
-        }
-
-        .producto-info h5 {
-          margin: 0 0 0.3rem 0;
-          font-size: 1rem;
-          color: #333;
-        }
-
-        .producto-info p {
-          margin: 0;
-          font-size: 0.85rem;
-          color: #666;
-        }
-
-        .producto-subtotal {
-          font-weight: 700;
-          color: #333;
-          font-size: 1.1rem;
-        }
-
-        .compra-footer {
-          display: flex;
-          justify-content: space-between;
-          padding-top: 1rem;
-          margin-top: 1rem;
-          border-top: 2px solid #e0e0e0;
-          font-size: 0.9rem;
-          color: #666;
-        }
-
-        @media (max-width: 768px) {
-          .profile-header {
-            flex-direction: column;
-            text-align: center;
-            padding: 30px 20px;
-          }
-
-          .profile-info h1 {
-            font-size: 22px;
-          }
-
-          .profile-stats {
-            justify-content: center;
-          }
-
-          .form-row {
-            grid-template-columns: 1fr;
-          }
-
-          .action-buttons {
-            flex-direction: column;
-            padding: 15px 20px;
-          }
-
-          .edit-btn,
-          .logout-btn {
-            width: 100%;
-          }
-
-          .tab-content {
-            padding: 20px;
-          }
-
-          .compra-header {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-
-          .producto-item {
-            flex-direction: column;
-            text-align: center;
-          }
-        }
-      `}</style>
-      <div className="profile-container">
-        <div className="profile-wrapper">
-          {/* Header del Perfil */}
-          <div className="profile-header">
-            <div className="profile-avatar">
-              {formData.firstName.charAt(0).toUpperCase()}
-              {formData.lastName.charAt(0).toUpperCase()}
-            </div>
-            <div className="profile-info">
-              <h1>
-                {formData.firstName} {formData.lastName}
-              </h1>
-              <p className="profile-email">{formData.email}</p>
-              <p>@{formData.username}</p>
-              <div className="profile-stats">
-                <div className="stat-item">
-                  <div className="stat-number">{compras.length}</div>
-                  <div className="stat-label">Compras</div>
-                </div>
-                <div className="stat-item">
-                  <div className="stat-number">4.8</div>
-                  <div className="stat-label">Calificación</div>
-                </div>
-                <div className="stat-item">
-                  <div className="stat-number">12</div>
-                  <div className="stat-label">Favoritos</div>
-                </div>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fff1f2 100%)", fontFamily: "'Poppins', sans-serif", padding: "24px 16px" }}>
+
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+
+        {/* Botón volver */}
+        <button onClick={() => navigate("/home")} style={{ background: "white", border: `2px solid ${ROSA_LIGHT}`, color: ROSA, borderRadius: 10, padding: "8px 16px", fontWeight: 600, cursor: "pointer", fontSize: 13, marginBottom: 20, display: "flex", alignItems: "center", gap: 6 }}>
+          ← Volver al inicio
+        </button>
+
+        {/* Header compacto */}
+        <div style={{ background: "white", borderRadius: 20, padding: "24px 28px", marginBottom: 16, boxShadow: "0 4px 24px rgba(219,39,119,.08)", display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+          <div style={{ width: 72, height: 72, borderRadius: "50%", background: `linear-gradient(135deg, ${ROSA}, #f472b6)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, fontWeight: 700, color: "white", flexShrink: 0, boxShadow: `0 4px 16px rgba(219,39,119,.3)` }}>
+            {initials}
+          </div>
+          <div style={{ flex: 1 }}>
+            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#1e1b4b" }}>{formData.firstName} {formData.lastName}</h1>
+            <p style={{ margin: "2px 0 0", fontSize: 13, color: "#9ca3af" }}>{formData.email}</p>
+          </div>
+          <div style={{ display: "flex", gap: 20 }}>
+            {[
+              { n: compras.length, label: "Compras" },
+              { n: "⭐ 4.8", label: "Rating" },
+            ].map((s, i) => (
+              <div key={i} style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: ROSA }}>{s.n}</div>
+                <div style={{ fontSize: 11, color: "#9ca3af" }}>{s.label}</div>
               </div>
-            </div>
+            ))}
+          </div>
+          <button onClick={() => { clearSession(); navigate("/login") }} style={{ background: "#fee2e2", border: "none", color: "#dc2626", borderRadius: 10, padding: "8px 14px", fontWeight: 600, cursor: "pointer", fontSize: 12 }}>
+            🚪 Salir
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ background: "white", borderRadius: 20, boxShadow: "0 4px 24px rgba(219,39,119,.08)", overflow: "hidden" }}>
+          <div style={{ display: "flex", borderBottom: "1.5px solid #f3f4f6" }}>
+            {tabs.map(t => (
+              <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
+                flex: 1, padding: "16px 8px", border: "none", background: "none", cursor: "pointer",
+                fontFamily: "'Poppins', sans-serif", fontSize: 13, fontWeight: 600,
+                color: activeTab === t.key ? ROSA : "#9ca3af",
+                borderBottom: activeTab === t.key ? `2.5px solid ${ROSA}` : "2.5px solid transparent",
+                transition: "all .2s", display: "flex", alignItems: "center", justifyContent: "center", gap: 6
+              }}>
+                {t.icon} {t.label}
+              </button>
+            ))}
           </div>
 
-          {/* Contenido del Perfil */}
-          <div className="profile-content">
-            <div className="tabs">
-              <button
-                className={`tab ${activeTab === "personal" ? "active" : ""}`}
-                onClick={() => setActiveTab("personal")}
-              >
-                Información Personal
-              </button>
-              <button
-                className={`tab ${activeTab === "compras" ? "active" : ""}`}
-                onClick={() => setActiveTab("compras")}
-              >
-                Mis Compras
-              </button>
-              <button
-                className={`tab ${activeTab === "security" ? "active" : ""}`}
-                onClick={() => setActiveTab("security")}
-              >
-                Seguridad
-              </button>
-            </div>
+          <div style={{ padding: "28px 28px" }}>
 
-            {/* Pestaña: Información Personal */}
-            <div className={`tab-content ${activeTab === "personal" ? "active" : ""}`}>
-              {error && <div className="message error">❌ {error}</div>}
-              {success && <div className="message success">✅ {success}</div>}
+            {/* ─── PESTAÑA PERSONAL ─── */}
+            {activeTab === "personal" && (
+              <div>
+                {error && <div style={{ background: "#fef2f2", color: "#dc2626", borderLeft: `4px solid #ef4444`, padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 13 }}>❌ {error}</div>}
+                {success && <div style={{ background: "#ecfdf5", color: "#059669", borderLeft: `4px solid #10b981`, padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 13 }}>✅ {success}</div>}
 
-              {!isEditing ? (
-                <div>
-                  <div className="section">
-                    <div className="section-title">👤 Datos Personales</div>
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Nombre</label>
-                        <input type="text" value={formData.firstName} disabled />
-                      </div>
-                      <div className="form-group">
-                        <label>Apellido Paterno</label>
-                        <input type="text" value={formData.lastName} disabled />
-                      </div>
+                {!isEditing ? (
+                  <>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14, marginBottom: 20 }}>
+                      {[
+                        { icon: "👤", label: "Nombre", val: formData.firstName },
+                        { icon: "👤", label: "Apellido Paterno", val: formData.lastName },
+                        { icon: "👤", label: "Apellido Materno", val: formData.motherLastName || "—" },
+                        { icon: "📧", label: "Correo", val: formData.email },
+                        { icon: "📱", label: "Teléfono", val: formData.phone || "—" },
+                        { icon: "🎂", label: "Nacimiento", val: formData.birthDate || "—" },
+                        { icon: "🔑", label: "Usuario", val: formData.username },
+                      ].map((f, i) => (
+                        <div key={i} style={{ background: "#fafafa", borderRadius: 12, padding: "14px 16px", border: "1.5px solid #f3f4f6" }}>
+                          <div style={{ fontSize: 11, color: "#9ca3af", marginBottom: 4 }}>{f.icon} {f.label}</div>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: "#374151" }}>{f.val}</div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="form-row full">
-                      <div className="form-group">
-                        <label>Apellido Materno</label>
-                        <input type="text" value={formData.motherLastName} disabled />
-                      </div>
+                    <button onClick={() => setIsEditing(true)} style={{ background: `linear-gradient(135deg, ${ROSA}, ${ROSA_DARK})`, color: "white", border: "none", borderRadius: 10, padding: "10px 22px", fontWeight: 600, cursor: "pointer", fontSize: 13 }}>
+                      ✏️ Editar Perfil
+                    </button>
+                  </>
+                ) : (
+                  <form onSubmit={handleSaveProfile}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+                      {[
+                        { label: "Nombre", name: "firstName", val: formData.firstName },
+                        { label: "Apellido Paterno", name: "lastName", val: formData.lastName },
+                        { label: "Apellido Materno", name: "motherLastName", val: formData.motherLastName },
+                        { label: "Teléfono", name: "phone", val: formData.phone },
+                      ].map((f, i) => (
+                        <div key={i}>
+                          <label style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", display: "block", marginBottom: 4 }}>{f.label}</label>
+                          <input value={f.val} name={f.name} onChange={e => setFormData({ ...formData, [f.name]: e.target.value })}
+                            style={{ width: "100%", padding: "9px 12px", border: `1.5px solid #e5e7eb`, borderRadius: 8, fontSize: 13, fontFamily: "'Poppins', sans-serif", outline: "none", boxSizing: "border-box" }} />
+                        </div>
+                      ))}
                     </div>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <button type="button" onClick={() => { setIsEditing(false); setError("") }} style={{ flex: 1, padding: "10px", background: "#f3f4f6", border: "none", borderRadius: 10, fontWeight: 600, cursor: "pointer", fontSize: 13 }}>Cancelar</button>
+                      <button type="submit" style={{ flex: 1, padding: "10px", background: `linear-gradient(135deg, ${ROSA}, ${ROSA_DARK})`, color: "white", border: "none", borderRadius: 10, fontWeight: 600, cursor: "pointer", fontSize: 13 }}>Guardar</button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
+
+            {/* ─── PESTAÑA COMPRAS ─── */}
+            {activeTab === "compras" && (
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1e1b4b" }}>🛍️ Mis Compras</h3>
+                    <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9ca3af" }}>{compras.length} pedido{compras.length !== 1 ? "s" : ""} realizados</p>
                   </div>
-
-                  <div className="section">
-                    <div className="section-title">📧 Contacto</div>
-                    <div className="form-row full">
-                      <div className="form-group">
-                        <label>Correo Electrónico</label>
-                        <input type="email" value={formData.email} disabled />
-                      </div>
+                  {compras.length > 0 && (
+                    <div style={{ background: ROSA_LIGHT, borderRadius: 10, padding: "8px 14px", textAlign: "center" }}>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: ROSA }}>{fmt(compras.reduce((s, c) => s + (c.total || 0), 0))}</div>
+                      <div style={{ fontSize: 11, color: "#9ca3af" }}>Total gastado</div>
                     </div>
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Teléfono</label>
-                        <input type="tel" value={formData.phone} disabled />
-                      </div>
-                      <div className="form-group">
-                        <label>Fecha de Nacimiento</label>
-                        <input type="date" value={formData.birthDate} disabled />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="section">
-                    <div className="section-title">👤 Usuario</div>
-                    <div className="form-row full">
-                      <div className="form-group">
-                        <label>Nombre de Usuario</label>
-                        <input type="text" value={formData.username} disabled />
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
-              ) : (
-                <form onSubmit={handleSaveProfile}>
-                  <div className="section">
-                    <div className="section-title">👤 Datos Personales</div>
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Nombre</label>
-                        <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} />
-                      </div>
-                      <div className="form-group">
-                        <label>Apellido Paterno</label>
-                        <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} />
-                      </div>
-                    </div>
-                    <div className="form-row full">
-                      <div className="form-group">
-                        <label>Apellido Materno</label>
-                        <input
-                          type="text"
-                          name="motherLastName"
-                          value={formData.motherLastName}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="section">
-                    <div className="section-title">📧 Contacto</div>
-                    <div className="form-row full">
-                      <div className="form-group">
-                        <label>Correo Electrónico</label>
-                        <input type="email" name="email" value={formData.email} onChange={handleInputChange} />
-                      </div>
-                    </div>
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Teléfono</label>
-                        <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} />
-                      </div>
-                      <div className="form-group">
-                        <label>Fecha de Nacimiento</label>
-                        <input type="date" name="birthDate" value={formData.birthDate} onChange={handleInputChange} />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="button-group">
-                    <button
-                      type="button"
-                      className="btn btn-outline"
-                      onClick={() => {
-                        setIsEditing(false)
-                        setError("")
-                        setSuccess("")
-                      }}
-                    >
-                      Cancelar
-                    </button>
-                    <button type="submit" className="btn btn-primary">
-                      Guardar Cambios
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-
-            {/* 🆕 Pestaña: Mis Compras */}
-            <div className={`tab-content ${activeTab === "compras" ? "active" : ""}`}>
-              <div className="section">
-                <div className="section-title">🛍️ Historial de Compras</div>
-                
                 {loadingCompras ? (
-                  <div className="compras-loading">
-                    <div className="spinner-compras"></div>
-                    <p>Cargando compras...</p>
+                  <div style={{ textAlign: "center", padding: "3rem", color: "#9ca3af" }}>
+                    <div style={{ width: 40, height: 40, border: "4px solid #f3f4f6", borderTop: `4px solid ${ROSA}`, borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 12px" }}></div>
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                    <p style={{ margin: 0, fontSize: 13 }}>Cargando compras...</p>
                   </div>
                 ) : compras.length === 0 ? (
-                  <div className="compras-empty">
-                    <div className="compras-empty-icon">🛍️</div>
-                    <h3>No tienes compras aún</h3>
-                    <p>Explora nuestro catálogo y realiza tu primera compra</p>
-                    <button className="btn btn-primary" onClick={() => navigate('/home')}>
+                  <div style={{ textAlign: "center", padding: "3rem" }}>
+                    <div style={{ fontSize: 56, marginBottom: 12 }}>🛍️</div>
+                    <h3 style={{ margin: "0 0 8px", color: "#374151" }}>Aún no tienes compras</h3>
+                    <p style={{ color: "#9ca3af", fontSize: 13, margin: "0 0 16px" }}>Explora el catálogo y encuentra algo que te guste</p>
+                    <button onClick={() => navigate("/home")} style={{ background: `linear-gradient(135deg, ${ROSA}, ${ROSA_DARK})`, color: "white", border: "none", borderRadius: 10, padding: "10px 22px", fontWeight: 600, cursor: "pointer", fontSize: 13 }}>
                       Ver Productos
                     </button>
                   </div>
                 ) : (
-                  <div className="compras-lista">
-                    {compras.map((compra) => (
-                      <div key={compra.id} className="compra-card">
-                        <div className="compra-header">
-                          <div>
-                            <h4>Folio: {compra.folio}</h4>
-                            <p className="compra-fecha">{formatearFecha(compra.fecha_venta)}</p>
-                          </div>
-                          <div className="compra-total">
-                            {formatearMoneda(compra.total)}
-                          </div>
-                        </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                    {compras.map((compra) => {
+                      const expandida = compraExpandida === compra.id_venta
+                      return (
+                        <div key={compra.id_venta} style={{ border: `1.5px solid ${expandida ? ROSA : "#f3f4f6"}`, borderRadius: 14, overflow: "hidden", transition: "border .2s", background: "white" }}>
+                          {/* Header de la compra */}
+                          <div onClick={() => setCompraExpandida(expandida ? null : compra.id_venta)}
+                            style={{ padding: "16px 20px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+                            
+                            {/* Icono estado */}
+                            <div style={{ width: 44, height: 44, borderRadius: 12, background: ROSA_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
+                              ✅
+                            </div>
 
-                        <div className="compra-productos">
-                          {compra.productos.map((prod) => (
-                            <div key={prod.id} className="producto-item">
-                              <div className="producto-img">
-                                {prod.producto_imagen ? (
-                                  <img src={prod.producto_imagen} alt={prod.producto_nombre} />
-                                ) : (
-                                  <div className="producto-placeholder">📦</div>
+                            {/* Info principal */}
+                            <div style={{ flex: 1, minWidth: 120 }}>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: "#1e1b4b" }}>{compra.folio}</div>
+                              <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>{fmtDateTime(compra.fecha_venta)}</div>
+                            </div>
+
+                            {/* Productos preview */}
+                            <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                              {(compra.productos || []).slice(0, 3).map((p, i) => (
+                                <div key={i} style={{ width: 36, height: 36, borderRadius: 8, background: "#f9fafb", border: "1.5px solid #f3f4f6", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  {p.producto_imagen ? (
+                                    <img src={p.producto_imagen.split(",")[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} />
+                                  ) : <span style={{ fontSize: 16 }}>📦</span>}
+                                </div>
+                              ))}
+                              {(compra.productos || []).length > 3 && (
+                                <div style={{ width: 36, height: 36, borderRadius: 8, background: ROSA_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: ROSA }}>
+                                  +{compra.productos.length - 3}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Total y método */}
+                            <div style={{ textAlign: "right", flexShrink: 0 }}>
+                              <div style={{ fontSize: 16, fontWeight: 700, color: ROSA }}>{fmt(compra.total)}</div>
+                              <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>💳 {compra.metodo_pago}</div>
+                            </div>
+
+                            {/* Flecha */}
+                            <div style={{ fontSize: 14, color: "#9ca3af", transition: "transform .2s", transform: expandida ? "rotate(180deg)" : "rotate(0)" }}>▼</div>
+                          </div>
+
+                          {/* Detalle expandible */}
+                          {expandida && (
+                            <div style={{ borderTop: `1.5px solid #f3f4f6`, padding: "16px 20px", background: "#fafafa" }}>
+                              <div style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", marginBottom: 10 }}>PRODUCTOS</div>
+                              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                {(compra.productos || []).map((p, i) => (
+                                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, background: "white", borderRadius: 10, padding: "10px 14px", border: "1.5px solid #f3f4f6" }}>
+                                    <div style={{ width: 48, height: 48, borderRadius: 8, background: "#f9fafb", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                      {p.producto_imagen ? (
+                                        <img src={p.producto_imagen.split(",")[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} />
+                                      ) : <span style={{ fontSize: 20 }}>📦</span>}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                      <div style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{p.nombre_producto || p.producto_nombre}</div>
+                                      <div style={{ fontSize: 11, color: "#9ca3af" }}>{p.cantidad} unidad{p.cantidad !== 1 ? "es" : ""} × {fmt(p.precio_unitario)}</div>
+                                    </div>
+                                    <div style={{ fontSize: 14, fontWeight: 700, color: "#374151" }}>{fmt(p.subtotal)}</div>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Resumen */}
+                              <div style={{ marginTop: 14, padding: "12px 14px", background: "white", borderRadius: 10, border: "1.5px solid #f3f4f6" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#9ca3af", marginBottom: 6 }}>
+                                  <span>Subtotal</span><span>{fmt(compra.subtotal || compra.total)}</span>
+                                </div>
+                                {compra.descuento > 0 && (
+                                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#10b981", marginBottom: 6 }}>
+                                    <span>🎁 Descuento</span><span>-{fmt(compra.descuento)}</span>
+                                  </div>
                                 )}
-                              </div>
-                              <div className="producto-info">
-                                <h5>{prod.producto_nombre}</h5>
-                                <p>{prod.cantidad} x {formatearMoneda(prod.precio_unitario)}</p>
-                              </div>
-                              <div className="producto-subtotal">
-                                {formatearMoneda(prod.subtotal)}
+                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 700, color: "#1e1b4b", borderTop: "1.5px solid #f3f4f6", paddingTop: 8 }}>
+                                  <span>Total</span><span style={{ color: ROSA }}>{fmt(compra.total)}</span>
+                                </div>
                               </div>
                             </div>
-                          ))}
-                        </div>
-
-                        <div className="compra-footer">
-                          <div>💳 {compra.metodo_pago.toUpperCase()}</div>
-                          {compra.descuento > 0 && (
-                            <div>🎁 Descuento: {formatearMoneda(compra.descuento)}</div>
                           )}
                         </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
               </div>
-            </div>
+            )}
 
-            {/* Pestaña: Seguridad */}
-            <div className={`tab-content ${activeTab === "security" ? "active" : ""}`}>
-              {error && <div className="message error">❌ {error}</div>}
-              {success && <div className="message success">✅ {success}</div>}
+            {/* ─── PESTAÑA SEGURIDAD ─── */}
+            {activeTab === "security" && (
+              <div>
+                {error && <div style={{ background: "#fef2f2", color: "#dc2626", borderLeft: "4px solid #ef4444", padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 13 }}>❌ {error}</div>}
+                {success && <div style={{ background: "#ecfdf5", color: "#059669", borderLeft: "4px solid #10b981", padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 13 }}>✅ {success}</div>}
 
-              <form onSubmit={handleChangePassword}>
-                <div className="section">
-                  <div className="section-title">🔒 Cambiar Contraseña</div>
-                  <div className="form-row full">
-                    <div className="form-group">
-                      <label>Contraseña Actual</label>
-                      <input
-                        type="password"
-                        name="currentPassword"
-                        value={passwordData.currentPassword}
-                        onChange={handlePasswordChange}
-                        placeholder="Ingresa tu contraseña actual"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="form-row full">
-                    <div className="form-group">
-                      <label>Nueva Contraseña</label>
-                      <input
-                        type="password"
-                        name="newPassword"
-                        value={passwordData.newPassword}
-                        onChange={handlePasswordChange}
-                        placeholder="Ingresa tu nueva contraseña"
-                        required
-                      />
-                      <div className="password-strength">
-                        <div className={`requirement ${passwordData.newPassword.length >= 8 ? "met" : "unmet"}`}>
-                          {passwordData.newPassword.length >= 8 ? "✓" : "○"} Mínimo 8 caracteres
-                        </div>
-                        <div className={`requirement ${/[A-Z]/.test(passwordData.newPassword) ? "met" : "unmet"}`}>
-                          {/[A-Z]/.test(passwordData.newPassword) ? "✓" : "○"} Una letra mayúscula
-                        </div>
-                        <div className={`requirement ${/\d/.test(passwordData.newPassword) ? "met" : "unmet"}`}>
-                          {/\d/.test(passwordData.newPassword) ? "✓" : "○"} Un número
-                        </div>
+                <form onSubmit={handleChangePassword}>
+                  <h3 style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "#1e1b4b" }}>🔒 Cambiar Contraseña</h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 420 }}>
+                    {[
+                      { label: "Contraseña actual", name: "currentPassword", val: passwordData.currentPassword },
+                      { label: "Nueva contraseña", name: "newPassword", val: passwordData.newPassword },
+                      { label: "Confirmar contraseña", name: "confirmPassword", val: passwordData.confirmPassword },
+                    ].map((f, i) => (
+                      <div key={i}>
+                        <label style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", display: "block", marginBottom: 4 }}>{f.label}</label>
+                        <input type="password" value={f.val} name={f.name}
+                          onChange={e => setPasswordData({ ...passwordData, [f.name]: e.target.value })}
+                          style={{ width: "100%", padding: "9px 12px", border: "1.5px solid #e5e7eb", borderRadius: 8, fontSize: 13, fontFamily: "'Poppins', sans-serif", outline: "none", boxSizing: "border-box" }} />
                       </div>
-                    </div>
-                  </div>
-                  <div className="form-row full">
-                    <div className="form-group">
-                      <label>Confirmar Nueva Contraseña</label>
-                      <input
-                        type="password"
-                        name="confirmPassword"
-                        value={passwordData.confirmPassword}
-                        onChange={handlePasswordChange}
-                        placeholder="Confirma tu nueva contraseña"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="button-group">
-                    <button type="submit" className="btn btn-primary">
+                    ))}
+
+                    {passwordData.newPassword && (
+                      <div style={{ background: "#f9fafb", borderRadius: 8, padding: "10px 12px", fontSize: 11 }}>
+                        {[
+                          { ok: passwordData.newPassword.length >= 8, label: "Mínimo 8 caracteres" },
+                          { ok: /[A-Z]/.test(passwordData.newPassword), label: "Una mayúscula" },
+                          { ok: /\d/.test(passwordData.newPassword), label: "Un número" },
+                        ].map((r, i) => (
+                          <div key={i} style={{ color: r.ok ? "#10b981" : "#9ca3af", marginBottom: 3 }}>
+                            {r.ok ? "✓" : "○"} {r.label}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <button type="submit" style={{ padding: "10px", background: `linear-gradient(135deg, ${ROSA}, ${ROSA_DARK})`, color: "white", border: "none", borderRadius: 10, fontWeight: 600, cursor: "pointer", fontSize: 13, fontFamily: "'Poppins', sans-serif" }}>
                       Actualizar Contraseña
                     </button>
                   </div>
-                </div>
-              </form>
-            </div>
+                </form>
+              </div>
+            )}
 
-            {/* Botones de Acción */}
-            <div className="action-buttons">
-              {!isEditing && activeTab === "personal" && (
-                <button className="edit-btn" onClick={() => setIsEditing(true)}>
-                  ✏️ Editar Perfil
-                </button>
-              )}
-              <button className="logout-btn" onClick={handleLogout}>
-                🚪 Cerrar Sesión
-              </button>
-            </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
-
-export default UserProfile
