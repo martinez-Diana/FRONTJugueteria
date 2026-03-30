@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ModalExportar from '../components/ModalExportar';
 
 const API = "https://back-jugueteria.vercel.app/api";
 
@@ -25,7 +26,14 @@ const Apartados = () => {
   const [productos, setProductos] = useState([]);
   const [guardando, setGuardando] = useState(false);
   const [exito, setExito] = useState("");
-
+  const [modalExportar, setModalExportar] = useState(false);
+ const [exportExito, setExportExito] = useState("");
+{exportExito && (
+  <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", background: "white", border: "3px solid #10b981", borderRadius: 16, padding: "32px 48px", textAlign: "center", zIndex: 9999, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+    <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
+    <p style={{ fontSize: 20, fontWeight: 700, color: "#1f2937", margin: 0 }}>{exportExito}</p>
+  </div>
+)}
   const [nuevoApartado, setNuevoApartado] = useState({
     id_usuario: "", id_producto: "", anticipo: "",
     fecha_limite: "", notas: ""
@@ -149,22 +157,7 @@ const Apartados = () => {
     }
   };
 
-  const exportarCSV = async () => {
-  try {
-    const res = await fetch(`${API}/exportar/apartados`, {
-      headers: { Authorization: `Bearer ${token()}` }
-    });
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `apartados_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  } catch{
-    alert("Error al exportar");
-  }
-};
+  
 
   const getEstadoStyle = (estado) => ({
     activo:    { bg: "#d1fae5", color: "#065f46", label: "✅ Activo" },
@@ -239,7 +232,7 @@ const Apartados = () => {
               <p style={{ color: "#6b7280", marginTop: "0.25rem" }}>Control de reservas y pagos</p>
             </div>
             <div style={{ display: "flex", gap: "0.75rem" }}>
-  <button onClick={exportarCSV}
+  <button onClick={() => setModalExportar(true)}
     style={{ background: "linear-gradient(135deg, #10b981, #059669)", border: "none", color: "white", padding: "10px 20px", borderRadius: 10, cursor: "pointer", fontWeight: 600, fontSize: 14 }}>
     ⬇️ Exportar CSV
   </button>
@@ -566,6 +559,36 @@ const Apartados = () => {
           </div>
         </div>
       )}
+
+      {modalExportar && (
+  <ModalExportar
+    titulo="Exportar Apartados"
+    plantillas={[
+      { label: "📋 Completo", cols: { "ID": true, "Cliente": true, "Email": true, "Producto": true, "SKU": true, "Precio Total": true, "Anticipo": true, "Total Abonado": true, "Saldo Pendiente": true, "Estado": true, "Fecha Apartado": true, "Fecha Limite": true, "Notas": true }},
+      { label: "💰 Financiero", cols: { "ID": true, "Cliente": true, "Producto": true, "Precio Total": true, "Anticipo": true, "Total Abonado": true, "Saldo Pendiente": true, "Estado": true, "Email": false, "SKU": false, "Fecha Apartado": false, "Fecha Limite": false, "Notas": false }},
+      { label: "⏳ Pendientes", cols: { "ID": true, "Cliente": true, "Producto": true, "Saldo Pendiente": true, "Fecha Limite": true, "Estado": true, "Email": false, "SKU": false, "Precio Total": false, "Anticipo": false, "Total Abonado": false, "Notas": false }},
+    ]}
+    columnasIniciales={{ "ID": true, "Cliente": true, "Producto": true, "Precio Total": true, "Total Abonado": true, "Saldo Pendiente": true, "Estado": true, "Email": false, "SKU": false, "Anticipo": false, "Fecha Apartado": true, "Fecha Limite": true, "Notas": false }}
+    onExportar={async (cols) => {
+      const params = new URLSearchParams();
+      params.append("columnas", cols.join(','));
+      const response = await fetch(`${API}/exportar/apartados?${params}`, {
+        headers: { Authorization: `Bearer ${token()}` }
+      });
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `apartados_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setModalExportar(false);
+      setExportExito("¡Exportación exitosa!");
+      setTimeout(() => setExportExito(""), 4000);
+    }}
+    onCerrar={() => setModalExportar(false)}
+  />
+)}
     </div>
   );
 };
