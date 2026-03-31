@@ -50,22 +50,33 @@ export default function UserProfile() {
     return () => clearInterval(check)
   }, [navigate])
 
-  useEffect(() => {
-    if (activeTab === "compras" && formData.id) cargarCompras()
-  }, [activeTab, formData.id])
+const userId = formData.id
 
-  const cargarCompras = async () => {
+useEffect(() => {
+  const cargarPerfil = async () => {
+    if (!userId) return
     try {
-      setLoadingCompras(true)
-      const res = await fetch(`${API}/ventas/mis-compras/${formData.id}`, {
+      const res = await fetch(`${API}/clientes/${userId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       })
       const data = await res.json()
-      if (data.success) setCompras(data.ventas)
-      else setError("Error al cargar compras")
-    } catch { setError("Error al cargar compras") }
-    finally { setLoadingCompras(false) }
+      if (data && data.id) {
+        setFormData(prev => ({
+          ...prev,
+          firstName: data.first_name || prev.firstName,
+          lastName: data.last_name || prev.lastName,
+          motherLastName: data.mother_lastname || prev.motherLastName,
+          phone: data.phone || prev.phone,
+          birthDate: data.birthdate || prev.birthDate,
+          username: data.username || prev.username,
+        }))
+      }
+    } catch (e) {
+      console.error("Error al cargar perfil:", e)
+    }
   }
+  cargarPerfil()
+}, [userId])
 
   const handleSaveProfile = async (e) => {
     e.preventDefault()
