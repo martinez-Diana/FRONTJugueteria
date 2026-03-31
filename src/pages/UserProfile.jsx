@@ -67,7 +67,7 @@ useEffect(() => {
           lastName: data.last_name || prev.lastName,
           motherLastName: data.mother_lastname || prev.motherLastName,
           phone: data.phone || prev.phone,
-          birthDate: data.birthdate || prev.birthDate,
+          birthDate: data.birthdate || data.birth_date || "",
           username: data.username || prev.username,
         }))
       }
