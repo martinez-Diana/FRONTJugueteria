@@ -179,7 +179,7 @@ useEffect(() => {
                         { icon: "👤", label: "Apellido Materno", val: formData.motherLastName || "—" },
                         { icon: "📧", label: "Correo", val: formData.email },
                         { icon: "📱", label: "Teléfono", val: formData.phone || "—" },
-                        { icon: "🎂", label: "Nacimiento", val: formData.birthDate || "—" },
+                       { icon: "🎂", label: "Nacimiento", val: formData.birthDate ? new Date(formData.birthDate).toLocaleDateString("es-MX", { day: "2-digit", month: "long", year: "numeric" }) : "—" },
                         { icon: "🔑", label: "Usuario", val: formData.username },
                       ].map((f, i) => (
                         <div key={i} style={{ background: "#fafafa", borderRadius: 12, padding: "14px 16px", border: "1.5px solid #f3f4f6" }}>
