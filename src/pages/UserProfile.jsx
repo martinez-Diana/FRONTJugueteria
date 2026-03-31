@@ -77,7 +77,7 @@ export default function UserProfile() {
         body: JSON.stringify({ nombre: `${formData.firstName} ${formData.lastName}`.trim(), email: formData.email, telefono: formData.phone })
       })
       const data = await res.json()
-      if (data.success) { setSuccess("Perfil actualizado"); setIsEditing(false); setTimeout(() => setSuccess(""), 3000) }
+      if (data.message === "Cliente actualizado correctamente" || data.success) { setSuccess("Perfil actualizado"); setIsEditing(false); setTimeout(() => setSuccess(""), 3000) }
       else setError(data.message || "Error al guardar")
     } catch { setError("Error al guardar") }
   }
