@@ -78,6 +78,24 @@ useEffect(() => {
   cargarPerfil()
 }, [userId])
 
+const cargarCompras = async () => {
+  if (!userId) return
+  try {
+    setLoadingCompras(true)
+    const res = await fetch(`${API}/ventas/mis-compras/${userId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    })
+    const data = await res.json()
+    if (data.success) setCompras(data.ventas)
+    else setError("Error al cargar compras")
+  } catch { setError("Error al cargar compras") }
+  finally { setLoadingCompras(false) }
+}
+
+useEffect(() => {
+  if (activeTab === "compras" && userId) cargarCompras()
+}, [activeTab, userId])
+
   const handleSaveProfile = async (e) => {
     e.preventDefault()
     setError(""); setSuccess("")
