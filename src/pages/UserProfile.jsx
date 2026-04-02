@@ -245,7 +245,7 @@ useEffect(() => {
                   </div>
                   {compras.length > 0 && (
                     <div style={{ background: ROSA_LIGHT, borderRadius: 10, padding: "8px 14px", textAlign: "center" }}>
-                      <div style={{ fontSize: 16, fontWeight: 700, color: ROSA }}>{fmt(compras.reduce((s, c) => s + (c.total || 0), 0))}</div>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: ROSA }}>{fmt(compras.reduce((s, c) => s + (parseFloat(c.total) || 0), 0))}</div>
                       <div style={{ fontSize: 11, color: "#9ca3af" }}>Total gastado</div>
                     </div>
                   )}
