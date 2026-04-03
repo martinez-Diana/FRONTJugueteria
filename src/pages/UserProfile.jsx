@@ -112,14 +112,26 @@ useEffect(() => {
   }
 
   const handleChangePassword = async (e) => {
-    e.preventDefault()
-    setError(""); setSuccess("")
-    if (passwordData.newPassword !== passwordData.confirmPassword) return setError("Las contraseñas no coinciden")
-    if (passwordData.newPassword.length < 8) return setError("Mínimo 8 caracteres")
-    setSuccess("Contraseña actualizada")
-    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-    setTimeout(() => setSuccess(""), 3000)
-  }
+  e.preventDefault()
+  setError(""); setSuccess("")
+  if (passwordData.newPassword !== passwordData.confirmPassword) return setError("Las contraseñas no coinciden")
+  if (passwordData.newPassword.length < 8) return setError("Mínimo 8 caracteres")
+  try {
+    const res = await fetch(`${API}/auth/change-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
+      body: JSON.stringify({ userId: formData.id, currentPassword: passwordData.currentPassword, newPassword: passwordData.newPassword })
+    })
+    const data = await res.json()
+    if (data.success) {
+      setSuccess("Contraseña actualizada correctamente ✅")
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
+      setTimeout(() => setSuccess(""), 3000)
+    } else {
+      setError(data.error || "Error al cambiar contraseña")
+    }
+  } catch { setError("Error al conectar con el servidor") }
+}
 
   const initials = `${formData.firstName.charAt(0)}${formData.lastName.charAt(0)}`.toUpperCase()
 
