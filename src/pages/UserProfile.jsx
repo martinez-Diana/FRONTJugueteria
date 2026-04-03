@@ -5,7 +5,6 @@ import { isTokenExpired, clearSession } from "../utils/authUtils"
 const API = "https://back-jugueteria.vercel.app/api"
 
 const fmt = (n) => new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(n || 0)
-const fmtDate = (d) => new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Mexico_City" })
 const fmtDateTime = (d) => new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Mexico_City" })
 
 const ROSA = "#db2777"
@@ -21,6 +20,7 @@ export default function UserProfile() {
   const [compras, setCompras] = useState([])
   const [loadingCompras, setLoadingCompras] = useState(false)
   const [compraExpandida, setCompraExpandida] = useState(null)
+  const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false })
 
   const [formData, setFormData] = useState(() => {
     const userData = localStorage.getItem("user")
@@ -33,7 +33,7 @@ export default function UserProfile() {
         motherLastName: user.mother_last_name || "",
         email: user.email || "",
         phone: user.phone || "",
-        birthDate: user.birth_date || "",
+        birthDate: user.birthdate || user.birth_date || "",
         username: user.username || user.email || "",
       }
     }
@@ -50,51 +50,53 @@ export default function UserProfile() {
     return () => clearInterval(check)
   }, [navigate])
 
-const userId = formData.id
+  const userId = formData.id
 
-useEffect(() => {
-  const cargarPerfil = async () => {
+  // Cargar perfil fresco del backend
+  useEffect(() => {
+    const cargarPerfil = async () => {
+      if (!userId) return
+      try {
+        const res = await fetch(`${API}/clientes/${userId}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        })
+        const data = await res.json()
+        if (data && data.id) {
+          setFormData(prev => ({
+            ...prev,
+            firstName: data.first_name || prev.firstName,
+            lastName: data.last_name || prev.lastName,
+            motherLastName: data.mother_lastname || prev.motherLastName,
+            phone: data.phone || prev.phone,
+            birthDate: data.birthdate ? new Date(data.birthdate).toISOString().split("T")[0] : prev.birthDate,
+            username: data.username || prev.username,
+          }))
+        }
+      } catch (e) {
+        console.error("Error al cargar perfil:", e)
+      }
+    }
+    cargarPerfil()
+  }, [userId])
+
+  // Cargar compras cuando se activa la pestaña
+  const cargarCompras = async () => {
     if (!userId) return
     try {
-      const res = await fetch(`${API}/clientes/${userId}`, {
+      setLoadingCompras(true)
+      const res = await fetch(`${API}/ventas/mis-compras/${userId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       })
       const data = await res.json()
-      if (data && data.id) {
-        setFormData(prev => ({
-          ...prev,
-          firstName: data.first_name || prev.firstName,
-          lastName: data.last_name || prev.lastName,
-          motherLastName: data.mother_lastname || prev.motherLastName,
-          phone: data.phone || prev.phone,
-          birthDate: data.birthdate || data.birth_date || "",
-          username: data.username || prev.username,
-        }))
-      }
-    } catch (e) {
-      console.error("Error al cargar perfil:", e)
-    }
+      if (data.success) setCompras(data.ventas)
+      else setError("Error al cargar compras")
+    } catch { setError("Error al cargar compras") }
+    finally { setLoadingCompras(false) }
   }
-  cargarPerfil()
-}, [userId])
 
-const cargarCompras = async () => {
-  if (!userId) return
-  try {
-    setLoadingCompras(true)
-    const res = await fetch(`${API}/ventas/mis-compras/${userId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-    })
-    const data = await res.json()
-    if (data.success) setCompras(data.ventas)
-    else setError("Error al cargar compras")
-  } catch { setError("Error al cargar compras") }
-  finally { setLoadingCompras(false) }
-}
-
-useEffect(() => {
-  if (activeTab === "compras" && userId) cargarCompras()
-}, [activeTab, userId])
+  useEffect(() => {
+    if (activeTab === "compras" && userId) cargarCompras()
+  }, [activeTab, userId])
 
   const handleSaveProfile = async (e) => {
     e.preventDefault()
@@ -106,32 +108,33 @@ useEffect(() => {
         body: JSON.stringify({ nombre: `${formData.firstName} ${formData.lastName}`.trim(), email: formData.email, telefono: formData.phone })
       })
       const data = await res.json()
-      if (data.message === "Cliente actualizado correctamente" || data.success) { setSuccess("Perfil actualizado"); setIsEditing(false); setTimeout(() => setSuccess(""), 3000) }
-      else setError(data.message || "Error al guardar")
+      if (data.message === "Cliente actualizado correctamente" || data.success) {
+        setSuccess("Perfil actualizado correctamente ✅")
+        setIsEditing(false)
+        setTimeout(() => setSuccess(""), 3000)
+      } else setError(data.message || "Error al guardar")
     } catch { setError("Error al guardar") }
   }
 
   const handleChangePassword = async (e) => {
-  e.preventDefault()
-  setError(""); setSuccess("")
-  if (passwordData.newPassword !== passwordData.confirmPassword) return setError("Las contraseñas no coinciden")
-  if (passwordData.newPassword.length < 8) return setError("Mínimo 8 caracteres")
-  try {
-    const res = await fetch(`${API}/auth/change-password`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
-      body: JSON.stringify({ userId: formData.id, currentPassword: passwordData.currentPassword, newPassword: passwordData.newPassword })
-    })
-    const data = await res.json()
-    if (data.success) {
-      setSuccess("Contraseña actualizada correctamente ✅")
-      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-      setTimeout(() => setSuccess(""), 3000)
-    } else {
-      setError(data.error || "Error al cambiar contraseña")
-    }
-  } catch { setError("Error al conectar con el servidor") }
-}
+    e.preventDefault()
+    setError(""); setSuccess("")
+    if (passwordData.newPassword !== passwordData.confirmPassword) return setError("Las contraseñas no coinciden")
+    if (passwordData.newPassword.length < 8) return setError("Mínimo 8 caracteres")
+    try {
+      const res = await fetch(`${API}/auth/change-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
+        body: JSON.stringify({ userId: formData.id, currentPassword: passwordData.currentPassword, newPassword: passwordData.newPassword })
+      })
+      const data = await res.json()
+      if (data.success) {
+        setSuccess("Contraseña actualizada correctamente ✅")
+        setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
+        setTimeout(() => setSuccess(""), 3000)
+      } else setError(data.error || "Error al cambiar contraseña")
+    } catch { setError("Error al conectar con el servidor") }
+  }
 
   const initials = `${formData.firstName.charAt(0)}${formData.lastName.charAt(0)}`.toUpperCase()
 
@@ -143,7 +146,6 @@ useEffect(() => {
 
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fff1f2 100%)", fontFamily: "'Poppins', sans-serif", padding: "24px 16px" }}>
-
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
         {/* Botón volver */}
@@ -151,7 +153,7 @@ useEffect(() => {
           ← Volver al inicio
         </button>
 
-        {/* Header compacto */}
+        {/* Header */}
         <div style={{ background: "white", borderRadius: 20, padding: "24px 28px", marginBottom: 16, boxShadow: "0 4px 24px rgba(219,39,119,.08)", display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
           <div style={{ width: 72, height: 72, borderRadius: "50%", background: `linear-gradient(135deg, ${ROSA}, #f472b6)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, fontWeight: 700, color: "white", flexShrink: 0, boxShadow: `0 4px 16px rgba(219,39,119,.3)` }}>
             {initials}
@@ -194,7 +196,7 @@ useEffect(() => {
 
           <div style={{ padding: "28px 28px" }}>
 
-            {/* ─── PESTAÑA PERSONAL ─── */}
+            {/* ─── MI PERFIL ─── */}
             {activeTab === "personal" && (
               <div>
                 {error && <div style={{ background: "#fef2f2", color: "#dc2626", borderLeft: `4px solid #ef4444`, padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 13 }}>❌ {error}</div>}
@@ -209,7 +211,7 @@ useEffect(() => {
                         { icon: "👤", label: "Apellido Materno", val: formData.motherLastName || "—" },
                         { icon: "📧", label: "Correo", val: formData.email },
                         { icon: "📱", label: "Teléfono", val: formData.phone || "—" },
-                       { icon: "🎂", label: "Nacimiento", val: formData.birthDate ? new Date(formData.birthDate).toLocaleDateString("es-MX", { day: "2-digit", month: "long", year: "numeric" }) : "—" },
+                        { icon: "🎂", label: "Nacimiento", val: formData.birthDate ? new Date(formData.birthDate).toLocaleDateString("es-MX", { day: "2-digit", month: "long", year: "numeric" }) : "—" },
                         { icon: "🔑", label: "Usuario", val: formData.username },
                       ].map((f, i) => (
                         <div key={i} style={{ background: "#fafafa", borderRadius: 12, padding: "14px 16px", border: "1.5px solid #f3f4f6" }}>
@@ -247,7 +249,7 @@ useEffect(() => {
               </div>
             )}
 
-            {/* ─── PESTAÑA COMPRAS ─── */}
+            {/* ─── MIS COMPRAS ─── */}
             {activeTab === "compras" && (
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
@@ -284,28 +286,17 @@ useEffect(() => {
                       const expandida = compraExpandida === compra.id_venta
                       return (
                         <div key={compra.id_venta} style={{ border: `1.5px solid ${expandida ? ROSA : "#f3f4f6"}`, borderRadius: 14, overflow: "hidden", transition: "border .2s", background: "white" }}>
-                          {/* Header de la compra */}
                           <div onClick={() => setCompraExpandida(expandida ? null : compra.id_venta)}
                             style={{ padding: "16px 20px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-                            
-                            {/* Icono estado */}
-                            <div style={{ width: 44, height: 44, borderRadius: 12, background: ROSA_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
-                              ✅
-                            </div>
-
-                            {/* Info principal */}
+                            <div style={{ width: 44, height: 44, borderRadius: 12, background: ROSA_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>✅</div>
                             <div style={{ flex: 1, minWidth: 120 }}>
                               <div style={{ fontSize: 13, fontWeight: 700, color: "#1e1b4b" }}>{compra.folio}</div>
                               <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>{fmtDateTime(compra.fecha_venta)}</div>
                             </div>
-
-                            {/* Productos preview */}
                             <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                               {(compra.productos || []).slice(0, 3).map((p, i) => (
                                 <div key={i} style={{ width: 36, height: 36, borderRadius: 8, background: "#f9fafb", border: "1.5px solid #f3f4f6", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  {p.producto_imagen ? (
-                                    <img src={p.producto_imagen.split(",")[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} />
-                                  ) : <span style={{ fontSize: 16 }}>📦</span>}
+                                  {p.producto_imagen ? <img src={p.producto_imagen.split(",")[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} /> : <span style={{ fontSize: 16 }}>📦</span>}
                                 </div>
                               ))}
                               {(compra.productos || []).length > 3 && (
@@ -314,18 +305,13 @@ useEffect(() => {
                                 </div>
                               )}
                             </div>
-
-                            {/* Total y método */}
                             <div style={{ textAlign: "right", flexShrink: 0 }}>
                               <div style={{ fontSize: 16, fontWeight: 700, color: ROSA }}>{fmt(compra.total)}</div>
                               <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>💳 {compra.metodo_pago}</div>
                             </div>
-
-                            {/* Flecha */}
                             <div style={{ fontSize: 14, color: "#9ca3af", transition: "transform .2s", transform: expandida ? "rotate(180deg)" : "rotate(0)" }}>▼</div>
                           </div>
 
-                          {/* Detalle expandible */}
                           {expandida && (
                             <div style={{ borderTop: `1.5px solid #f3f4f6`, padding: "16px 20px", background: "#fafafa" }}>
                               <div style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", marginBottom: 10 }}>PRODUCTOS</div>
@@ -333,9 +319,7 @@ useEffect(() => {
                                 {(compra.productos || []).map((p, i) => (
                                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, background: "white", borderRadius: 10, padding: "10px 14px", border: "1.5px solid #f3f4f6" }}>
                                     <div style={{ width: 48, height: 48, borderRadius: 8, background: "#f9fafb", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                      {p.producto_imagen ? (
-                                        <img src={p.producto_imagen.split(",")[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} />
-                                      ) : <span style={{ fontSize: 20 }}>📦</span>}
+                                      {p.producto_imagen ? <img src={p.producto_imagen.split(",")[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => e.target.style.display = "none"} /> : <span style={{ fontSize: 20 }}>📦</span>}
                                     </div>
                                     <div style={{ flex: 1 }}>
                                       <div style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{p.nombre_producto || p.producto_nombre}</div>
@@ -345,8 +329,6 @@ useEffect(() => {
                                   </div>
                                 ))}
                               </div>
-
-                              {/* Resumen */}
                               <div style={{ marginTop: 14, padding: "12px 14px", background: "white", borderRadius: 10, border: "1.5px solid #f3f4f6" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#9ca3af", marginBottom: 6 }}>
                                   <span>Subtotal</span><span>{fmt(compra.subtotal || compra.total)}</span>
@@ -370,7 +352,7 @@ useEffect(() => {
               </div>
             )}
 
-            {/* ─── PESTAÑA SEGURIDAD ─── */}
+            {/* ─── SEGURIDAD ─── */}
             {activeTab === "security" && (
               <div>
                 {error && <div style={{ background: "#fef2f2", color: "#dc2626", borderLeft: "4px solid #ef4444", padding: "10px 14px", borderRadius: 8, marginBottom: 16, fontSize: 13 }}>❌ {error}</div>}
@@ -379,16 +361,30 @@ useEffect(() => {
                 <form onSubmit={handleChangePassword}>
                   <h3 style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "#1e1b4b" }}>🔒 Cambiar Contraseña</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 420 }}>
+
                     {[
-                      { label: "Contraseña actual", name: "currentPassword", val: passwordData.currentPassword },
-                      { label: "Nueva contraseña", name: "newPassword", val: passwordData.newPassword },
-                      { label: "Confirmar contraseña", name: "confirmPassword", val: passwordData.confirmPassword },
+                      { label: "Contraseña actual", name: "currentPassword", val: passwordData.currentPassword, showKey: "current" },
+                      { label: "Nueva contraseña", name: "newPassword", val: passwordData.newPassword, showKey: "new" },
+                      { label: "Confirmar contraseña", name: "confirmPassword", val: passwordData.confirmPassword, showKey: "confirm" },
                     ].map((f, i) => (
                       <div key={i}>
                         <label style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", display: "block", marginBottom: 4 }}>{f.label}</label>
-                        <input type="password" value={f.val} name={f.name}
-                          onChange={e => setPasswordData({ ...passwordData, [f.name]: e.target.value })}
-                          style={{ width: "100%", padding: "9px 12px", border: "1.5px solid #e5e7eb", borderRadius: 8, fontSize: 13, fontFamily: "'Poppins', sans-serif", outline: "none", boxSizing: "border-box" }} />
+                        <div style={{ position: "relative" }}>
+                          <input
+                            type={showPasswords[f.showKey] ? "text" : "password"}
+                            value={f.val}
+                            name={f.name}
+                            onChange={e => setPasswordData({ ...passwordData, [f.name]: e.target.value })}
+                            style={{ width: "100%", padding: "9px 40px 9px 12px", border: "1.5px solid #e5e7eb", borderRadius: 8, fontSize: 13, fontFamily: "'Poppins', sans-serif", outline: "none", boxSizing: "border-box" }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPasswords(prev => ({ ...prev, [f.showKey]: !prev[f.showKey] }))}
+                            style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "#9ca3af" }}
+                          >
+                            {showPasswords[f.showKey] ? "🙈" : "👁️"}
+                          </button>
+                        </div>
                       </div>
                     ))}
 
