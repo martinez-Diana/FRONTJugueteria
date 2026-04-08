@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import "./Home.css";
 import logoImg from "../assets/logo.png";
 import productosService from "../services/productosService";
+import SeccionOfertas from './SeccionOfertas';
 
 const Home = () => {
   const navigate = useNavigate(); 
@@ -556,6 +557,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <SeccionOfertas onAddToCart={addToCart} />
 
       {/* Categories */}
       <section className="categories" id="categorias">
