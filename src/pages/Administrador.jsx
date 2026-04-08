@@ -129,6 +129,7 @@ const Administrador = () => {
             📦 Importar Stock
           </Link>
             <Link to="/admin/apartados">🔖 Apartados</Link>
+            <Link to="/admin/ofertas">🏷️ Ofertas</Link>
           <Link to="/admin/empleados">👨‍💼 Empleados</Link>
             <Link to="/admin/clientes">👥 Clientes</Link>
             <Link to="/admin/mensajes-contacto">📧 Mensajes</Link>

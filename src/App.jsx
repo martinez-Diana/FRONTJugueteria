@@ -32,6 +32,7 @@ import GestionEmpleados from "./pages/GestionEmpleados";
 import Reportes from "./pages/Reportes";
 import ImportarProductos from "./pages/ImportarProductos";
 import ImportarInventario from "./pages/ImportarInventario";
+import GestionOfertas from "./pages/GestionOfertas";
 
 
 
@@ -192,6 +193,16 @@ element={
     <ImportarInventario />
   </ProtectedRoute>
 } />
+
+
+<Route 
+  path="/admin/ofertas" 
+  element={
+    <ProtectedRoute allowedRoles={[1]}>
+      <GestionOfertas />
+    </ProtectedRoute>
+  } 
+/>
         
         {/* 🆕 RUTAS DE ERROR */}
         <Route path="/400" element={<BadRequest />} />
