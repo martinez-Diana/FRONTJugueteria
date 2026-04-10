@@ -67,7 +67,7 @@ const RespaldosBD = () => {
       const data = await response.json();
       setConfig(data);
       setConfigLocal({
-        activo: data.activo,
+        activo: data.activo === 1 || data.activo === true,
         modo: data.modo || 'completo',
         tablas: data.tablas ? JSON.parse(data.tablas) : TODAS_LAS_TABLAS.map(t => t.key)
       });
