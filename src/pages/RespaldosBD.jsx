@@ -65,14 +65,15 @@ const RespaldosBD = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
+      console.log('Config recibida:', data);
       setConfig(data);
       setConfigLocal({
         activo: data.activo === 1 || data.activo === true,
         modo: data.modo || 'completo',
         tablas: data.tablas ? JSON.parse(data.tablas) : TODAS_LAS_TABLAS.map(t => t.key)
       });
-    } catch {
-      console.error('Error al cargar configuración');
+    } catch (error){
+      console.error('Error al cargar configuración', error);
     }
   };
 
