@@ -70,7 +70,9 @@ const RespaldosBD = () => {
       setConfigLocal({
         activo: data.activo === 1 || data.activo === true,
         modo: data.modo || 'completo',
-        tablas: data.tablas ? JSON.parse(data.tablas) : TODAS_LAS_TABLAS.map(t => t.key)
+        tablas: data.tablas 
+        ? (typeof data.tablas === 'string' ? JSON.parse(data.tablas) : data.tablas)
+        : TODAS_LAS_TABLAS.map(t => t.key)
       });
     } catch (error){
       console.error('Error al cargar configuración', error);
