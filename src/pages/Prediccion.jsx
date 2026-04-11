@@ -344,7 +344,7 @@ const Prediccion = () => {
 
             {/* Info box */}
             <div className="info-box">
-              📐 El modelo calcula <strong>P(t) = P₀ · e^(kt)</strong> con los últimos 2 meses de ventas reales.
+              📐 El modelo calcula <strong></strong> con los últimos 2 meses de ventas reales.
               Las proyecciones corresponden a los 3 picos estacionales:
               <strong> Día del Niño (Abril)</strong>, <strong>Graduaciones (Junio)</strong> y <strong>Navidad (Diciembre)</strong>.
             </div>

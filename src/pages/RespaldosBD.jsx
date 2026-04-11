@@ -409,7 +409,7 @@ const RespaldosBD = () => {
               </div>
 
               <p style={{ color: "#6b7280", fontSize: "0.85rem", marginBottom: "1rem" }}>
-                Se ejecuta automáticamente <strong>cada 6 horas</strong>. Configura qué incluir:
+                Se ejecuta automáticamente <strong>cada 24 horas</strong>. Configura qué incluir:
               </p>
 
               {/* Modo */}
