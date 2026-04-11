@@ -135,6 +135,7 @@ const Administrador = () => {
             <Link to="/admin/mensajes-contacto">📧 Mensajes</Link>
             <Link to="/admin/reportes">📈 Reportes</Link>
             <Link to="/admin/respaldos">🗄️ Respaldos</Link>
+            <Link to="/admin/prediccion">🔮 Predicción de Stock</Link>
             
         </nav>
         </aside>

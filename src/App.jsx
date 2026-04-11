@@ -33,6 +33,7 @@ import Reportes from "./pages/Reportes";
 import ImportarProductos from "./pages/ImportarProductos";
 import ImportarInventario from "./pages/ImportarInventario";
 import GestionOfertas from "./pages/GestionOfertas";
+import Prediccion from "./pages/Prediccion";
 
 
 
@@ -203,6 +204,12 @@ element={
     </ProtectedRoute>
   } 
 />
+
+<Route path="/admin/prediccion" element={
+  <ProtectedRoute allowedRoles={[1]}>
+    <Prediccion />
+  </ProtectedRoute>
+} />
         
         {/* 🆕 RUTAS DE ERROR */}
         <Route path="/400" element={<BadRequest />} />
