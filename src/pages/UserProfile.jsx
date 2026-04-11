@@ -31,6 +31,32 @@ export default function UserProfile() {
   const [montoAbono, setMontoAbono] = useState("")
   const [notasAbono, setNotasAbono] = useState("")
   const [guardandoAbono, setGuardandoAbono] = useState(false)
+  const [deseos, setDeseos] = useState([])
+const [loadingDeseos, setLoadingDeseos] = useState(false)
+
+// 👇 LUEGO las funciones
+const cargarDeseos = async () => {
+  if (!userId) return
+  try {
+    setLoadingDeseos(true)
+    const res = await fetch(`${API}/lista-deseos/${userId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    })
+    const data = await res.json()
+    if (data.success) setDeseos(data.deseos)
+  } catch (e) { console.error(e) }
+  finally { setLoadingDeseos(false) }
+}
+
+const quitarDeseo = async (idProducto) => {
+  try {
+    await fetch(`${API}/lista-deseos/${userId}/${idProducto}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    })
+    setDeseos(prev => prev.filter(d => d.id_producto !== idProducto))
+  } catch (e) { console.error(e) }
+}
 
   const [formData, setFormData] = useState(() => {
     const userData = localStorage.getItem("user")
@@ -114,9 +140,10 @@ export default function UserProfile() {
   }
 
   useEffect(() => {
-    if (activeTab === "compras" && userId) cargarCompras()
-    if (activeTab === "apartados" && userId) cargarApartados()
-  }, [activeTab, userId])
+  if (activeTab === "compras" && userId) cargarCompras()
+  if (activeTab === "apartados" && userId) cargarApartados()
+  if (activeTab === "favoritos" && userId) cargarDeseos()
+}, [activeTab, userId])
 
   const handleSaveProfile = async (e) => {
     e.preventDefault()
@@ -191,11 +218,12 @@ export default function UserProfile() {
   const initials = `${formData.firstName.charAt(0)}${formData.lastName.charAt(0)}`.toUpperCase()
 
   const tabs = [
-    { key: "personal",   icon: "👤", label: "Mi Perfil" },
-    { key: "compras",    icon: "🛍️", label: "Mis Compras" },
-    { key: "apartados",  icon: "🏷️", label: "Mis Apartados" },
-    { key: "security",   icon: "🔒", label: "Seguridad" },
-  ]
+  { key: "personal",   icon: "👤", label: "Mi Perfil" },
+  { key: "compras",    icon: "🛍️", label: "Mis Compras" },
+  { key: "apartados",  icon: "🏷️", label: "Mis Apartados" },
+  { key: "favoritos",  icon: "❤️", label: "Mis Favoritos" },
+  { key: "security",   icon: "🔒", label: "Seguridad" },
+]
 
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fff1f2 100%)", fontFamily: "'Poppins', sans-serif", padding: "24px 16px" }}>
@@ -500,6 +528,52 @@ export default function UserProfile() {
                 )}
               </div>
             )}
+
+
+            {/* ─── MIS FAVORITOS ─── */}
+{activeTab === "favoritos" && (
+  <div>
+    <div style={{ marginBottom: 20 }}>
+      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1e1b4b" }}>❤️ Mis Favoritos</h3>
+      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9ca3af" }}>{deseos.length} producto{deseos.length !== 1 ? "s" : ""} guardados</p>
+    </div>
+    {loadingDeseos ? (
+      <div style={{ textAlign: "center", padding: "3rem", color: "#9ca3af" }}>
+        <div style={{ width: 40, height: 40, border: "4px solid #f3f4f6", borderTop: `4px solid ${ROSA}`, borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 12px" }}></div>
+        <p style={{ margin: 0, fontSize: 13 }}>Cargando favoritos...</p>
+      </div>
+    ) : deseos.length === 0 ? (
+      <div style={{ textAlign: "center", padding: "3rem" }}>
+        <div style={{ fontSize: 56, marginBottom: 12 }}>🤍</div>
+        <h3 style={{ margin: "0 0 8px", color: "#374151" }}>No tienes favoritos</h3>
+        <p style={{ color: "#9ca3af", fontSize: 13, margin: "0 0 16px" }}>Agrega productos a tu lista de deseos desde el catálogo</p>
+        <button onClick={() => navigate("/home")} style={{ background: `linear-gradient(135deg, ${ROSA}, ${ROSA_DARK})`, color: "white", border: "none", borderRadius: 10, padding: "10px 22px", fontWeight: 600, cursor: "pointer", fontSize: 13 }}>Ver Productos</button>
+      </div>
+    ) : (
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
+        {deseos.map((d) => (
+          <div key={d.id_producto} style={{ background: "#fafafa", borderRadius: 14, overflow: "hidden", border: "1.5px solid #f3f4f6" }}>
+            <div style={{ height: 140, background: ROSA_LIGHT, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+              {d.imagen ? (
+                <img src={d.imagen.split(",")[0]} alt={d.nombre} style={{ width: "100%", height: "100%", objectFit: "contain" }} onError={(e) => e.target.style.display = "none"} />
+              ) : (
+                <span style={{ fontSize: 40 }}>🧸</span>
+              )}
+            </div>
+            <div style={{ padding: "12px 14px" }}>
+              <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "#1e1b4b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{d.nombre}</p>
+              <p style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: ROSA }}>{fmt(d.precio)}</p>
+              <button onClick={() => quitarDeseo(d.id_producto)}
+                style={{ width: "100%", padding: "7px", background: "#fee2e2", border: "none", borderRadius: 8, color: "#dc2626", fontWeight: 600, cursor: "pointer", fontSize: 12 }}>
+                💔 Quitar de favoritos
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
             {/* ─── SEGURIDAD ─── */}
             {activeTab === "security" && (

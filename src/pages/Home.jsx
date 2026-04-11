@@ -22,6 +22,7 @@ const Home = () => {
   const agesRef = useRef(null);
   const brandsRef = useRef(null);
   const [user, setUser] = useState(null);
+  const [favoritos, setFavoritos] = useState([]);
 
   // 🆕 Estados para productos reales
   const [productos, setProductos] = useState([]);
@@ -133,6 +134,20 @@ const Home = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+  const cargarFavoritos = async () => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch(`https://back-jugueteria.vercel.app/api/lista-deseos/${user.id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await res.json();
+      if (data.success) setFavoritos(data.deseos.map(d => d.id_producto));
+    } catch (e) { console.error(e); }
+  };
+  cargarFavoritos();
+}, [user]);
 
   // Cerrar dropdowns al hacer clic fuera
   useEffect(() => {
@@ -340,7 +355,29 @@ const Home = () => {
     document.body.style.overflow = 'auto';
   };
 
+
+  const toggleFavorito = async (e, producto) => {
+  e.stopPropagation();
+  if (!user) { alert('⚠️ Debes iniciar sesión para guardar favoritos'); navigate('/login'); return; }
+  const esFav = favoritos.includes(producto.id);
+  if (esFav) {
+    await fetch(`https://back-jugueteria.vercel.app/api/lista-deseos/${user.id}/${producto.id}`, {
+      method: 'DELETE', headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    setFavoritos(prev => prev.filter(id => id !== producto.id));
+  } else {
+    await fetch(`https://back-jugueteria.vercel.app/api/lista-deseos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+      body: JSON.stringify({ id_usuario: user.id, id_producto: producto.id })
+    });
+    setFavoritos(prev => [...prev, producto.id]);
+  }
+};
+
   const productosAMostrar = searchResults !== null ? searchResults : productos;
+
+
 
   return (
     <div>
@@ -730,41 +767,54 @@ const Home = () => {
         ) : productosAMostrar.length > 0 ? (
           <div className="products-grid">
             {productosAMostrar.map((producto) => (
-              <div className="product-card" key={producto.id} onClick={() => handleProductClick(producto)}>
-                <div className="product-image">
-                  {producto.imagen ? (
-                    <img 
-                      src={producto.imagen} 
-                      alt={producto.titulo} 
-                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                      onError={(e) => { 
-                        e.target.style.display = 'none';
-                        e.target.parentElement.innerHTML = '<span style="font-size:3rem">🧸</span>';
-                      }}
-                    />
-                  ) : (
-                    <span style={{ fontSize: '3rem' }}>🧸</span>
-                  )}
-                </div>
-                <div className="product-info">
-                  <h3>{producto.titulo}</h3>
-                  <p>{producto.descripcion}</p>
-                  <div className="product-footer">
-                    <span className="product-price">${producto.precio.toLocaleString('es-MX')}</span>
-                    <button 
-                      className="btn-add-cart"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addToCart(producto);
-                      }}
-                    >
-                      {user ? 'Agregar' : '🔒 Iniciar Sesión'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+              <div className="product-card" key={producto.id} onClick={() => handleProductClick(producto)} style={{ position: 'relative' }}>
+        <button
+          onClick={(e) => toggleFavorito(e, producto)}
+          style={{
+            position: 'absolute', top: '8px', right: '8px',
+            background: 'white', border: 'none', borderRadius: '50%',
+            width: '32px', height: '32px', cursor: 'pointer',
+            fontSize: '18px', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            zIndex: 10
+          }}
+        >
+          {favoritos.includes(producto.id) ? '❤️' : '🤍'}
+        </button>
+        <div className="product-image">
+          {producto.imagen ? (
+            <img 
+              src={producto.imagen} 
+              alt={producto.titulo} 
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              onError={(e) => { 
+                e.target.style.display = 'none';
+                e.target.parentElement.innerHTML = '<span style="font-size:3rem">🧸</span>';
+              }}
+            />
+          ) : (
+            <span style={{ fontSize: '3rem' }}>🧸</span>
+          )}
+        </div>
+        <div className="product-info">
+          <h3>{producto.titulo}</h3>
+          <p>{producto.descripcion}</p>
+          <div className="product-footer">
+            <span className="product-price">${producto.precio.toLocaleString('es-MX')}</span>
+            <button 
+              className="btn-add-cart"
+              onClick={(e) => {
+                e.stopPropagation();
+                addToCart(producto);
+              }}
+            >
+              {user ? 'Agregar' : '🔒 Iniciar Sesión'}
+            </button>
           </div>
+        </div>
+      </div>
+    ))}
+  </div>
         ) : (
           !loadingProductos && searchResults === null && (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
