@@ -311,7 +311,7 @@ export default function CalculadoraPredictiva() {
                           {p.total_vendido_3meses}
                         </td>
                         <td style={{ padding: "12px 14px", textAlign: "center", color: "#6b7280" }}>
-                          {p.promedio_mensual > 0 ? `Venta aprox: ${p.promedio_mensual} por mes` : "—"}
+                          {p.promedio_mensual > 0 ? `${Math.round(p.promedio_mensual)} por mes` : "—"}
                         </td>
                         <td style={{ padding: "12px 14px", textAlign: "center" }}>
                           {p.meses_restantes === null ? (
@@ -324,7 +324,7 @@ export default function CalculadoraPredictiva() {
                                 : p.meses_restantes <= 3 ? "#eab308"
                                 : "#10b981"
                             }}>
-                              Duración del stock: {p.meses_restantes} {p.meses_restantes === 1 ? "mes" : "meses"}
+                              {Math.round(p.meses_restantes)} {Math.round(p.meses_restantes) === 1 ? "mes" : "meses"}
                             </span>
                           )}
                         </td>
