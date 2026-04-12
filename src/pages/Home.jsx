@@ -544,13 +544,24 @@ const Home = () => {
                   <span className="user-icon">👤</span>
                   <span className="user-name">{user.nombre || user.username}</span>
                 </button>
-                <button 
-                  className="logout-btn" 
+               <button 
                   onClick={handleLogout}
-                  title="Cerrar sesión"
+                  style={{
+                    padding: "0.6rem 1.2rem",
+                    background: "white",
+                    border: "2px solid #f93b9a",
+                    borderRadius: "25px",
+                    cursor: "pointer",
+                    fontFamily: "'Poppins', sans-serif",
+                    fontWeight: 600,
+                    fontSize: "0.85rem",
+                    color: "#f93b9a",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.4rem"
+                  }}
                 >
-                  <span className="logout-icon">🚪</span>
-                  <span style={{ fontSize: "13px", fontWeight: 600 }}>Cerrar Sesión</span>
+                  🚪 Cerrar Sesión
                 </button>
               </div>
             ) : (
