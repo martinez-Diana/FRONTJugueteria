@@ -2222,17 +2222,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1.2rem;
+  width: 44px;
+  height: 44px;
   background: white;
   border: 2px solid #f93b9a;
-  border-radius: 25px;
+  border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: #f93b9a;
+  flex-shrink: 0;
 }
 
 .logout-btn:hover {
@@ -2267,16 +2264,17 @@ body {
     gap: 0.5rem;
   }
 
- .logout-btn {
-  padding: 0.5rem 0.9rem;
-  font-size: 0.8rem;
+  .logout-btn {
+    width: 40px;
+    height: 40px;
+  }
 }
 
 @media (max-width: 480px) {
   .logout-btn {
-  padding: 0.4rem 0.7rem;
-  font-size: 0.75rem;
-}
+    width: 36px;
+    height: 36px;
+  }
 
   .user-btn {
     width: 36px;

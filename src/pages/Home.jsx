@@ -550,6 +550,7 @@ const Home = () => {
                   title="Cerrar sesión"
                 >
                   <span className="logout-icon">🚪</span>
+                  <span style={{ fontSize: "13px", fontWeight: 600 }}>Cerrar Sesión</span>
                 </button>
               </div>
             ) : (
