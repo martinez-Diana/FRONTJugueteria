@@ -1412,14 +1412,13 @@ body {
 }
 
 .product-detail-image {
-  background: linear-gradient(135deg, #fce4ec 0%, #e0f7fa 100%);
   border-radius: 20px;
-  padding: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 400px;
   overflow: hidden;
+  background: #f9fafb;
 }
 
 .product-detail-image img {
