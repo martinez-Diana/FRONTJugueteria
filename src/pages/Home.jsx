@@ -547,18 +547,20 @@ const Home = () => {
                <button 
                   onClick={handleLogout}
                   style={{
-                    padding: "0.6rem 1.2rem",
+                    padding: "0.5rem 0.9rem",
                     background: "white",
                     border: "2px solid #f93b9a",
                     borderRadius: "25px",
                     cursor: "pointer",
                     fontFamily: "'Poppins', sans-serif",
                     fontWeight: 600,
-                    fontSize: "0.85rem",
+                    fontSize: "0.78rem",
                     color: "#f93b9a",
                     display: "flex",
                     alignItems: "center",
-                    gap: "0.4rem"
+                    gap: "0.3rem",
+                    flexShrink: 0,
+                    whiteSpace: "nowrap"
                   }}
                 >
                   🚪 Cerrar Sesión
