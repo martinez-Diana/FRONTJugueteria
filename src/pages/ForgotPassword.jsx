@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { sanitizeInput, isValidEmail } from "../utils/authUtils";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://back-jugueteria.vercel.app";
+const API_URL = "https://back-jugueteria.vercel.app";
 
 // ✅ Función para obtener CSRF token (si lo necesitas)
 const getCSRFToken = () => {
