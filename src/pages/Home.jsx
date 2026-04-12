@@ -844,114 +844,64 @@ const Home = () => {
           <div className="modal-content product-detail-modal" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={closeProductDetail}>✖</button>
             
-            <div className="product-detail-grid">
-              <div style={{
-                  borderRadius: "20px",
-                  overflow: "hidden",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "#f9fafb",
-                  height: "400px"
-                }}>
-                  {selectedProduct.imagen ? (
-                    <img 
-                      src={selectedProduct.imagen} 
-                      alt={selectedProduct.titulo}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                        objectPosition: "center"
-                      }}
-                      onError={(e) => { e.target.style.display = 'none'; }}
-                    />
-                  ) : (
-                    <div className="product-detail-emoji">🧸</div>
-                  )}
-                </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+  {/* Nombre arriba */}
+  <h2 style={{ fontSize: "1.8rem", color: "#333", margin: 0 }}>{selectedProduct.titulo}</h2>
+  
+  {/* Imagen centrada y grande */}
+  <div style={{
+    borderRadius: "20px",
+    overflow: "hidden",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#f9fafb",
+    height: "350px",
+    width: "100%"
+  }}>
+    {selectedProduct.imagen ? (
+      <img 
+        src={selectedProduct.imagen} 
+        alt={selectedProduct.titulo}
+        style={{ width: "100%", height: "100%", objectFit: "contain" }}
+        onError={(e) => { e.target.style.display = 'none'; }}
+      />
+    ) : (
+      <span style={{ fontSize: "8rem" }}>🧸</span>
+    )}
+  </div>
 
-              <div className="product-detail-info">
-                <h2>{selectedProduct.titulo}</h2>
-                <p className="product-detail-description">{selectedProduct.descripcion}</p>
-                
-                <div className="product-detail-meta">
-                  <div className="meta-item">
-                    <span className="meta-label">Categoría:</span>
-                    <span className="meta-value" style={{ textTransform: 'capitalize' }}>
-                      {selectedProduct.categoria?.replace('_', ' ')}
-                    </span>
-                  </div>
-                  {selectedProduct.marca && (
-                    <div className="meta-item">
-                      <span className="meta-label">Marca:</span>
-                      <span className="meta-value">{selectedProduct.marca}</span>
-                    </div>
-                  )}
-                  {selectedProduct.edad && (
-                    <div className="meta-item">
-                      <span className="meta-label">Edad recomendada:</span>
-                      <span className="meta-value">{selectedProduct.edad}</span>
-                    </div>
-                  )}
-                  {selectedProduct.color && (
-                    <div className="meta-item">
-                      <span className="meta-label">Color:</span>
-                      <span className="meta-value">{selectedProduct.color}</span>
-                    </div>
-                  )}
-                  {selectedProduct.material && (
-                    <div className="meta-item">
-                      <span className="meta-label">Material:</span>
-                      <span className="meta-value">{selectedProduct.material}</span>
-                    </div>
-                  )}
-                  <div className="meta-item">
-                    <span className="meta-label">Stock disponible:</span>
-                    <span className="meta-value">{selectedProduct.stock} unidades</span>
-                  </div>
-                  {selectedProduct.sku && (
-                    <div className="meta-item">
-                      <span className="meta-label">SKU:</span>
-                      <span className="meta-value">{selectedProduct.sku}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="product-detail-price">
-                  <span className="price-label">Precio:</span>
-                  <span className="price-value">${selectedProduct.precio.toLocaleString('es-MX')}</span>
-                </div>
-
-                <div className="product-detail-actions">
-                  <button 
-                    className="btn-add-to-cart-detail"
-                    onClick={() => {
-                      addToCart(selectedProduct);
-                      if (user) closeProductDetail();
-                    }}
-                  >
-                    {user ? '🛒 Agregar al Carrito' : '🔒 Iniciar Sesión para Comprar'}
-                  </button>
-                  <button className="btn-buy-now">
-                    ⚡ Comprar Ahora
-                  </button>
-                </div>
-
-                <div className="product-detail-features">
-                  <h3>Características:</h3>
-                  <ul>
-                    <li>✓ Producto original y certificado</li>
-                    <li>✓ Garantía de 30 días</li>
-                    <li>✓ Envío gratis en compras mayores a $500</li>
-                    <li>✓ Atención al cliente 24/7</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+  {/* Info abajo */}
+  <div className="product-detail-info">
+    <p className="product-detail-description">{selectedProduct.descripcion}</p>
+    <div className="product-detail-meta">
+      <div className="meta-item">
+        <span className="meta-label">Categoría:</span>
+        <span className="meta-value" style={{ textTransform: "capitalize" }}>{selectedProduct.categoria?.replace('_', ' ')}</span>
+      </div>
+      {selectedProduct.marca && <div className="meta-item"><span className="meta-label">Marca:</span><span className="meta-value">{selectedProduct.marca}</span></div>}
+      <div className="meta-item"><span className="meta-label">Stock:</span><span className="meta-value">{selectedProduct.stock} unidades</span></div>
+      {selectedProduct.sku && <div className="meta-item"><span className="meta-label">SKU:</span><span className="meta-value">{selectedProduct.sku}</span></div>}
+    </div>
+    <div className="product-detail-price">
+      <span className="price-label">Precio:</span>
+      <span className="price-value">${selectedProduct.precio.toLocaleString('es-MX')}</span>
+    </div>
+    <div className="product-detail-actions">
+      <button className="btn-add-to-cart-detail" onClick={() => { addToCart(selectedProduct); if (user) closeProductDetail(); }}>
+        {user ? '🛒 Agregar al Carrito' : '🔒 Iniciar Sesión para Comprar'}
+      </button>
+      <button className="btn-buy-now">⚡ Comprar Ahora</button>
+    </div>
+    </div>
+</div>
           </div>
         </div>
       )}
+
+              
+        
+    
 
       {/* Modal del Carrito */}
       {showCart && (
