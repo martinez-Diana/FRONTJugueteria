@@ -845,17 +845,31 @@ const Home = () => {
             <button className="modal-close" onClick={closeProductDetail}>✖</button>
             
             <div className="product-detail-grid">
-              <div className="product-detail-image">
-                {selectedProduct.imagen ? (
-                  <img 
-                    src={selectedProduct.imagen} 
-                    alt={selectedProduct.titulo}
-                    onError={(e) => { e.target.style.display = 'none'; }}
-                  />
-                ) : (
-                  <div className="product-detail-emoji">🧸</div>
-                )}
-              </div>
+              <div style={{
+                  borderRadius: "20px",
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "#f9fafb",
+                  height: "400px"
+                }}>
+                  {selectedProduct.imagen ? (
+                    <img 
+                      src={selectedProduct.imagen} 
+                      alt={selectedProduct.titulo}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        objectPosition: "center"
+                      }}
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <div className="product-detail-emoji">🧸</div>
+                  )}
+                </div>
 
               <div className="product-detail-info">
                 <h2>{selectedProduct.titulo}</h2>
