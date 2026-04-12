@@ -188,9 +188,9 @@ const Apartados = () => {
       )}
 
       {/* Header */}
-      <header style={{ background: "linear-gradient(to right, #7e3ff2, #db2777)", color: "white", padding: "1rem 2rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <header style={{ background: "linear-gradient(to right, #f472b6, #db2777)", color: "white", padding: "1rem 2rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div style={{ width: "3rem", height: "3rem", background: "#facc15", color: "#7e3ff2", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>JM</div>
+          <div style={{ width: "3rem", height: "3rem", background: "#facc15", color: "#f472b6", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>JM</div>
           <div>
             <h1 style={{ fontSize: "1.2rem", fontWeight: 700, margin: 0 }}>Juguetería Martínez</h1>
             <p style={{ fontSize: "0.85rem", color: "#f5d0fe", margin: 0 }}>Panel Administrativo</p>
@@ -247,7 +247,7 @@ const Apartados = () => {
           {stats && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
               {[
-                { label: "Activos", value: stats.total_activos, icon: "⏰", color: "linear-gradient(135deg,#8b5cf6,#6d28d9)" },
+                { label: "Activos", value: stats.total_activos, icon: "⏰", color: "linear-gradient(135deg,#8b5cf6,#e879a0)" },
                 { label: "Total en Apartados", value: formatCurrency(stats.total_en_apartados), icon: "💰", color: "linear-gradient(135deg,#ec4899,#db2777)" },
                 { label: "Anticipos Recibidos", value: formatCurrency(stats.total_anticipos), icon: "💵", color: "linear-gradient(135deg,#10b981,#059669)" },
                 { label: "Por Cobrar", value: formatCurrency(stats.total_por_cobrar), icon: "💸", color: "linear-gradient(135deg,#06b6d4,#0891b2)" },
@@ -267,7 +267,7 @@ const Apartados = () => {
           <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.5rem" }}>
             {["activo", "liquidado", "cancelado", "vencido"].map((e) => (
               <button key={e} onClick={() => setFiltroEstado(e)}
-                style={{ padding: "8px 20px", borderRadius: 20, border: "2px solid", borderColor: filtroEstado === e ? "#7e3ff2" : "#e5e7eb", background: filtroEstado === e ? "#f3e8ff" : "white", color: filtroEstado === e ? "#7e3ff2" : "#374151", fontWeight: 600, cursor: "pointer", textTransform: "capitalize", fontFamily: "'Poppins', sans-serif" }}>
+                style={{ padding: "8px 20px", borderRadius: 20, border: "2px solid", borderColor: filtroEstado === e ? "#f472b6" : "#e5e7eb", background: filtroEstado === e ? "#f3e8ff" : "white", color: filtroEstado === e ? "#f472b6" : "#374151", fontWeight: 600, cursor: "pointer", textTransform: "capitalize", fontFamily: "'Poppins', sans-serif" }}>
                 {e.charAt(0).toUpperCase() + e.slice(1)}
               </button>
             ))}
@@ -348,7 +348,7 @@ const Apartados = () => {
                         <span style={{ color: "#7e3ff2", fontWeight: 700 }}>{progreso}%</span>
                       </div>
                       <div style={{ background: "#e5e7eb", borderRadius: 999, height: 8, overflow: "hidden" }}>
-                        <div style={{ width: `${progreso}%`, height: "100%", background: "linear-gradient(to right, #7e3ff2, #db2777)", borderRadius: 999, transition: "width 0.3s" }}></div>
+                        <div style={{ width: `${progreso}%`, height: "100%", background: "linear-gradient(135deg, #f472b6, #e879a0)", borderRadius: 999, transition: "width 0.3s" }}></div>
                       </div>
                     </div>
 
@@ -361,7 +361,7 @@ const Apartados = () => {
                         {a.estado === "activo" && (
                           <>
                             <button onClick={() => { setModalAbono(a); setNuevoAbono({ monto: "", notas: "" }); }}
-                              style={{ background: "linear-gradient(135deg, #7e3ff2, #db2777)", border: "none", color: "white", padding: "6px 14px", borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: "0.85rem" }}>
+                              style={{ background: "linear-gradient(135deg, #f472b6, #e879a0)", border: "none", color: "white", padding: "6px 14px", borderRadius: 8, fontWeight: 600, cursor: "pointer", fontSize: "0.85rem" }}>
                               💰 Registrar Abono
                             </button>
                             <button onClick={() => cancelarApartado(a.id_apartado)}
