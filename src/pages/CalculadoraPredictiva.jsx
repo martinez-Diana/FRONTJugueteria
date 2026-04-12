@@ -260,7 +260,7 @@ export default function CalculadoraPredictiva() {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                   <thead>
                     <tr style={{ background: "#f9fafb" }}>
-                      {["#", "Producto", "Categoría", "Stock actual", "Vendidos (3 meses)", "Venta mensual", "Meses restantes", "Estado", "Alerta temporada"].map(h => (
+                      {["#", "Producto", "Categoría", "Stock actual", "Vendidos (3 meses)", "Venta aprox.", "Duración del stock", "Estado", "Alerta temporada"].map(h => (
                         <th key={h} style={{
                           padding: "10px 14px", textAlign: "left",
                           color: "#374151", fontWeight: 700, fontSize: 12,
@@ -311,7 +311,7 @@ export default function CalculadoraPredictiva() {
                           {p.total_vendido_3meses}
                         </td>
                         <td style={{ padding: "12px 14px", textAlign: "center", color: "#6b7280" }}>
-                          {p.promedio_mensual > 0 ? `${p.promedio_mensual} al mes` : "—"}
+                          {p.promedio_mensual > 0 ? `Venta aprox: ${p.promedio_mensual} por mes` : "—"}
                         </td>
                         <td style={{ padding: "12px 14px", textAlign: "center" }}>
                           {p.meses_restantes === null ? (
@@ -324,7 +324,7 @@ export default function CalculadoraPredictiva() {
                                 : p.meses_restantes <= 3 ? "#eab308"
                                 : "#10b981"
                             }}>
-                              {p.meses_restantes} {p.meses_restantes === 1 ? "mes" : "meses"}
+                              Duración del stock: {p.meses_restantes} {p.meses_restantes === 1 ? "mes" : "meses"}
                             </span>
                           )}
                         </td>
