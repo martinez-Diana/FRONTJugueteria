@@ -19,6 +19,19 @@ function fmt(n) {
   return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(n ?? 0);
 }
 
+function traducirMes(etiqueta) {
+  if (!etiqueta) return etiqueta;
+  return etiqueta
+    .replace(/January/gi, 'Enero').replace(/February/gi, 'Febrero')
+    .replace(/March/gi, 'Marzo').replace(/April/gi, 'Abril')
+    .replace(/May/gi, 'Mayo').replace(/June/gi, 'Junio')
+    .replace(/July/gi, 'Julio').replace(/August/gi, 'Agosto')
+    .replace(/September/gi, 'Septiembre').replace(/October/gi, 'Octubre')
+    .replace(/November/gi, 'Noviembre').replace(/December/gi, 'Diciembre')
+    .replace(/Jan/gi, 'Ene').replace(/Apr/gi, 'Abr')
+    .replace(/Aug/gi, 'Ago').replace(/Dec/gi, 'Dic');
+}
+
 function getToken() {
   return localStorage.getItem("token") || sessionStorage.getItem("token") || "";
 }
@@ -163,8 +176,8 @@ function ReporteVentas({ params }) {
       .finally(() => setLoading(false));
   }, [JSON.stringify(params)]);
 
-  const serie = data?.serie ?? [];
-  const totalIngresos = serie.reduce((s, d) => s + (d.total ?? 0), 0);
+  const serie = (data?.serie ?? []).map(d => ({ ...d, etiqueta: traducirMes(d.etiqueta) }));
+  const totalIngresos = serie.reduce((s, d) => s + (parseFloat(d.total) || 0), 0);
   const totalVentas = serie.reduce((s, d) => s + (d.cantidad ?? 0), 0);
   const ticketProm = totalVentas ? totalIngresos / totalVentas : 0;
 
