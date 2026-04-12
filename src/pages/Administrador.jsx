@@ -80,26 +80,28 @@ const Administrador = () => {
               <div className="user-avatar"></div>
             </div>
             <button 
-              onClick={handleLogout}
-              className="logout-button"
-              title="Cerrar Sesión"
-            >
-              <svg
-                className="icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                width="20"
-                height="20"
+                onClick={handleLogout}
+                className="logout-button"
+                title="Cerrar Sesión"
+                style={{ display: "flex", alignItems: "center", gap: "6px", padding: "0.4rem 0.8rem" }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="icon"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+                <span style={{ fontSize: "13px", fontWeight: 600 }}>Cerrar Sesión</span>
+              </button>
           </div>
         </div>
       </header>

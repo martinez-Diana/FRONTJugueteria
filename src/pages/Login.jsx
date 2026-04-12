@@ -20,6 +20,7 @@ const Login = () => {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isBlocked, setIsBlocked] = useState(false);
   const [blockTimer, setBlockTimer] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -579,24 +580,37 @@ const Login = () => {
                 />
 
                 <label style={styles.label}>Contraseña</label>
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  disabled={loading || isBlocked}
-                  style={styles.input}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = "#c084fc";
-                    e.target.style.boxShadow = "0 0 6px rgba(192, 132, 252, 0.25)";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "#ddd";
-                    e.target.style.boxShadow = "none";
-                  }}
-                />
+                <div style={{ position: "relative", marginBottom: "15px" }}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    disabled={loading || isBlocked}
+                    style={{ ...styles.input, marginBottom: 0, paddingRight: "40px" }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = "#c084fc";
+                      e.target.style.boxShadow = "0 0 6px rgba(192, 132, 252, 0.25)";
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = "#ddd";
+                      e.target.style.boxShadow = "none";
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: "absolute", right: "10px", top: "50%",
+                      transform: "translateY(-50%)", background: "none",
+                      border: "none", cursor: "pointer", fontSize: "18px"
+                    }}
+                  >
+                    {showPassword ? "👁️" : "👁️‍🗨️"}
+                  </button>
+                </div>
 
                 <button
                   type="submit"
