@@ -238,7 +238,7 @@ const Login = () => {
     },
     leftPanel: {
       flex: 1,
-      background: "#ec4899",
+      background: "linear-gradient(135deg, #f472b6 0%, #e879a0 100%)",
       color: "white",
       textAlign: "center",
       padding: "50px 20px",
@@ -315,7 +315,7 @@ const Login = () => {
       transition: "color 0.2s ease",
     },
     rightTitle: {
-      color: "#ec4899",
+      color: "#f472b6",
       fontSize: "22px",
       fontWeight: 700,
       marginBottom: "5px",
@@ -344,7 +344,7 @@ const Login = () => {
     },
     methodButtonActive: {
       borderColor: "#ec4899",
-      background: "#fef5fb",
+      background: "#fdf2f8",
       color: "#ec4899",
     },
     divider: {
@@ -403,7 +403,7 @@ const Login = () => {
       fontFamily: "'Poppins', sans-serif",
     },
     button: {
-      backgroundColor: "#ec4899",
+      backgroundColor: "#f472b6",
       color: "white",
       border: "none",
       padding: "12px",
@@ -413,7 +413,7 @@ const Login = () => {
       fontSize: "15px",
       transition: "all 0.3s ease",
       marginTop: "8px",
-      boxShadow: "0 3px 12px rgba(236, 72, 153, 0.25)",
+      boxShadow: "0 3px 12px rgba(244, 114, 182, 0.25)",
     },
     buttonDisabled: {
       backgroundColor: "#d1d5db",
@@ -607,9 +607,9 @@ const Login = () => {
                   }}
                   onMouseEnter={(e) => {
                     if (!loading && !isBlocked) {
-                      e.target.style.backgroundColor = "#db2777";
+                      e.target.style.backgroundColor = "#e879a0";
                       e.target.style.transform = "translateY(-2px)";
-                      e.target.style.boxShadow = "0 5px 16px rgba(219, 39, 119, 0.3)";
+                      e.target.style.boxShadow = "0 5px 16px rgba(232, 121, 160, 0.3)";
                     }
                   }}
                   onMouseLeave={(e) => {
