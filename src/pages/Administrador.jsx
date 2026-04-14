@@ -47,6 +47,31 @@ const Administrador = () => {
     }).format(num);
   };
 
+  // Corregir nombres de categorías
+const formatCategoria = (categoria) => {
+  const categorias = {
+    'munecas': 'Muñecas',
+    'didactico': 'Didáctico',
+    'educativo': 'Educativo',
+    'juegos_mesa': 'Juegos de Mesa',
+    'juegos de mesa': 'Juegos de Mesa',
+    'vehiculos': 'Vehículos',
+    'bebes': 'Bebés',
+    'accion': 'Acción',
+    'construccion': 'Construcción',
+    'deportes': 'Deportes',
+    'electronicos': 'Electrónicos',
+    'peluches': 'Peluches',
+    'arte': 'Arte',
+    'disfraces': 'Disfraces',
+  };
+
+  const key = categoria.toLowerCase().replace(/_/g, ' ');
+  return categorias[key] || categoria
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase());
+};
+
   return (
     <div className="admin-body">
       {/* Header */}
@@ -214,7 +239,7 @@ const Administrador = () => {
                           marginBottom: '0.5rem'
                         }}>
                           <span style={{ textTransform: 'capitalize', fontWeight: '600' }}>
-                            {cat.categoria.replace('_', ' ')}
+                            {formatCategoria(cat.categoria)}
                           </span>
                           <span style={{ fontSize: '0.9rem', color: '#6b7280' }}>
                             {cat.cantidad_productos} productos ({porcentaje}%)
