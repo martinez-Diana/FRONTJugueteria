@@ -532,12 +532,33 @@ export default function Reportes() {
         display: "flex", alignItems: "center", justifyContent: "space-between",
         flexWrap: "wrap", gap: 12
       }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>📊 Reportes</h1>
-          <p style={{ margin: "4px 0 0", fontSize: 13, opacity: .85 }}>
-            Análisis y estadísticas de la Juguetería Martínez
-          </p>
-        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+  <a href="/admin" style={{
+    background: "rgba(255,255,255,0.2)",
+    color: "#fff",
+    border: "1.5px solid rgba(255,255,255,0.4)",
+    borderRadius: 10,
+    padding: "8px 14px",
+    fontSize: 13,
+    fontWeight: 600,
+    textDecoration: "none",
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    transition: "background .2s"
+  }}
+    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.35)"}
+    onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.2)"}
+  >
+    ← Dashboard
+  </a>
+  <div>
+    <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>📊 Reportes</h1>
+    <p style={{ margin: "4px 0 0", fontSize: 13, opacity: .85 }}>
+      Análisis y estadísticas de la Juguetería Martínez
+    </p>
+  </div>
+</div>
         {!needsInventario && (
           <PeriodFilter period={period} setPeriod={handlePeriod}
             dateFrom={dateFrom} setDateFrom={setDateFrom}
